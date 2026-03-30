@@ -441,6 +441,16 @@
       background: radial-gradient(ellipse at center, var(--neon-green), transparent 70%);
     }
 
+    .app-card.card-energy {
+      --card-color: var(--neon-gold);
+      --card-glow:  rgba(255,215,0,0.35);
+      --card-bg:    rgba(255,215,0,0.04);
+    }
+
+    .card-energy .card-art-bg {
+      background: radial-gradient(ellipse at center, var(--neon-gold), transparent 70%);
+    }
+
     .card-icon {
       font-size: 5rem;
       position: relative;
@@ -801,7 +811,7 @@
     <div class="stats-section reveal">
       <div class="stats-grid">
         <div class="stat-card reveal reveal-delay-1">
-          <span class="stat-number">3</span>
+          <span class="stat-number">4</span>
           <div class="stat-label">學習 APP</div>
         </div>
         <div class="stat-card reveal reveal-delay-2">
@@ -916,6 +926,34 @@
           </div>
         </a>
 
+        <!-- APP 4: 能源電力廠 -->
+        <a class="app-card card-energy reveal reveal-delay-4"
+           href="https://energy-lab-4.vercel.app/"
+           target="_blank" rel="noopener">
+          <div class="card-glow-bg"></div>
+          <div class="card-art">
+            <div class="card-art-bg"></div>
+            <div class="card-icon">⚡</div>
+            <div class="card-badge">自然科學</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">能源電力廠</div>
+            <p class="card-desc">
+              連接電路讓村莊重見光明！測試導體與絕緣體，再化身節能小尖兵找出浪費電的壞習慣。四年級電學必玩！
+            </p>
+            <div class="card-tags">
+              <span class="tag">通路短路</span>
+              <span class="tag">串聯並聯</span>
+              <span class="tag">導體絕緣體</span>
+              <span class="tag">節能省電</span>
+            </div>
+            <div class="card-launch">
+              進入冒險
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </div>
+        </a>
+
       </div>
     </div>
   </section>
@@ -985,6 +1023,9 @@
       ·
       <a href="https://nature-science-4.vercel.app/" target="_blank"
          style="color:var(--neon-green);text-decoration:none;margin:0 0.5rem;">大地觀測站</a>
+      ·
+      <a href="https://energy-lab-4.vercel.app/" target="_blank"
+         style="color:var(--neon-gold);text-decoration:none;margin:0 0.5rem;">能源電力廠</a>
     </p>
   </footer>
 
