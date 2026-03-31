@@ -471,6 +471,38 @@
       background: radial-gradient(ellipse at center, var(--neon-green), transparent 70%);
     }
 
+    .app-card.card-natural-science {
+      --card-color: var(--neon-green);
+      --card-glow:  rgba(0,255,136,0.35);
+      --card-bg:    rgba(0,255,136,0.04);
+      background: linear-gradient(135deg,
+        rgba(0, 212, 255, 0.1) 0%,
+        rgba(255, 153, 0, 0.1) 25%,
+        rgba(0, 255, 136, 0.1) 50%,
+        rgba(255, 51, 102, 0.1) 100%);
+      border: 1px solid rgba(0, 255, 136, 0.4);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2),
+                  inset 0 0 20px rgba(0, 255, 136, 0.05);
+    }
+
+    .app-card.card-natural-science:hover {
+      background: linear-gradient(135deg,
+        rgba(0, 212, 255, 0.15) 0%,
+        rgba(255, 153, 0, 0.15) 25%,
+        rgba(0, 255, 136, 0.15) 50%,
+        rgba(255, 51, 102, 0.15) 100%);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.4),
+                  inset 0 0 20px rgba(0, 255, 136, 0.1);
+    }
+
+    .card-natural-science .card-art-bg {
+      background: linear-gradient(135deg,
+        rgba(0, 212, 255, 0.3) 0%,
+        rgba(255, 153, 0, 0.3) 25%,
+        rgba(0, 255, 136, 0.3) 50%,
+        rgba(255, 51, 102, 0.3) 100%);
+    }
+
     .card-icon {
       font-size: 5rem;
       position: relative;
@@ -997,6 +1029,33 @@
             </div>
             <div class="card-launch">
               進入冒險
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </div>
+        </a>
+
+        <a class="app-card card-natural-science reveal reveal-delay-6"
+           href="https://natural-science-app.vercel.app/"
+           target="_blank" rel="noopener">
+          <div class="card-glow-bg"></div>
+          <div class="card-art">
+            <div class="card-art-bg"></div>
+            <div class="card-icon">🌿</div>
+            <div class="card-badge">自然科學</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">自然科綜合版</div>
+            <p class="card-desc">
+              探索力、動力、液體、地球、能源和電的奧秘！6 個篇章、18 項任務，144 道題目涵蓋物理、地球科學和能源，層層深入自然科學的世界。
+            </p>
+            <div class="card-tags">
+              <span class="tag">多選測驗</span>
+              <span class="tag">四年級</span>
+              <span class="tag">6篇章 · 18任務</span>
+              <span class="tag">進度追蹤</span>
+            </div>
+            <div class="card-launch">
+              進入學習
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </div>
           </div>
