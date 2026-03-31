@@ -1128,7 +1128,7 @@
       <a href="https://math-logic-delta.vercel.app/" target="_blank"
          style="color:var(--neon-cyan);text-decoration:none;margin:0 0.5rem;">數感邏輯</a>
       ·
-      <a href="https://nature-science-4.vercel.app/" target="_blank"
+      <a href="https://natural-science-app.vercel.app/" target="_blank"
          style="color:var(--neon-green);text-decoration:none;margin:0 0.5rem;">大地觀測站</a>
       ·
       <a href="https://energy-lab-4.vercel.app/" target="_blank"
@@ -1176,10 +1176,12 @@
       ctx.globalAlpha = 1;
     }
 
-    let raf;
+    // Global RAF variable for cleanup
+    window.starAnimationRaf = null;
+
     function animate(t) {
       drawStars(t * 0.001);
-      raf = requestAnimationFrame(animate);
+      window.starAnimationRaf = requestAnimationFrame(animate);
     }
 
     resizeCanvas();
@@ -1189,6 +1191,14 @@
     window.addEventListener('resize', () => {
       resizeCanvas();
       createStars();
+    });
+
+    // Cleanup RAF on page unload to prevent memory leak
+    window.addEventListener('beforeunload', () => {
+      if (window.starAnimationRaf) {
+        cancelAnimationFrame(window.starAnimationRaf);
+        window.starAnimationRaf = null;
+      }
     });
 
     // ===== 3D CARD TILT =====
