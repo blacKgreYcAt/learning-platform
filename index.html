@@ -513,6 +513,38 @@
         rgba(255, 51, 102, 0.3) 100%);
     }
 
+    .app-card.card-english {
+      --card-color: var(--neon-gold);
+      --card-glow:  rgba(255,215,0,0.35);
+      --card-bg:    rgba(255,215,0,0.04);
+      background: linear-gradient(135deg,
+        rgba(255, 215, 0, 0.1) 0%,
+        rgba(0, 245, 255, 0.1) 25%,
+        rgba(180, 0, 255, 0.1) 50%,
+        rgba(255, 0, 170, 0.1) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2),
+                  inset 0 0 20px rgba(255, 215, 0, 0.05);
+    }
+
+    .app-card.card-english:hover {
+      background: linear-gradient(135deg,
+        rgba(255, 215, 0, 0.15) 0%,
+        rgba(0, 245, 255, 0.15) 25%,
+        rgba(180, 0, 255, 0.15) 50%,
+        rgba(255, 0, 170, 0.15) 100%);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4),
+                  inset 0 0 20px rgba(255, 215, 0, 0.1);
+    }
+
+    .card-english .card-art-bg {
+      background: linear-gradient(135deg,
+        rgba(255, 215, 0, 0.3) 0%,
+        rgba(0, 245, 255, 0.3) 25%,
+        rgba(180, 0, 255, 0.3) 50%,
+        rgba(255, 0, 170, 0.3) 100%);
+    }
+
     .card-icon {
       font-size: 5rem;
       position: relative;
@@ -873,7 +905,7 @@
     <div class="stats-section reveal">
       <div class="stats-grid">
         <div class="stat-card reveal reveal-delay-1">
-          <span class="stat-number">4</span>
+          <span class="stat-number">8</span>
           <div class="stat-label">學習 APP</div>
         </div>
         <div class="stat-card reveal reveal-delay-2">
@@ -1094,6 +1126,34 @@
             </div>
             <div class="card-launch">
               進入學習
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- APP 8: 英文千詞營 -->
+        <a class="app-card card-english reveal reveal-delay-9"
+           href="https://english-app.vercel.app/"
+           target="_blank" rel="noopener">
+          <div class="card-glow-bg"></div>
+          <div class="card-art">
+            <div class="card-art-bg"></div>
+            <div class="card-icon">🎤</div>
+            <div class="card-badge">英文學習</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">英文千詞營</div>
+            <p class="card-desc">
+              掌握 1000 個高頻英文單詞！從基礎母音、短語到進階詞彙，搭配語音識別練習與互動遊戲，10 個難度等級層層深入，成為英文小達人。
+            </p>
+            <div class="card-tags">
+              <span class="tag">Fry 1000 詞</span>
+              <span class="tag">語音練習</span>
+              <span class="tag">10難度等級</span>
+              <span class="tag">自然發音</span>
+            </div>
+            <div class="card-launch">
+              進入冒險
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </div>
           </div>
