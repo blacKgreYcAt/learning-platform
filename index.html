@@ -1353,27 +1353,27 @@
             </div>
           </div>
 
-          <!-- 國語科佔位符 -->
-          <div class="app-card card-chinese reveal reveal-delay-7" style="opacity: 0.5;">
+          <!-- 國語科 -->
+          <div class="app-card card-chinese reveal reveal-delay-7">
             <div class="card-glow-bg"></div>
             <div class="card-art">
               <div class="card-art-bg"></div>
-              <div class="card-icon">📖</div>
-              <div class="card-badge">敬請期待</div>
+              <div class="card-icon">📚</div>
+              <div class="card-badge">新上線</div>
             </div>
             <div class="card-body">
               <div class="card-title">國語科</div>
               <p class="card-desc">
-                專為國語文學習設計的互動學習平台，正在開發中...
+                語文閣樓互動學習平台，透過卡牌模式和智慧闖關挑戰，掌握易混淆字詞、成語理解和句式排序。
               </p>
               <div class="card-tags">
-                <span class="tag">國文科</span>
-                <span class="tag">文學閱讀</span>
-                <span class="tag">寫作訓練</span>
-                <span class="tag">即將推出</span>
+                <span class="tag">字詞辨析</span>
+                <span class="tag">成語理解</span>
+                <span class="tag">句式排序</span>
+                <span class="tag">互動學習</span>
               </div>
-              <div class="card-launch" style="cursor: not-allowed; opacity: 0.5;">
-                敬請期待
+              <div class="card-launch" onclick="showGradeModal('chinese')">
+                開始學習
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </div>
             </div>
@@ -1565,7 +1565,8 @@
       const subjectUrls = {
         'math-science': 'https://math-science-app.vercel.app/',
         'natural-science': 'https://natural-science-app.vercel.app/',
-        'social-studies': 'https://social-studies-app.vercel.app/'
+        'social-studies': 'https://social-studies-app.vercel.app/',
+        'chinese': 'https://chinese-language-app.vercel.app/'
       };
 
       const baseUrl = subjectUrls[currentSubject];
