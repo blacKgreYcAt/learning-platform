@@ -1598,7 +1598,7 @@
       const baseUrl = subjectUrls[currentSubject];
       if (baseUrl) {
         const fullUrl = `${baseUrl}?grade=${grade}`;
-        window.open(fullUrl, '_blank', 'noopener');
+        window.location.href = fullUrl;
         closeGradeModal();
       }
     }
