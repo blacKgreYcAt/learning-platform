@@ -871,3 +871,98 @@ function calculateTimeBeforeHours(endDay, endHour, hours) {
 
   return { day: startDay, hour: startHour };
 }
+
+// ============ 基礎概念交互函數 ============
+
+// 進度條互動 - 天/小時
+function highlightSegment(button, segment) {
+  const container = button.closest('.progress-segments');
+  const buttons = container.querySelectorAll('.progress-segment');
+
+  buttons.forEach(btn => btn.classList.remove('highlight'));
+  button.classList.add('highlight');
+
+  const hours = segment * 6;
+  const startHour = (segment - 1) * 6;
+  document.getElementById('segmentDisplay').textContent =
+    `✓ ${startHour}-${hours} 小時是一天中的 ${segment}/4`;
+}
+
+// 進度條互動 - 分鐘
+function highlightMinutes(button, segment) {
+  const container = button.closest('.progress-segments');
+  const buttons = container.querySelectorAll('.progress-segment');
+  buttons.forEach(btn => btn.classList.remove('highlight'));
+  button.classList.add('highlight');
+
+  const minutes = segment * 20;
+  const startMin = (segment - 1) * 20;
+  document.getElementById('minutesDisplay').textContent =
+    `✓ ${startMin}-${minutes} 分鐘是一小時中的 ${segment}/3`;
+}
+
+// 進度條互動 - 秒
+function highlightSeconds(button, segment) {
+  const container = button.closest('.progress-segments');
+  const buttons = container.querySelectorAll('.progress-segment');
+  buttons.forEach(btn => btn.classList.remove('highlight'));
+  button.classList.add('highlight');
+
+  const seconds = segment * 15;
+  const startSec = (segment - 1) * 15;
+  document.getElementById('secondsDisplay').textContent =
+    `✓ ${startSec}-${seconds} 秒是一分鐘中的 ${segment}/4`;
+}
+
+// 轉換器互動函數
+function updateDaysConversion(value) {
+  const days = parseInt(value) || 0;
+  document.getElementById('hoursResult').textContent = days * 24;
+}
+
+function updateHoursConversion(value) {
+  const hours = parseInt(value) || 0;
+  document.getElementById('minutesResult').textContent = hours * 60;
+}
+
+function updateMinutesConversion(value) {
+  const minutes = parseInt(value) || 0;
+  document.getElementById('secondsResult').textContent = minutes * 60;
+}
+
+// 反向轉換切換
+let reverseMode = false;
+
+function toggleReverseMode() {
+  reverseMode = !reverseMode;
+  const btn = document.getElementById('reverseToggleBtn');
+  const labels = document.querySelectorAll('.card-label');
+
+  if (reverseMode) {
+    btn.classList.add('active');
+    labels[0].textContent = '小時 ← 天';
+    labels[1].textContent = '分鐘 ← 小時';
+    labels[2].textContent = '秒 ← 分鐘';
+
+    document.getElementById('daysInput').placeholder = '輸入小時';
+    document.getElementById('hoursInput').placeholder = '輸入分鐘';
+    document.getElementById('minutesInput').placeholder = '輸入秒';
+  } else {
+    btn.classList.remove('active');
+    labels[0].textContent = '天 → 小時';
+    labels[1].textContent = '小時 → 分鐘';
+    labels[2].textContent = '分鐘 → 秒';
+
+    document.getElementById('daysInput').placeholder = '0';
+    document.getElementById('hoursInput').placeholder = '0';
+    document.getElementById('minutesInput').placeholder = '0';
+  }
+}
+
+// 初始化基礎概念
+function initializeBasicConcept() {
+  // 立即設置初始值
+  updateDaysConversion(2);
+  updateHoursConversion(3);
+  updateMinutesConversion(5);
+}
