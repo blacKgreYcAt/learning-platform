@@ -398,22 +398,22 @@ const TIME_CONVERSION_TUTORIAL = {
                 <div class="step-num">第2步</div>
                 <div class="step-explain">從「今天早上8點」往回推6小時</div>
                 <div class="step-work">
-                  早上8點 - 6小時 = 前天晚上2點<br>
-                  (8 - 6 = 2)
+                  早上8點 - 6小時 = 凌晨2點<br>
+                  (8 - 6 = 2，即02:00凌晨2點)
                 </div>
               </div>
               <div class="solution-step">
                 <div class="step-num">第3步</div>
                 <div class="step-explain">再往回推1天</div>
                 <div class="step-work">
-                  前天晚上2點 - 1天 = 前前天晚上2點<br>
-                  （或說：前天晚上2點就是前天的第2小時）
+                  凌晨2點 - 1天 = 前天凌晨2點<br>
+                  （昨天凌晨2點的前一天）
                 </div>
               </div>
             </div>
             <div class="answer-box" style="background: rgba(255,0,170,0.15);">
-              <strong>✓ 答案：前天晚上2點（22:00）</strong><br>
-              <small>驗證：前天晚上2點 → 今天早上8點 = 30小時 ✓</small>
+              <strong>✓ 答案：前天凌晨2點（02:00）</strong><br>
+              <small>驗證：前天凌晨2點 + 30小時 = 今天早上8點 ✓</small>
             </div>
           </div>
         `
@@ -485,7 +485,7 @@ const TIME_CONVERSION_TUTORIAL = {
               <span style="background: #00f5ff; color: #0a0e27; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">正推</span>
             </div>
             <div style="background: rgba(0,245,255,0.05); padding: 12px; border-radius: 6px; margin-bottom: 12px; color: #b8c5d6; font-size: 13px;">💡 提示：42小時 = 1天 + 18小時</div>
-            <input type="text" id="practice1Answer" placeholder="周三下午11點" style="width: 100%; padding: 10px; background: rgba(0,245,255,0.1); border: 1px solid #00f5ff; border-radius: 6px; color: #00f5ff; font-size: 14px; margin-bottom: 12px;">
+            <input type="text" id="practice1Answer" placeholder="周四早上11點" style="width: 100%; padding: 10px; background: rgba(0,245,255,0.1); border: 1px solid #00f5ff; border-radius: 6px; color: #00f5ff; font-size: 14px; margin-bottom: 12px;">
             <div id="practiceResult1" class="practice-result" style="display:none; margin-bottom: 12px;"></div>
             <button onclick="checkPractice(1)" class="btn-check" style="background: #00f5ff; color: #0a0e27; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;">提交答案 ✓</button>
           </div>
@@ -559,7 +559,7 @@ const TIME_CONVERSION_TUTORIAL = {
               <span style="background: #b400ff; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px;">反推</span>
             </div>
             <div style="background: rgba(156,39,176,0.05); padding: 12px; border-radius: 6px; margin-bottom: 12px; color: #b8c5d6; font-size: 13px;">💡 提示：26小時 = 1天 + 2小時</div>
-            <input type="text" id="practice7Answer" placeholder="周一下午11點" style="width: 100%; padding: 10px; background: rgba(156,39,176,0.1); border: 1px solid #b400ff; border-radius: 6px; color: #b400ff; font-size: 14px; margin-bottom: 12px;">
+            <input type="text" id="practice7Answer" placeholder="周二早上11點" style="width: 100%; padding: 10px; background: rgba(156,39,176,0.1); border: 1px solid #b400ff; border-radius: 6px; color: #b400ff; font-size: 14px; margin-bottom: 12px;">
             <div id="practiceResult7" class="practice-result" style="display:none; margin-bottom: 12px;"></div>
             <button onclick="checkPractice(7)" class="btn-check" style="background: #b400ff; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;">提交 ✓</button>
           </div>
@@ -600,7 +600,7 @@ const TIME_CONVERSION_TUTORIAL = {
               <span style="background: #00ff88; color: #0a0e27; padding: 5px 10px; border-radius: 20px; font-size: 12px;">正推</span>
             </div>
             <div style="background: rgba(0,255,136,0.05); padding: 12px; border-radius: 6px; margin-bottom: 12px; color: #b8c5d6; font-size: 13px;">💡 提示：54小時 = 2天 + 6小時</div>
-            <input type="text" id="practice10Answer" placeholder="周五下午12點" style="width: 100%; padding: 10px; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; border-radius: 6px; color: #00ff88; font-size: 14px; margin-bottom: 12px;">
+            <input type="text" id="practice10Answer" placeholder="周六午夜12點" style="width: 100%; padding: 10px; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; border-radius: 6px; color: #00ff88; font-size: 14px; margin-bottom: 12px;">
             <div id="practiceResult10" class="practice-result" style="display:none; margin-bottom: 12px;"></div>
             <button onclick="checkPractice(10)" class="btn-check" style="background: #00ff88; color: #0a0e27; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%;">提交 ✓</button>
           </div>
@@ -1374,15 +1374,16 @@ const ADVANCED_PROBLEMS = [
       {
         step: 2,
         prompt: '下午3點(15點) - 18小時 = 幾點？',
-        answer: '前天下午9點',
-        options: ['下午9點', '前一天下午9點', '前天下午9點', '昨天下午9點'],
-        hint: '15 - 18 = -3，要借1天(+24)，所以24 + 15 - 18 = 21點(下午9點)，但這是前一天'
+        answer: '周四下午9點',
+        options: ['下午9點', '周四下午9點', '周四上午9點', '周五下午9點'],
+        hint: '15 - 18 = -3，要借1天(+24)，所以24 + 15 - 18 = 21點(下午9點)，時刻是前一天'
       },
       {
         step: 3,
-        prompt: '周五下午9點往回推1天 = 周幾幾點？',
-        answer: '周四下午9點',
-        options: ['周四下午9點', '周四上午9點', '周五上午9點', '周五下午9點']
+        prompt: '周四下午9點往回推1天 = 周幾幾點？',
+        answer: '周三下午9點',
+        options: ['周二下午9點', '周三下午9點', '周四下午9點', '周五下午9點'],
+        hint: '周四 - 1天 = 周三'
       }
     ]
   },
@@ -1505,15 +1506,15 @@ const ADVANCED_PROBLEMS = [
       {
         step: 2,
         prompt: '凌晨3點 - 16小時 = 幾點？',
-        answer: '前一天下午11點',
-        options: ['下午3點', '下午7點', '下午11點', '下午12點'],
-        hint: '3 - 16 要借1天，(3 + 24) - 16 = 11點，是前一天'
+        answer: '周五上午11點',
+        options: ['下午3點', '周五上午11點', '下午11點', '下午12點'],
+        hint: '3 - 16 要借1天，(3 + 24) - 16 = 11點，是前一天的上午11點'
       },
       {
         step: 3,
-        prompt: '周六凌晨3點往回推1天得到下午11點，那是周幾？',
-        answer: '周五下午11點',
-        options: ['周四下午11點', '周五下午11點', '周六下午11點', '周日下午11點']
+        prompt: '周五上午11點往回推1天 = 周幾幾點？',
+        answer: '周四上午11點',
+        options: ['周三上午11點', '周四上午11點', '周五上午11點', '周六上午11點']
       }
     ]
   },
@@ -1558,15 +1559,15 @@ const ADVANCED_PROBLEMS = [
       {
         step: 2,
         prompt: '上午9點 - 21小時 = 幾點？',
-        answer: '前一天中午12點',
-        options: ['前一天上午12點', '前一天中午12點', '前一天下午12點', '當天午夜12點'],
-        hint: '9 - 21要借1天，(9 + 24) - 21 = 12點'
+        answer: '周一中午12點',
+        options: ['周一上午12點', '周一中午12點', '周一下午12點', '當天午夜12點'],
+        hint: '9 - 21要借1天，(9 + 24) - 21 = 12點，是前一天'
       },
       {
         step: 3,
-        prompt: '周二上午9點減去1天（借的那天）= 周幾中午12點？',
-        answer: '周一中午12點',
-        options: ['周一中午12點', '周二中午12點', '周三中午12點', '周二上午12點']
+        prompt: '周一中午12點往回推1天 = 周幾中午12點？',
+        answer: '周日中午12點',
+        options: ['周六中午12點', '周日中午12點', '周一中午12點', '周二中午12點']
       }
     ]
   },
@@ -1585,15 +1586,15 @@ const ADVANCED_PROBLEMS = [
       {
         step: 2,
         prompt: '晚上11點(23點) - 14小時 = 幾點？',
-        answer: '前一天下午9點',
-        options: ['下午9點', '前一天下午9點', '前一天晚上9點', '當天下午9點'],
-        hint: '23 - 14 = 9點（下午9點），但這是前一天'
+        answer: '周四早上9點',
+        options: ['早上9點', '周四早上9點', '周四下午9點', '當天早上9點'],
+        hint: '23 - 14 = 9點（09:00，早上9點），是前一天'
       },
       {
         step: 3,
-        prompt: '周五晚上11點的前一天下午9點 = 周幾幾點？',
-        answer: '周四下午9點',
-        options: ['周三下午9點', '周四下午9點', '周五下午9點', '周四晚上9點']
+        prompt: '周四早上9點往回推1天 = 周幾幾點？',
+        answer: '周三早上9點',
+        options: ['周二早上9點', '周三早上9點', '周四早上9點', '周五早上9點']
       }
     ]
   },
@@ -1766,7 +1767,7 @@ const CHAPTER_QUIZ = [
     content: '今天早上10點已經是某課程啟動後的第25小時，課程開始時間是？',
     type: 'multiple_choice',
     options: ['昨天早上8點', '昨天晚上8點', '昨天下午8點', '前天早上10點'],
-    answer: '昨天下午8點'
+    answer: '昨天早上9點'
   }
 ];
 
