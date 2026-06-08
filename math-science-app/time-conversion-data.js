@@ -315,6 +315,31 @@ const TIME_CONVERSION_TUTORIAL = {
         `
       },
       {
+        heading: '🎨 時間分解視覺化 - 30小時如何分解？',
+        content: `
+          <div class="time-decomposition">
+            <div class="decomposition-header">
+              <div class="decomposition-title">30小時 = ? 天 + ? 小時</div>
+              <div class="decomposition-buttons" style="display: flex; gap: 10px; margin-top: 12px;">
+                <button onclick="visualizeDecomposition(30)" class="decomposition-btn" style="background: rgba(0,245,255,0.15); border: 2px solid #00f5ff; color: #00f5ff; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">30小時</button>
+                <button onclick="visualizeDecomposition(36)" class="decomposition-btn" style="background: rgba(0,245,255,0.15); border: 2px solid #00f5ff; color: #00f5ff; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">36小時</button>
+                <button onclick="visualizeDecomposition(48)" class="decomposition-btn" style="background: rgba(0,245,255,0.15); border: 2px solid #00f5ff; color: #00f5ff; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">48小時</button>
+              </div>
+            </div>
+
+            <div id="decompositionVisualization" style="margin-top: 20px;">
+              <div class="decomposition-bar">
+                <div id="dayBar" class="decomposition-segment" style="background: linear-gradient(90deg, #00ff88 0%, #00ff88 100%); height: 40px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: #0a0e27; font-weight: bold;"></div>
+                <div id="hourBar" class="decomposition-segment" style="background: linear-gradient(90deg, #00f5ff 0%, #00f5ff 100%); height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0a0e27; font-weight: bold;"></div>
+              </div>
+              <div class="decomposition-result" style="margin-top: 15px; padding: 15px; background: rgba(0,245,255,0.08); border: 2px solid #00f5ff; border-radius: 8px;">
+                <div id="decompositionText" style="text-align: center; color: #b8c5d6; font-size: 16px;"></div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
         heading: '💡 解題技巧',
         content: `
           <div class="tips-box">
