@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/math-science-app/(.*)", "destination": "/math-science-app/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
