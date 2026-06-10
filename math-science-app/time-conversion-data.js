@@ -1062,7 +1062,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 2,
         prompt: '中午12點 + 0小時（沒有額外小時）',
-        answer: '中午12點'
+        answer: '中午12點',
+        options: ['早上12點', '中午12點', '下午12點', '晚上12點']
       },
       {
         step: 3,
@@ -1121,7 +1122,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周六下午6點 + 1天 = 周幾幾點？',
-        answer: '周日下午6點'
+        answer: '周日下午6點',
+        options: ['周六下午6點', '周日下午4點', '周日下午6點', '周一下午6點']
       }
     ]
   },
@@ -1146,7 +1148,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周四晚上10點 + 1天 = 周幾幾點？',
-        answer: '周五晚上10點'
+        answer: '周五晚上10點',
+        options: ['周四晚上10點', '周五晚上8點', '周五晚上10點', '周六晚上10點']
       }
     ]
   },
@@ -1171,7 +1174,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周一下午4點 + 2天 = 周幾幾點？',
-        answer: '周三下午4點'
+        answer: '周三下午4點',
+        options: ['周一下午4點', '周二下午4點', '周三下午4點', '周四下午4點']
       }
     ]
   },
@@ -1196,7 +1200,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周日凌晨6點 + 1天 = 周幾幾點？',
-        answer: '周一凌晨6點'
+        answer: '周一凌晨6點',
+        options: ['周日凌晨6點', '周一凌晨4點', '周一凌晨6點', '周二凌晨6點']
       }
     ]
   },
@@ -1221,7 +1226,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周二早上5點 + 1天 = 周幾幾點？',
-        answer: '周三早上5點'
+        answer: '周三早上5點',
+        options: ['周二早上5點', '周三早上3點', '周三早上5點', '周四早上5點']
       }
     ]
   },
@@ -1246,7 +1252,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周四凌晨3點 + 1天 = 周幾幾點？',
-        answer: '周五凌晨3點'
+        answer: '周五凌晨3點',
+        options: ['周四凌晨3點', '周五凌晨1點', '周五凌晨3點', '周六凌晨3點']
       }
     ]
   },
@@ -1271,7 +1278,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周六晚上8點 + 1天 = 周幾幾點？',
-        answer: '周日晚上8點'
+        answer: '周日晚上8點',
+        options: ['周六晚上8點', '周日晚上6點', '周日晚上8點', '周一晚上8點']
       }
     ]
   },
@@ -1296,7 +1304,8 @@ const INTERMEDIATE_PROBLEMS = [
       {
         step: 3,
         prompt: '周一下午3點 + 2天 = 周幾幾點？',
-        answer: '周三下午3點'
+        answer: '周三下午3點',
+        options: ['周一下午3點', '周二下午3點', '周三下午3點', '周四下午3點']
       }
     ]
   },
@@ -1766,7 +1775,7 @@ const CHAPTER_QUIZ = [
     id: 'quiz-5',
     content: '今天早上10點已經是某課程啟動後的第25小時，課程開始時間是？',
     type: 'multiple_choice',
-    options: ['昨天早上8點', '昨天晚上8點', '昨天下午8點', '前天早上10點'],
+    options: ['昨天早上9點', '昨天晚上8點', '昨天下午8點', '前天早上10點'],
     answer: '昨天早上9點'
   }
 ];
