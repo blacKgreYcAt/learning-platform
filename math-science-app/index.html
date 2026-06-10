@@ -2450,9 +2450,43 @@
   <script>
     // 時間換算模塊導航函數
     function backToTimeConversion() {
-      document.getElementById('timeConversionPage').style.display = 'none';
-      document.getElementById('homePage').style.display = 'flex';
+      // 隱藏所有時間換算相關頁面
+      const timeConvPageEl = document.getElementById('timeConversionPage');
+      const quizPageEl = document.getElementById('timeConversionQuizPage');
+      
+      if (timeConvPageEl) {
+        timeConvPageEl.style.display = 'none';
+        timeConvPageEl.classList.remove('active');
+      }
+      
+      if (quizPageEl) {
+        quizPageEl.style.display = 'none';
+      }
+      
+      // 隱藏卡牌模式
+      const cardModePageEl = document.getElementById('cardModePage');
+      if (cardModePageEl) {
+        cardModePageEl.classList.remove('active');
+        cardModePageEl.style.display = 'none';
+      }
+      
+      // 隱藏遊戲模式
+      const gameModePageEl = document.getElementById('gameModePage');
+      if (gameModePageEl) {
+        gameModePageEl.classList.remove('active');
+        gameModePageEl.style.display = 'none';
+      }
+      
+      // 顯示首頁
+      const homePageEl = document.getElementById('homePage');
+      if (homePageEl) {
+        homePageEl.style.display = 'flex';
+      }
+      
+      // 滾動到頂部
+      window.scrollTo(0, 0);
     }
+
 
     // 添加返回首頁快捷鍵
     document.addEventListener('keydown', (e) => {
