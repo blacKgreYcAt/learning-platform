@@ -3,6 +3,31 @@
  * 包含：教學邏輯、時間軸動畫、步驟式答題、反饋系統
  */
 
+// ============ 工具函數 ============
+/**
+ * HTML轉義 - 防止XSS攻擊
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * 標準化答案 - 容错匹配
+ * 去除多余空格、統一大小寫、处理特殊空格字符
+ */
+function normalizeAnswer(answer) {
+  if (!answer) return '';
+  return answer
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')  // 多個空格變成單個空格
+    .replace(/　/g, ' ') // 全角空格變成普通空格
+    .replace(/﻿/g, ''); // 移除BOM字符
+}
+
 // ============ 全局狀態管理 ============
 const timeConversionState = {
   currentChapter: 1,
@@ -723,15 +748,15 @@ function displayMultipleChoiceProblem(problem) {
   let html = `
     <div class="quiz-problem">
       <div class="problem-header">
-        <h3>${problem.content}</h3>
+        <h3>${escapeHtml(problem.content)}</h3>
       </div>
-      <div class="problem-options">
+      <div class="problem-options" id="optionsContainer">
   `;
 
-  problem.options.forEach((option) => {
+  problem.options.forEach((option, idx) => {
     html += `
-      <button class="option-btn" onclick="submitMultipleChoiceAnswer('${option}')">
-        ${option}
+      <button class="option-btn" data-option-index="${idx}" data-option-text="${escapeHtml(option)}">
+        ${escapeHtml(option)}
       </button>
     `;
   });
@@ -743,6 +768,52 @@ function displayMultipleChoiceProblem(problem) {
   `;
 
   container.innerHTML = html;
+
+  // 使用事件委托代替inline onclick
+  const optionsContainer = document.getElementById('optionsContainer');
+  if (optionsContainer) {
+    optionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('option-btn')) {
+        const selectedAnswer = e.target.getAttribute('data-option-text');
+        submitMultipleChoiceAnswerSafe(selectedAnswer, problem);
+      }
+    });
+  }
+}
+
+// 安全的答案提交函数 - 处理多选题
+function submitMultipleChoiceAnswerSafe(selectedAnswer, problem) {
+  const difficulty = timeConversionState.currentDifficulty;
+  const feedbackDiv = document.getElementById('answerFeedback');
+
+  if (!problem || !feedbackDiv) return;
+
+  // 改进的答案匹配 - 支持容错匹配
+  const isCorrect = normalizeAnswer(selectedAnswer) === normalizeAnswer(problem.answer);
+
+  if (isCorrect) {
+    feedbackDiv.innerHTML = `
+      <div style="color: #00ff88; padding: 15px; background: rgba(0,255,136,0.15); border-radius: 8px; margin-top: 15px;">
+        <div style="font-size: 18px; margin-bottom: 8px;">✓ 正確！</div>
+        <div>${problem.explanation || '答案正確！'}</div>
+        <button onclick="moveToNextProblem()" class="btn-next" style="margin-top: 12px; display: inline-block;">下一題 →</button>
+      </div>
+    `;
+    timeConversionState.quizProgress[difficulty].completed++;
+  } else {
+    feedbackDiv.innerHTML = `
+      <div style="color: #ff6b6b; padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px; margin-top: 15px;">
+        <div style="font-size: 18px; margin-bottom: 8px;">✗ 不對</div>
+        <div>正確答案：<strong>${escapeHtml(problem.answer)}</strong></div>
+        <div style="margin-top: 8px;">${problem.explanation || '請重新嘗試'}</div>
+      </div>
+    `;
+  }
+
+  // 禁用所有按鈕
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.disabled = true;
+  });
 }
 
 function displayStepByStepProblem(problem) {
@@ -759,21 +830,21 @@ function displayStepByStepProblem(problem) {
   let html = `
     <div class="quiz-problem">
       <div class="problem-header">
-        <h3>${problem.content}</h3>
+        <h3>${escapeHtml(problem.content)}</h3>
         <div class="step-indicator">
           第 ${currentStep + 1} / ${problem.questions.length} 步
         </div>
       </div>
       <div class="step-content">
-        <div class="step-question">${step.prompt}</div>
+        <div class="step-question">${escapeHtml(step.prompt)}</div>
   `;
 
-  if (step.options) {
-    html += '<div class="step-options">';
-    step.options.forEach((option) => {
+  if (step.options && step.options.length > 0) {
+    html += '<div class="step-options" id="stepOptionsContainer">';
+    step.options.forEach((option, idx) => {
       html += `
-        <button class="step-option-btn" onclick="submitStepAnswer('${option}')">
-          ${option}
+        <button class="step-option-btn" data-step-option-index="${idx}" data-step-option-text="${escapeHtml(option)}">
+          ${escapeHtml(option)}
         </button>
       `;
     });
@@ -781,8 +852,8 @@ function displayStepByStepProblem(problem) {
   } else {
     html += `
       <div class="step-input-area">
-        <input type="text" id="stepAnswerInput" placeholder="輸入答案" onkeypress="if(event.key==='Enter') submitStepAnswer(this.value)">
-        <button onclick="submitStepAnswer(document.getElementById('stepAnswerInput').value)" class="btn-submit">提交</button>
+        <input type="text" id="stepAnswerInput" placeholder="輸入答案">
+        <button id="stepSubmitBtn" class="btn-submit">提交</button>
       </div>
     `;
   }
@@ -795,131 +866,135 @@ function displayStepByStepProblem(problem) {
 
   container.innerHTML = html;
 
+  // 綁定事件 - 選項按鈕
+  const stepOptionsContainer = document.getElementById('stepOptionsContainer');
+  if (stepOptionsContainer) {
+    stepOptionsContainer.addEventListener('click', function(e) {
+      if (e.target.classList.contains('step-option-btn')) {
+        const selectedAnswer = e.target.getAttribute('data-step-option-text');
+        submitStepAnswerSafe(selectedAnswer, problem, currentStep);
+      }
+    });
+  }
+
+  // 綁定事件 - 文本輸入
+  const stepSubmitBtn = document.getElementById('stepSubmitBtn');
+  const stepAnswerInput = document.getElementById('stepAnswerInput');
+  if (stepSubmitBtn && stepAnswerInput) {
+    stepSubmitBtn.addEventListener('click', function() {
+      const userAnswer = stepAnswerInput.value.trim();
+      submitStepAnswerSafe(userAnswer, problem, currentStep);
+    });
+
+    stepAnswerInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const userAnswer = this.value.trim();
+        submitStepAnswerSafe(userAnswer, problem, currentStep);
+      }
+    });
+  }
+
   // 如果有提示，顯示提示按鈕
   if (step.hint) {
     const feedbackDiv = document.getElementById('stepFeedback');
     if (feedbackDiv) {
       feedbackDiv.innerHTML += `
-        <button onclick="showHint()" class="btn-hint" style="margin-top: 10px;">💡 查看提示</button>
+        <button id="hintBtn" class="btn-hint" style="margin-top: 10px;">💡 查看提示</button>
       `;
+      const hintBtn = document.getElementById('hintBtn');
+      if (hintBtn) {
+        hintBtn.addEventListener('click', function() {
+          showHintForStep(step);
+        });
+      }
     }
   }
 }
 
-function submitMultipleChoiceAnswer(selectedAnswer) {
+// 安全的步驟答案提交函数
+function submitStepAnswerSafe(userAnswer, problem, currentStep) {
   const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = [];
-
-  if (difficulty === 'basic') {
-    problemSet = TIME_CONVERSION_DATA.basicProblems;
-  } else if (difficulty === 'intermediate') {
-    problemSet = TIME_CONVERSION_DATA.intermediateProblems;
-  } else if (difficulty === 'advanced') {
-    problemSet = TIME_CONVERSION_DATA.advancedProblems;
-  }
-
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const feedbackDiv = document.getElementById('answerFeedback');
-
-  if (selectedAnswer === problem.answer) {
-    feedbackDiv.innerHTML = `
-      <div style="color: #00ff88; padding: 15px; background: rgba(0,255,136,0.15); border-radius: 8px; margin-top: 15px;">
-        <div style="font-size: 18px; margin-bottom: 8px;">✓ 正確！</div>
-        <div>${problem.explanation}</div>
-        <button onclick="moveToNextProblem()" class="btn-next" style="margin-top: 12px; display: inline-block;">下一題 →</button>
-      </div>
-    `;
-    timeConversionState.quizProgress[difficulty].completed++;
-  } else {
-    feedbackDiv.innerHTML = `
-      <div style="color: #ff6b6b; padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px; margin-top: 15px;">
-        <div style="font-size: 18px; margin-bottom: 8px;">✗ 不對</div>
-        <div>正確答案：<strong>${problem.answer}</strong></div>
-        <div style="margin-top: 8px;">${problem.explanation}</div>
-      </div>
-    `;
-  }
-
-  // 禁用所有按鈕
-  document.querySelectorAll('.option-btn').forEach(btn => {
-    btn.disabled = true;
-  });
-}
-
-function submitStepAnswer(selectedAnswer) {
-  const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = [];
-
-  if (difficulty === 'basic') {
-    problemSet = TIME_CONVERSION_DATA.basicProblems;
-  } else if (difficulty === 'intermediate') {
-    problemSet = TIME_CONVERSION_DATA.intermediateProblems;
-  } else if (difficulty === 'advanced') {
-    problemSet = TIME_CONVERSION_DATA.advancedProblems;
-  }
-
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const currentStep = timeConversionState.currentStep;
   const step = problem.questions[currentStep];
   const feedbackDiv = document.getElementById('stepFeedback');
 
-  if (selectedAnswer === step.answer) {
+  if (!step || !feedbackDiv) return;
+
+  // 改进的答案匹配 - 支持容错匹配
+  const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(step.answer);
+
+  if (isCorrect) {
     feedbackDiv.innerHTML = `
       <div style="color: #00ff88; padding: 15px; background: rgba(0,255,136,0.15); border-radius: 8px; margin-top: 15px;">
         <div style="font-size: 16px; margin-bottom: 8px;">✓ 正確！</div>
-        <button onclick="nextStep()" class="btn-next" style="margin-top: 12px;">下一步 →</button>
+        <div style="margin-top: 8px;">這一步的答案是：<strong>${escapeHtml(step.answer)}</strong></div>
+        <button id="nextStepBtn" class="btn-next" style="margin-top: 12px;">下一步 →</button>
       </div>
     `;
+
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    if (nextStepBtn) {
+      nextStepBtn.addEventListener('click', function() {
+        nextStep();
+      });
+    }
   } else {
     feedbackDiv.innerHTML = `
       <div style="color: #ff6b6b; padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px; margin-top: 15px;">
         <div style="font-size: 16px; margin-bottom: 8px;">✗ 不對</div>
-        <div>正確答案：<strong>${step.answer}</strong></div>
+        <div class="error-analysis">
+          <div>你的答案：<strong>${escapeHtml(userAnswer)}</strong></div>
+          <div>正確答案：<strong>${escapeHtml(step.answer)}</strong></div>
+          ${step.hint ? `<div style="margin-top: 10px; color: #00ff88;">提示：${escapeHtml(step.hint)}</div>` : ''}
+        </div>
+        <button id="retryStepBtn" class="btn-retry" style="margin-top: 10px;">重新試試</button>
       </div>
     `;
+
+    const retryStepBtn = document.getElementById('retryStepBtn');
+    if (retryStepBtn) {
+      retryStepBtn.addEventListener('click', function() {
+        retryCurrentStep();
+      });
+    }
   }
 
-  // 禁用所有按鈕
+  // 禁用所有選項按鈕
   document.querySelectorAll('.step-option-btn').forEach(btn => {
     btn.disabled = true;
   });
-}
 
-function nextStep() {
-  timeConversionState.currentStep++;
-  displayCurrentProblem();
-}
-
-function moveToNextProblem() {
-  timeConversionState.currentProblemIndex++;
-  timeConversionState.currentStep = 0;
-  displayCurrentProblem();
-}
-
-function showHint() {
-  const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = [];
-
-  if (difficulty === 'basic') {
-    problemSet = TIME_CONVERSION_DATA.basicProblems;
-  } else if (difficulty === 'intermediate') {
-    problemSet = TIME_CONVERSION_DATA.intermediateProblems;
-  } else if (difficulty === 'advanced') {
-    problemSet = TIME_CONVERSION_DATA.advancedProblems;
+  // 禁用提交按鈕
+  const submitBtn = document.getElementById('stepSubmitBtn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
   }
+}
 
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const step = problem.questions[timeConversionState.currentStep];
-
-  if (step.hint) {
-    const feedbackDiv = document.getElementById('stepFeedback');
+function showHintForStep(step) {
+  const feedbackDiv = document.getElementById('stepFeedback');
+  if (step.hint && feedbackDiv) {
     feedbackDiv.innerHTML = `
       <div style="color: #ffc107; padding: 12px; background: rgba(255,193,7,0.15); border-radius: 8px; margin-top: 12px;">
-        <strong>💡 提示：</strong> ${step.hint}
+        <strong>💡 提示：</strong> ${escapeHtml(step.hint)}
       </div>
     `;
   }
 }
+
+
+function nextStep() {
+  timeConversionState.currentStep++;
+  const difficulty = timeConversionState.currentDifficulty;
+  let problemSet = TIME_CONVERSION_DATA[difficulty === 'basic' ? 'basicProblems' : difficulty === 'intermediate' ? 'intermediateProblems' : 'advancedProblems'];
+  const problem = problemSet[timeConversionState.currentProblemIndex];
+
+  if (timeConversionState.currentStep >= problem.questions.length) {
+    moveToNextProblem();
+  } else {
+    displayCurrentProblem();
+  }
+}
+
 
 function updateProgressBar(difficulty) {
   const completed = timeConversionState.quizProgress[difficulty].completed;
@@ -962,75 +1037,7 @@ function showQuizComplete(difficulty) {
   `;
 }
 
-function submitMultipleChoiceAnswer(selectedAnswer) {
-  const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = [];
 
-  if (difficulty === 'basic') {
-    problemSet = TIME_CONVERSION_DATA.basicProblems;
-  } else if (difficulty === 'intermediate') {
-    problemSet = TIME_CONVERSION_DATA.intermediateProblems;
-  } else if (difficulty === 'advanced') {
-    problemSet = TIME_CONVERSION_DATA.advancedProblems;
-  }
-
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const feedbackDiv = document.getElementById('answerFeedback');
-
-  if (selectedAnswer === problem.answer) {
-    showCorrectFeedback(problem, feedbackDiv);
-    timeConversionState.quizProgress[difficulty].completed++;
-
-    setTimeout(() => {
-      moveToNextProblem();
-    }, 2000);
-  } else {
-    showWrongFeedback(problem, selectedAnswer, feedbackDiv);
-  }
-}
-
-function submitStepAnswer(userAnswer) {
-  const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = [];
-
-  if (difficulty === 'basic') {
-    problemSet = TIME_CONVERSION_DATA.basicProblems;
-  } else if (difficulty === 'intermediate') {
-    problemSet = TIME_CONVERSION_DATA.intermediateProblems;
-  } else if (difficulty === 'advanced') {
-    problemSet = TIME_CONVERSION_DATA.advancedProblems;
-  }
-
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const step = problem.questions[timeConversionState.currentStep];
-  const feedbackDiv = document.getElementById('stepFeedback');
-
-  if (userAnswer === step.answer) {
-    showCorrectStepFeedback(step, problem, feedbackDiv);
-    timeConversionState.currentStep++;
-
-    setTimeout(() => {
-      displayStepByStepProblem(problem);
-    }, 1500);
-  } else {
-    showWrongStepFeedback(step, userAnswer, feedbackDiv);
-  }
-}
-
-function showHint() {
-  const difficulty = timeConversionState.currentDifficulty;
-  let problemSet = TIME_CONVERSION_DATA[difficulty === 'basic' ? 'basicProblems' : difficulty === 'intermediate' ? 'intermediateProblems' : 'advancedProblems'];
-
-  const problem = problemSet[timeConversionState.currentProblemIndex];
-  const step = problem.questions[timeConversionState.currentStep];
-
-  if (step.hint) {
-    const feedbackDiv = document.getElementById('stepFeedback');
-    if (feedbackDiv) {
-      feedbackDiv.innerHTML = `<div class="hint-box">💡 提示：${step.hint}</div>`;
-    }
-  }
-}
 
 function showCorrectFeedback(problem, container) {
   container.innerHTML = `
