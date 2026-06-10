@@ -589,17 +589,16 @@ function checkPractice(practiceNum) {
     message = '<strong style="color: #00ff88;">✓ 正確！</strong><br><br>解答過程：<br>• ' + practiceData[practiceNum].explanation;
   }
 
-  // 檢查答案（支持多個正確答案）
+  // 檢查答案（支持多個正確答案 - 使用規範化比較）
   isCorrect = correctAnswers.some(answer =>
-    answer.toLowerCase().includes(userAnswer.toLowerCase()) ||
-    userAnswer.toLowerCase().includes(answer.toLowerCase())
+    normalizeAnswer(answer) === normalizeAnswer(userAnswer)
   );
 
   resultDiv.style.display = 'block';
   resultDiv.innerHTML = `
     <div style="padding: 15px; background: ${isCorrect ? 'rgba(0,255,136,0.15)' : 'rgba(255,107,107,0.15)'}; border: 2px solid ${isCorrect ? '#00ff88' : '#ff6b6b'}; border-radius: 8px;">
       <div style="color: ${isCorrect ? '#00ff88' : '#ff6b6b'};line-height: 1.6;">
-        ${isCorrect ? message : `<strong>❌ 答案不對，試試看吧</strong><br><br><strong>正確答案的例子：</strong><br>• ${correctAnswers[0]}`}
+        ${isCorrect ? message : `<strong>❌ 答案不對，試試看吧</strong><br><br><strong>正確答案的例子：</strong><br>• ${escapeHtml(correctAnswers[0])}`}
       </div>
     </div>
   `;
@@ -627,14 +626,14 @@ function initChapterQuiz() {
     html += `
       <div class="quiz-question" id="quiz-${idx}">
         <div class="quiz-number">第 ${idx + 1} 題</div>
-        <div class="quiz-content">${problem.content}</div>
-        <div class="quiz-options">
+        <div class="quiz-content">${escapeHtml(problem.content)}</div>
+        <div class="quiz-options" id="quizOptions-${idx}">
     `;
 
-    problem.options.forEach((option) => {
+    problem.options.forEach((option, optIdx) => {
       html += `
-        <button class="quiz-option" onclick="submitQuizAnswer(${idx}, '${option}')">
-          ${option}
+        <button class="quiz-option" data-quiz-idx="${idx}" data-option-idx="${optIdx}" data-option-text="${escapeHtml(option)}">
+          ${escapeHtml(option)}
         </button>
       `;
     });
@@ -647,21 +646,34 @@ function initChapterQuiz() {
   });
 
   html += `
-    <button onclick="finishChapterQuiz()" class="btn-next" id="finishQuizBtn" style="display: none;">
+    <button id="finishQuizBtn" class="btn-next" style="display: none;">
       完成小測，進入正式題庫
     </button>
   </div>`;
 
   container.innerHTML = html;
+
+  // 使用事件委托处理按钮点击
+  container.addEventListener('click', function(e) {
+    if (e.target.classList.contains('quiz-option')) {
+      const quizIdx = parseInt(e.target.getAttribute('data-quiz-idx'));
+      const selectedAnswer = e.target.getAttribute('data-option-text');
+      submitQuizAnswerSafe(quizIdx, selectedAnswer);
+    }
+    if (e.target.id === 'finishQuizBtn') {
+      finishChapterQuiz();
+    }
+  });
 }
 
-function submitQuizAnswer(questionIdx, selectedAnswer) {
+// 安全的小测答题函数
+function submitQuizAnswerSafe(questionIdx, selectedAnswer) {
   const problem = TIME_CONVERSION_DATA.chapterQuiz[questionIdx];
   const resultDiv = document.querySelector(`.quiz-result-${questionIdx}`);
 
-  if (!resultDiv) return;
+  if (!resultDiv || !problem) return;
 
-  if (selectedAnswer === problem.answer) {
+  if (normalizeAnswer(selectedAnswer) === normalizeAnswer(problem.answer)) {
     resultDiv.innerHTML = '✓ 正確！';
     resultDiv.style.color = '#00ff88';
     resultDiv.style.display = 'block';
@@ -674,11 +686,12 @@ function submitQuizAnswer(questionIdx, selectedAnswer) {
     // 檢查是否全部正確
     checkAllQuizAnswered();
   } else {
-    resultDiv.innerHTML = `✗ 不對，正確答案是：${problem.answer}`;
+    resultDiv.innerHTML = `✗ 不對，正確答案是：${escapeHtml(problem.answer)}`;
     resultDiv.style.color = '#ff6b6b';
     resultDiv.style.display = 'block';
   }
 }
+
 
 function checkAllQuizAnswered() {
   const allAnswered = document.querySelectorAll('.quiz-result-0, .quiz-result-1, .quiz-result-2, .quiz-result-3, .quiz-result-4').length === 5;
@@ -996,46 +1009,6 @@ function nextStep() {
 }
 
 
-function updateProgressBar(difficulty) {
-  const completed = timeConversionState.quizProgress[difficulty].completed;
-  const total = timeConversionState.quizProgress[difficulty].total;
-  const percentage = (completed / total) * 100;
-
-  document.getElementById('quizProgress').style.width = percentage + '%';
-  document.getElementById('quizCurrentIndex').textContent = timeConversionState.currentProblemIndex + 1;
-  document.getElementById('quizTotal').textContent = total;
-  document.getElementById('quizTitle').textContent =
-    difficulty === 'basic' ? '基礎題庫' :
-    difficulty === 'intermediate' ? '進階題庫' : '挑戰題庫';
-}
-
-function showQuizComplete(difficulty) {
-  const container = document.getElementById('quizProblemContainer');
-  const completed = timeConversionState.quizProgress[difficulty].completed;
-  const total = timeConversionState.quizProgress[difficulty].total;
-
-  let nextButtonHTML = '';
-  if (difficulty === 'basic') {
-    nextButtonHTML = `<button onclick="initTimeConversionQuiz('intermediate')" class="btn" style="background: #ff00aa; color: white; margin-left: 10px;">進階題庫</button>`;
-  } else if (difficulty === 'intermediate') {
-    nextButtonHTML = `<button onclick="initTimeConversionQuiz('advanced')" class="btn" style="background: #00ff88; color: #0a0e27; margin-left: 10px;">挑戰題庫</button>`;
-  }
-
-  container.innerHTML = `
-    <div class="quiz-complete" style="text-align: center; padding: 40px;">
-      <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
-      <h2 style="color: #00ff88; margin-bottom: 10px;">太棒了！</h2>
-      <p style="color: #b8c5d6; margin-bottom: 20px;">你已完成此難度的所有題目</p>
-      <div style="font-size: 24px; color: #00f5ff; margin-bottom: 30px;">
-        ${completed}/${total} 道題
-      </div>
-      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <button onclick="backToTimeConversionHome()" class="btn" style="background: #00f5ff; color: #0a0e27;">返回教學</button>
-        ${nextButtonHTML}
-      </div>
-    </div>
-  `;
-}
 
 
 
@@ -1044,7 +1017,7 @@ function showCorrectFeedback(problem, container) {
     <div class="feedback-box correct-feedback">
       <div class="feedback-icon">✓</div>
       <div class="feedback-text">答對了！</div>
-      <div class="feedback-explanation">${problem.explanation || ''}</div>
+      <div class="feedback-explanation">${escapeHtml(problem.explanation || '')}</div>
     </div>
   `;
   container.style.display = 'block';
@@ -1056,14 +1029,20 @@ function showWrongFeedback(problem, selectedAnswer, container) {
       <div class="feedback-icon">✗</div>
       <div class="feedback-text">答錯了</div>
       <div class="error-analysis">
-        <div>你選擇的是：<strong>${selectedAnswer}</strong></div>
-        <div>正確答案是：<strong>${problem.answer}</strong></div>
-        <div style="margin-top: 10px; color: #00ff88;">說明：${problem.explanation}</div>
+        <div>你選擇的是：<strong>${escapeHtml(selectedAnswer)}</strong></div>
+        <div>正確答案是：<strong>${escapeHtml(problem.answer)}</strong></div>
+        <div style="margin-top: 10px; color: #00ff88;">說明：${escapeHtml(problem.explanation)}</div>
       </div>
-      <button onclick="retryCurrentProblem()" class="btn-retry">重新試試</button>
+      <button id="retryProblemBtn" class="btn-retry">重新試試</button>
     </div>
   `;
   container.style.display = 'block';
+
+  // 绑定重试按钮事件
+  const retryBtn = document.getElementById('retryProblemBtn');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', retryCurrentProblem);
+  }
 }
 
 function showCorrectStepFeedback(step, problem, container) {
@@ -1072,7 +1051,7 @@ function showCorrectStepFeedback(step, problem, container) {
       <div class="feedback-icon">✓</div>
       <div class="feedback-text">正確！</div>
       <div style="margin-top: 10px; font-size: 14px; color: #b4b4ff;">
-        這一步的答案是：<strong>${step.answer}</strong>
+        這一步的答案是：<strong>${escapeHtml(step.answer)}</strong>
       </div>
     </div>
   `;
@@ -1085,14 +1064,20 @@ function showWrongStepFeedback(step, selectedAnswer, container) {
       <div class="feedback-icon">✗</div>
       <div class="feedback-text">這一步的答案不對</div>
       <div class="error-analysis">
-        <div>你的答案：<strong>${selectedAnswer}</strong></div>
-        <div>正確答案：<strong>${step.answer}</strong></div>
-        ${step.hint ? `<div style="margin-top: 10px; color: #00ff88;">提示：${step.hint}</div>` : ''}
+        <div>你的答案：<strong>${escapeHtml(selectedAnswer)}</strong></div>
+        <div>正確答案：<strong>${escapeHtml(step.answer)}</strong></div>
+        ${step.hint ? `<div style="margin-top: 10px; color: #00ff88;">提示：${escapeHtml(step.hint)}</div>` : ''}
       </div>
-      <button onclick="retryCurrentStep()" class="btn-retry">重新試試</button>
+      <button id="retryStepBtn" class="btn-retry">重新試試</button>
     </div>
   `;
   container.style.display = 'block';
+
+  // 绑定重试按钮事件
+  const retryBtn = document.getElementById('retryStepBtn');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', retryCurrentStep);
+  }
 }
 
 function retryCurrentProblem() {
