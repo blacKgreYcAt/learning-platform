@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover：iPad 全螢幕時避開瀏海／圓角；maximum-scale 保留 5 倍，不剝奪放大權利 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="color-scheme" content="dark">
+<title>🚀 星際數學探險 · 引導式教學</title>
+<link rel="stylesheet" href="g5-styles-20260807.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>🚀 星際數學探險</h1>
+    <p>引導式教學 · 先把概念弄懂，再練題目</p>
+  </div>
+
+  <!-- 年級選擇 -->
+  <section class="card" id="grade-card">
+    <h2>選擇年級</h2>
+    <p class="sub">目前開放五年級上學期，其他年級陸續加入中</p>
+    <div class="grade-row" id="grade-row"></div>
+  </section>
+
+  <!-- 單元地圖 -->
+  <section class="card" id="unit-card" hidden>
+    <h2 id="unit-card-title">五年級上學期 · 數學</h2>
+    <p class="sub">翰林版 · 10 個單元。點單元開始學習，進度會自動記住。</p>
+    <div class="unit-list" id="unit-list"></div>
+  </section>
+
+  <!-- 家長入口：主畫面 App 沒有網址列，沒有站內連結就進不去報告頁 -->
+  <p class="parent-link" id="parent-link" hidden>
+    <a href="g5-tutor-report-20260808.html">家長：看「問老師」使用紀錄</a>
+  </p>
+
+  <!-- 課程 -->
+  <section class="card" id="lesson-card" hidden>
+    <button class="back-link" id="back-btn" type="button">← 回單元地圖</button>
+    <div id="lesson-root"></div>
+  </section>
+
+</div>
+
+<script src="g5-lesson-engine-20260807.js"></script>
+<script src="g5-tutor-content-20260808.js"></script>
+<script src="g5-tutor-content-part2-20260808.js"></script>
+<script src="g5-unit01-linechart-20260807.js"></script>
+<script src="g5-unit02-factors-20260807.js"></script>
+<script src="g5-unit03-plane-20260808.js"></script>
+<script src="g5-unit04-common-20260807.js"></script>
+<script src="g5-unit05-solids-20260808.js"></script>
+<script src="g5-unit06-operations-20260807.js"></script>
+<script src="g5-unit07-fractions-20260807.js"></script>
+<script src="g5-unit08-area-20260808.js"></script>
+<script src="g5-unit09-multiply-20260807.js"></script>
+<script src="g5-unit10-sector-20260808.js"></script>
+<script>
+'use strict';
+(function () {
+  const { El, LessonEngine } = window.G5;
+
+  // 翰林版 五上 數學單元（依課本順序）
+  const UNITS = [
+    { order: 1,  title: '折線圖',         icon: '📈', id: 'g5-u01-linechart' },
+    { order: 2,  title: '倍數與因數',     icon: '🔢', id: 'g5-u02-factors' },
+    { order: 3,  title: '平面圖形',       icon: '📐', id: 'g5-u03-plane' },
+    { order: 4,  title: '公倍數與公因數', icon: '🔗', id: 'g5-u04-common' },
+    { order: 5,  title: '立體形體',       icon: '🧊', id: 'g5-u05-solids' },
+    { order: 6,  title: '四則運算',       icon: '➗', id: 'g5-u06-operations' },
+    { order: 7,  title: '擴分約分與加減', icon: '🍰', id: 'g5-u07-fractions' },
+    { order: 8,  title: '面積',           icon: '🟩', id: 'g5-u08-area' },
+    { order: 9,  title: '乘以幾分之一',   icon: '✖️', id: 'g5-u09-multiply' },
+    { order: 10, title: '扇形',           icon: '🌗', id: 'g5-u10-sector' },
+  ];
+
+  const gradeCard  = document.getElementById('grade-card');
+  const unitCard   = document.getElementById('unit-card');
+  const lessonCard = document.getElementById('lesson-card');
+  const lessonRoot = document.getElementById('lesson-root');
+  const unitList   = document.getElementById('unit-list');
+
+  // ── 年級按鈕 ──
+  const gradeRow = document.getElementById('grade-row');
+  for (let g = 1; g <= 6; g++) {
+    const ready = g === 5;
+    const btn = El('button', {
+      class: 'grade-btn' + (ready ? '' : ''),
+      type: 'button',
+      disabled: ready ? null : 'disabled',
+    }, `${g} 年級`, El('small', {}, ready ? '上學期 · 可用' : '準備中'));
+    if (ready) btn.addEventListener('click', () => selectGrade(g, btn));
+    gradeRow.append(btn);
+  }
+
+  function selectGrade(g, btn) {
+    gradeRow.querySelectorAll('.grade-btn').forEach((b) => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    unitCard.hidden = false;
+    document.getElementById('parent-link').hidden = false;
+    renderUnits();
+    unitCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── 單元列表 ──
+  function renderUnits() {
+    unitList.replaceChildren();
+    UNITS.forEach((u) => {
+      const ready = Boolean(u.id && window.G5_UNITS && window.G5_UNITS[u.id]);
+      const done = ready && localStorage.getItem(`g5-progress-${u.id}-done`) === '1';
+      const card = El('button', {
+        class: 'unit ' + (ready ? 'is-ready' : 'is-locked') + (done ? ' is-done' : ''),
+        type: 'button',
+        disabled: ready ? null : 'disabled',
+      },
+        El('span', { class: 'icon' }, u.icon),
+        El('span', { class: 'meta' },
+          El('strong', {}, `${u.order}. ${u.title}`),
+          El('span', {}, ready
+            ? (window.G5_UNITS[u.id].estimatedMinutes + ' 分鐘 · ' + window.G5_UNITS[u.id].subtitle)
+            : '製作中')),
+        El('span', { class: 'tag' }, done ? '已完成' : (ready ? '可開始' : '製作中'))
+      );
+      if (ready) card.addEventListener('click', () => openUnit(u.id));
+      unitList.append(card);
+    });
+  }
+
+  // ── 開課 ──
+  function openUnit(id) {
+    const unit = window.G5_UNITS[id];
+    gradeCard.hidden = true;
+    unitCard.hidden = true;
+    document.getElementById('parent-link').hidden = true;
+    lessonCard.hidden = false;
+
+    lessonRoot.replaceChildren();
+    const intro = El('div', { class: 'lesson-intro' },
+      El('h2', { class: 'lesson-title' }, `${unit.icon} ${unit.title}`),
+      El('p', { class: 'lesson-text' }, unit.subtitle),
+      El('h3', { style: 'margin:18px 0 10px;font-size:1.15rem;' }, '學完這個單元，你會：'),
+      El('ul', { class: 'objectives' }, unit.objectives.map((o) => El('li', {}, o))),
+      El('div', { class: 'lesson-nav' },
+        El('button', {
+          class: 'btn btn--primary', type: 'button',
+          onClick: () => { lessonRoot.replaceChildren(); new LessonEngine(unit, lessonRoot).start(); },
+        }, '開始學習 →'))
+    );
+    lessonRoot.append(intro);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToMap() {
+    lessonCard.hidden = true;
+    gradeCard.hidden = false;
+    unitCard.hidden = false;
+    document.getElementById('parent-link').hidden = false;
+    document.getElementById('parent-link').hidden = false;
+    renderUnits();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('back-btn').addEventListener('click', backToMap);
+  window.addEventListener('lesson:exit', backToMap);
+})();
+</script>
+</body>
+</html>

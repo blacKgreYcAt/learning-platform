@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="color-scheme" content="dark">
+<title>📊 問老師使用紀錄</title>
+<link rel="stylesheet" href="g5-styles-20260807.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>📊 問老師使用紀錄</h1>
+    <p>看小孩實際點了哪些問題　·　資料只存在這台裝置，沒有上傳</p>
+  </div>
+  <div id="report"></div>
+</div>
+
+<script src="g5-lesson-engine-20260807.js"></script>
+<script src="g5-tutor-content-20260808.js"></script>
+<script src="g5-tutor-content-part2-20260808.js"></script>
+<script src="g5-unit01-linechart-20260807.js"></script>
+<script src="g5-unit02-factors-20260807.js"></script>
+<script src="g5-unit03-plane-20260808.js"></script>
+<script src="g5-unit04-common-20260807.js"></script>
+<script src="g5-unit05-solids-20260808.js"></script>
+<script src="g5-unit06-operations-20260807.js"></script>
+<script src="g5-unit07-fractions-20260807.js"></script>
+<script src="g5-unit08-area-20260808.js"></script>
+<script src="g5-unit09-multiply-20260807.js"></script>
+<script src="g5-unit10-sector-20260808.js"></script>
+<script>
+'use strict';
+(function () {
+  const { El } = window.G5;
+  const root = document.getElementById('report');
+  const KEY = 'g5-tutor-log';
+
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { log = []; }
+
+  if (!log.length) {
+    root.append(El('section', { class: 'card' },
+      El('h2', {}, '還沒有紀錄'),
+      El('p', { class: 'sub' },
+        '要先讓小孩在這台裝置上實際用過「問老師」才會有資料。' +
+        '注意：紀錄是跟「裝置 + 瀏覽器」綁在一起的，' +
+        '在 Mac 上看不到 iPad 的紀錄——要在 iPad 上打開這一頁才看得到他的使用情形。')));
+    return;
+  }
+
+  // 統計：每個問題被點幾次
+  const counts = new Map();
+  log.forEach((e) => {
+    const k = `${e.unit}||${e.sec}||${e.q}`;
+    const c = counts.get(k) || { q: 0, more: 0 };
+    c[e.kind === 'more' ? 'more' : 'q']++;
+    counts.set(k, c);
+  });
+
+  const unitTitle = (id) => window.G5_UNITS?.[id]?.title || id;
+  const sectionTitle = (id, sec) => window.G5_UNITS?.[id]?.sections?.[sec]?.heading || `第 ${sec + 1} 段`;
+
+  // 總覽
+  const first = new Date(Math.min(...log.map((e) => e.t)));
+  const last = new Date(Math.max(...log.map((e) => e.t)));
+  const fmt = (d) => `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const moreTotal = log.filter((e) => e.kind === 'more').length;
+
+  root.append(El('section', { class: 'card' },
+    El('h2', {}, '總覽'),
+    El('p', { class: 'sub' }, `共 ${log.length} 次點擊　·　${fmt(first)} ～ ${fmt(last)}`),
+    El('p', {}, `其中按了「我還是不懂」${moreTotal} 次`
+      + (moreTotal ? '——這些是第一層解釋沒講通的地方，最值得優先改寫。' : '。')),
+    El('button', {
+      class: 'btn btn--ghost', type: 'button', style: 'margin-top:14px',
+      onClick: () => {
+        if (confirm('確定要清除這台裝置上的所有使用紀錄嗎？')) {
+          localStorage.removeItem(KEY); location.reload();
+        }
+      },
+    }, '清除紀錄'),
+    El('button', {
+      class: 'btn btn--primary', type: 'button', style: 'margin:14px 0 0 10px',
+      onClick: () => exportLog(log),
+    }, '匯出文字（可貼給我看）')));
+
+  /**
+   * 匯出成純文字。
+   * 為什麼需要這個：iOS 主畫面 App 和 Safari 的儲存空間可能是分開的，
+   * 而且 Safari 超過 7 天沒使用會自動清掉 localStorage。
+   * 有匯出功能就不必依賴那些行為——直接把文字複製走或分享出去。
+   */
+  function exportLog(entries) {
+    const lines = ['問老師使用紀錄　匯出時間：' + new Date().toLocaleString('zh-TW'), ''];
+    const agg = new Map();
+    entries.forEach((e) => {
+      const k = `${e.unit}||${e.sec}||${e.q}`;
+      const c = agg.get(k) || { q: 0, more: 0 };
+      c[e.kind === 'more' ? 'more' : 'q']++;
+      agg.set(k, c);
+    });
+    [...agg.entries()]
+      .sort((a, b) => b[1].q - a[1].q)
+      .forEach(([k, c]) => {
+        const [unit, sec, q] = k.split('||');
+        lines.push(`${c.q} 次${c.more ? `（還是不懂 ${c.more} 次）` : ''}　[${unitTitle(unit)} 第${Number(sec) + 1}段] ${q}`);
+      });
+    lines.push('', `總點擊 ${entries.length} 次`);
+    const text = lines.join('\n');
+
+    // iPad 上用系統分享面板最順（可以直接傳給自己）；不支援就退回複製到剪貼簿
+    if (navigator.share) {
+      navigator.share({ title: '問老師使用紀錄', text }).catch(() => fallback(text));
+    } else fallback(text);
+  }
+
+  function fallback(text) {
+    navigator.clipboard?.writeText(text)
+      .then(() => alert('已複製到剪貼簿，可以貼到訊息或備忘錄'))
+      .catch(() => {
+        const box = El('textarea', {
+          style: 'width:100%;height:300px;margin-top:16px;font-size:1rem;padding:12px;'
+               + 'background:rgba(10,14,39,.7);color:#e8e8ff;border:1px solid rgba(120,160,255,.3);'
+               + 'border-radius:12px',
+        });
+        box.value = text;
+        root.prepend(El('section', { class: 'card' },
+          El('h2', {}, '手動複製'), El('p', { class: 'sub' }, '長按選取全部再複製'), box));
+      });
+  }
+
+  // 依單元列出：有被點的、以及完全沒被點的
+  Object.keys(window.G5_TUTOR || {}).forEach((unitId) => {
+    const secs = window.G5_TUTOR[unitId];
+    const rows = [];
+    Object.keys(secs).map(Number).sort((a, b) => a - b).forEach((sec) => {
+      secs[sec].forEach((item) => {
+        const c = counts.get(`${unitId}||${sec}||${item.q}`) || { q: 0, more: 0 };
+        // 欄位名要跟統計的 q/more 分開，不然展開時題目文字會被次數蓋掉
+        rows.push({ sec, text: item.q, hasMore: Boolean(item.more), taps: c.q, mores: c.more });
+      });
+    });
+    if (!rows.length) return;
+
+    const used = rows.filter((r) => r.taps > 0).sort((a, b) => b.taps - a.taps);
+    const unused = rows.filter((r) => r.taps === 0);
+
+    const card = El('section', { class: 'card' },
+      El('h2', {}, unitTitle(unitId)),
+      El('p', { class: 'sub' }, `${rows.length} 個問題，被點過 ${used.length} 個，從沒被點 ${unused.length} 個`));
+
+    if (used.length) {
+      const t = El('table', { class: 'data-table' },
+        El('tr', {}, El('th', {}, '次數'), El('th', {}, '還是不懂'), El('th', {}, '段落'), El('th', {}, '問題')));
+      used.forEach((r) => {
+        t.append(El('tr', {},
+          El('td', {}, String(r.taps)),
+          El('td', { style: r.mores ? 'color:#fbbf24;font-weight:700' : '' },
+            r.mores ? String(r.mores) : (r.hasMore ? '0' : '—')),
+          El('td', { style: 'font-size:.9rem' }, sectionTitle(unitId, r.sec)),
+          El('td', { style: 'text-align:left' }, r.text)));
+      });
+      card.append(t);
+    }
+
+    if (unused.length) {
+      card.append(
+        El('h3', { style: 'margin:22px 0 10px;font-size:1.1rem;color:var(--text-dim)' },
+          '從來沒被點過的問題（可能寫錯方向）'),
+        El('ul', { class: 'objectives' },
+          unused.map((r) => El('li', { style: 'color:var(--text-dim)' },
+            `${sectionTitle(unitId, r.sec)}　—　${r.text}`))));
+    }
+
+    root.append(card);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="color-scheme" content="dark">
+<title>🔧 幾何元件測試台</title>
+<link rel="stylesheet" href="g5-styles-20260807.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🔧 幾何元件測試台</h1>
+    <p>單元 3、5、8、10 共用元件的檢查頁　·　不是給小孩用的</p>
+  </div>
+  <div id="lab"></div>
+</div>
+
+<script src="g5-lesson-engine-20260807.js"></script>
+<script>
+'use strict';
+(function () {
+  const { El, GeoBoard, DissectArea, PieSector, NetGallery } = window.G5;
+  const lab = document.getElementById('lab');
+
+  const bench = (title, note, build) => {
+    const card = El('section', { class: 'card' },
+      El('h2', {}, title),
+      El('p', { class: 'sub' }, note));
+    const holder = El('div', { class: 'lesson-component' });
+    card.append(holder);
+    lab.append(card);
+    build().mount(holder);
+  };
+
+  // 1. 三角形：拖動頂點，內角和應恆為 180°
+  bench('GeoBoard · 三角形', '拖任一頂點，邊長與角度即時更新，內角和固定 180°',
+    () => new GeoBoard({ points: [{ x: 2, y: 1 }, { x: 9, y: 1 }, { x: 5, y: 6 }] }));
+
+  // 2. 四邊形：內角和應恆為 360°
+  bench('GeoBoard · 四邊形', '同一個元件換 4 個點，內角和應為 360°',
+    () => new GeoBoard({ points: [{ x: 2, y: 1 }, { x: 10, y: 1 }, { x: 9, y: 6 }, { x: 3, y: 6 }] }));
+
+  // 3. 平行四邊形剪貼成長方形
+  bench('DissectArea · 平行四邊形', '三步：原圖 → 剪下三角形 → 補到右邊變長方形',
+    () => new DissectArea({ mode: 'parallelogram', base: 6, height: 4, offset: 2 }));
+
+  // 4. 兩個三角形拼成平行四邊形
+  bench('DissectArea · 三角形', '三步：原圖 → 複製一個轉半圈 → 拼成平行四邊形',
+    () => new DissectArea({ mode: 'triangle', base: 6, height: 4, offset: 2 }));
+
+  // 5. 扇形圓心角
+  bench('PieSector · 扇形', '拖動圓周上的白點改變圓心角，顯示佔全圓的幾分之幾',
+    () => new PieSector({ angle: 90 }));
+
+  // 6. 展開圖判斷
+  bench('NetGallery · 展開圖', '點每一張判斷摺不摺得成正方體',
+    () => new NetGallery({
+      nets: [
+        { cells: [[0,1],[1,0],[1,1],[1,2],[1,3],[2,1]], ok: true,
+          why: '第 1 張：這是最常見的「一列四格＋上下各一格」，摺得成正方體。' },
+        { cells: [[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]], ok: false,
+          why: '第 2 張：2×3 的長方形摺起來會有兩片重疊、兩個面空著，摺不成。' },
+        { cells: [[0,0],[1,0],[1,1],[1,2],[2,2],[2,3]], ok: true,
+          why: '第 3 張：階梯狀的排法也可以，只要六個面能互相對應就摺得成。' },
+        { cells: [[0,0],[0,1],[0,2],[0,3],[1,0],[1,1]], ok: false,
+          why: '第 4 張：上排四格摺成側面之後，下排兩格會疊在同一個位置，摺不成。' },
+      ],
+    }));
+})();
+</script>
+</body>
+</html>
