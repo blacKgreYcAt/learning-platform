@@ -1,0 +1,11 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="600" fill="#E8F5E9"/>
+        <rect width="800" height="250" fill="#00C853" opacity="0.1"/>
+        <circle cx="100" cy="100" r="50" fill="#00C853" opacity="0.15"/>
+        <circle cx="700" cy="150" r="70" fill="#00C853" opacity="0.12"/>
+        <rect x="200" y="300" width="150" height="200" rx="20" fill="#00C853" opacity="0.1"/>
+        <rect x="550" y="250" width="120" height="250" rx="15" fill="#00C853" opacity="0.08"/>
+        <rect x="100" y="450" width="600" height="100" rx="15" fill="#FFFFFF" stroke="#00C853" stroke-width="3" opacity="0.9"/>
+        <text x="400" y="485" text-anchor="middle" font-size="18" font-weight="bold" fill="#00C853">Drag and Drop Learning Cards Here!</text>
+        <text x="400" y="525" text-anchor="middle" font-size="14" fill="#333">Interactive Practice Zone</text>
+      </svg>

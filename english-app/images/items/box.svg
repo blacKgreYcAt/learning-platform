@@ -1,0 +1,21 @@
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Box front face -->
+  <rect x="30" y="50" width="90" height="70" fill="#FF6B35" stroke="#333" stroke-width="2"/>
+
+  <!-- Box top face -->
+  <polygon points="30,50 50,30 140,30 120,50" fill="#FFB84D" stroke="#333" stroke-width="2"/>
+
+  <!-- Box right face -->
+  <polygon points="120,50 140,30 140,100 120,120" fill="#FF8C42" stroke="#333" stroke-width="2"/>
+
+  <!-- Box opening line (suggesting it's a container) -->
+  <path d="M 35 55 Q 75 45 115 55" stroke="#333" stroke-width="1.5" fill="none" stroke-dasharray="3,3"/>
+
+  <!-- Shadow/depth -->
+  <ellipse cx="75" cy="125" rx="45" ry="8" fill="rgba(0,0,0,0.2)"/>
+
+  <!-- Label text -->
+  <text x="75" y="95" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">
+    BOX
+  </text>
+</svg>

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>舒爾特方格 | 視覺訓練</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #00ff88;
+      --bg: #0a0810;
+      --bg2: #10121d;
+      --green: #00ff88;
+      --gold: #ffd700;
+      --cyan: #00f5ff;
+      --text: #f0e8ff;
+      --dim: #8a7a9a;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 2rem;
+      z-index: 10;
+      background: var(--bg);
+    }
+
+    .screen.active { display: flex; }
+
+    #screen-complete {
+      background: linear-gradient(135deg, rgba(10, 8, 16, 0.95), rgba(10, 8, 16, 0.98));
+      z-index: 100;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 1.2rem;
+      left: 1.2rem;
+      z-index: 50;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--green);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .back-btn.show { display: block; }
+    .back-btn:hover { background: rgba(0, 255, 136, 0.25); }
+
+    /* ════ HOME SCREEN ════ */
+    #screen-home {
+      gap: 3rem;
+      padding-top: 3rem;
+    }
+
+    .home-header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .home-title {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 900;
+      color: #fff;
+      background: linear-gradient(135deg, var(--cyan), var(--green), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
+      margin-bottom: 0.5rem;
+      line-height: 1.1;
+    }
+
+    .home-sub {
+      color: var(--dim);
+      font-size: 0.95rem;
+      margin-top: 1rem;
+    }
+
+    .home-sub strong { color: var(--green); }
+
+    .difficulty-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .difficulty-card {
+      background: var(--bg2);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 16px;
+      padding: 1.8rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .difficulty-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--green);
+      box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2);
+    }
+
+    .card-icon { font-size: 2.5rem; }
+    .card-title { font-size: 1.3rem; font-weight: 800; color: #fff; }
+    .card-spec { font-size: 0.85rem; color: var(--dim); font-weight: 600; }
+
+    .card-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .progress-text { color: var(--green); font-weight: 700; }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      box-shadow: 0 0 8px var(--green);
+      transition: width 0.4s;
+    }
+
+    .card-best-time {
+      font-size: 0.85rem;
+      color: var(--dim);
+    }
+
+    .best-time { color: var(--green); font-weight: 700; }
+
+    .card-btn {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 245, 255, 0.2));
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 0.7rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    .card-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.5), rgba(0, 245, 255, 0.4));
+      transform: scale(1.05);
+    }
+
+    .achievements-section {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .achievements-title { font-size: 0.85rem; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+
+    .badge-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.9rem;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-icon { font-size: 1.3rem; }
+
+    /* ════ GAME SCREEN ════ */
+    .game-screen {
+      gap: 1.5rem;
+      padding-top: 4rem;
+    }
+
+    .game-header {
+      text-align: center;
+    }
+
+    .game-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.5rem; }
+    .game-title { font-size: clamp(1.4rem, 3.5vw, 1.8rem); font-weight: 900; color: #fff; }
+    .game-spec { font-size: 0.85rem; color: var(--dim); margin-top: 0.3rem; }
+
+    .game-info {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
+    .info-item {
+      text-align: center;
+      flex: 0 1 auto;
+    }
+
+    .info-label { font-size: 0.75rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+    .info-value { font-size: 1.5rem; font-weight: 900; color: var(--green); margin-top: 0.3rem; }
+
+    #grid {
+      display: grid;
+      gap: 10px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1.5px solid rgba(0, 255, 136, 0.3);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.12s;
+      color: var(--text);
+      user-select: none;
+    }
+
+    .grid-cell:hover {
+      transform: scale(1.05);
+      border-color: var(--green);
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+    }
+
+    .grid-cell.correct {
+      background: rgba(0, 255, 136, 0.4);
+      border-color: var(--green);
+      color: #fff;
+      opacity: 0.4;
+    }
+
+    .grid-cell.wrong {
+      background: rgba(255, 34, 68, 0.25);
+      border-color: #ff2244;
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .info-box {
+      background: rgba(0, 255, 136, 0.06);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .info-box-title { font-size: 0.8rem; color: var(--dim); text-transform: uppercase; margin-bottom: 0.5rem; }
+    .info-box-content { font-size: 1rem; color: var(--text); }
+
+    /* ════ COMPLETION SCREEN ════ */
+    .completion-box {
+      text-align: center;
+      animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes pop-in {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .completion-emoji {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      animation: bounce 0.6s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .completion-title { font-size: 1.8rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; }
+    .completion-message { font-size: 1rem; color: var(--dim); margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .completion-stats {
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .stat-label { color: var(--dim); }
+    .stat-value { color: var(--green); font-weight: 700; }
+
+    .completion-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: 0.9rem 2rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    /* ════ RESPONSIVE ════ */
+    @media (max-width: 640px) {
+      .difficulty-cards { grid-template-columns: 1fr; }
+      #grid { gap: 8px; }
+      .game-info { gap: 1.5rem; flex-direction: column; }
+      .home-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ HOME SCREEN ════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <h1 class="home-title">舒爾特方格</h1>
+    <p class="home-sub">視覺反應 × 專注力訓練<br><strong>4 個難度</strong> | <strong>12 個任務</strong> | <strong>無限挑戰</strong></p>
+  </div>
+
+  <div class="difficulty-cards">
+    <div class="difficulty-card">
+      <div class="card-icon">🟢</div>
+      <div class="card-title">入門級</div>
+      <div class="card-spec">3 × 3 (1-9)</div>
+      <div class="card-progress">
+        <div style="font-size: 0.85rem; color: var(--dim);">進度</div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="progress-text" id="progress-easy">0 / 3</span>
+          <span style="color: var(--dim);">目標: 20秒</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-easy" style="width: 0%"></div></div>
+      </div>
+      <div class="card-best-time">最佳: <span class="best-time" id="best-easy">--</span></div>
+      <button class="card-btn" onclick="startDifficulty('easy', 1)">開始訓練</button>
+    </div>
+
+    <div class="difficulty-card">
+      <div class="card-icon">🟡</div>
+      <div class="card-title">標準級</div>
+      <div class="card-spec">5 × 5 (1-25)</div>
+      <div class="card-progress">
+        <div style="font-size: 0.85rem; color: var(--dim);">進度</div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="progress-text" id="progress-medium">0 / 3</span>
+          <span style="color: var(--dim);">目標: 20秒</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-medium" style="width: 0%"></div></div>
+      </div>
+      <div class="card-best-time">最佳: <span class="best-time" id="best-medium">--</span></div>
+      <button class="card-btn" onclick="startDifficulty('medium', 1)">開始訓練</button>
+    </div>
+
+    <div class="difficulty-card">
+      <div class="card-icon">🔴</div>
+      <div class="card-title">進階級</div>
+      <div class="card-spec">7 × 7 (1-49)</div>
+      <div class="card-progress">
+        <div style="font-size: 0.85rem; color: var(--dim);">進度</div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="progress-text" id="progress-hard">0 / 3</span>
+          <span style="color: var(--dim);">目標: 60秒</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-hard" style="width: 0%"></div></div>
+      </div>
+      <div class="card-best-time">最佳: <span class="best-time" id="best-hard">--</span></div>
+      <button class="card-btn" onclick="startDifficulty('hard', 1)">開始訓練</button>
+    </div>
+
+    <div class="difficulty-card">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">干擾級</div>
+      <div class="card-spec">5 × 5 + 字母干擾</div>
+      <div class="card-progress">
+        <div style="font-size: 0.85rem; color: var(--dim);">進度</div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="progress-text" id="progress-distraction">0 / 3</span>
+          <span style="color: var(--dim);">目標: 25秒</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="fill-distraction" style="width: 0%"></div></div>
+      </div>
+      <div class="card-best-time">最佳: <span class="best-time" id="best-distraction">--</span></div>
+      <button class="card-btn" onclick="startDifficulty('distraction', 1)">開始訓練</button>
+    </div>
+  </div>
+
+  <div class="achievements-section">
+    <div class="achievements-title">🏆 成就</div>
+    <div class="badge-container" id="achievements"></div>
+  </div>
+</div>
+
+<!-- ════ GAME SCREEN (Template) ════ -->
+<div id="screen-game" class="screen game-screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+
+  <div class="game-header">
+    <div class="game-label" id="game-label"></div>
+    <h1 class="game-title" id="game-title"></h1>
+    <div class="game-spec" id="game-spec"></div>
+  </div>
+
+  <div class="game-info">
+    <div class="info-item">
+      <div class="info-label">用時</div>
+      <div class="info-value" id="timer">0s</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">下一個</div>
+      <div class="info-value" id="nextNum">1</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">正確率</div>
+      <div class="info-value" id="accuracy">100%</div>
+    </div>
+  </div>
+
+  <div id="grid"></div>
+  <div class="info-box">
+    <div class="info-box-title">提示</div>
+    <div class="info-box-content" id="hint">按順序點擊 1 到 <span id="max-num">9</span></div>
+  </div>
+</div>
+
+<!-- ════ COMPLETION SCREEN ════ -->
+<div id="screen-complete" class="screen">
+  <div class="completion-box">
+    <span class="completion-emoji" id="completion-emoji">🎉</span>
+    <h1 class="completion-title" id="completion-title">任務完成！</h1>
+    <p class="completion-message" id="completion-message"></p>
+
+    <div class="completion-stats">
+      <div class="stat-row">
+        <span class="stat-label">用時</span>
+        <span class="stat-value" id="final-time">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">正確率</span>
+        <span class="stat-value" id="final-accuracy">--</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">錯誤次數</span>
+        <span class="stat-value" id="final-errors">0</span>
+      </div>
+    </div>
+
+    <div class="completion-btns">
+      <button class="btn-primary" id="btn-next" onclick="nextTask()">下一任務</button>
+      <button class="btn-secondary" onclick="goHome()">返回首頁</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════ STATE ════
+const gameState = {
+  currentDifficulty: null,
+  currentTask: null,
+  gridSize: 0,
+  totalNumbers: 0,
+  grid: [],
+  nextTarget: 1,
+  clickedCount: 0,
+  correctClicks: 0,
+  wrongClicks: 0,
+  startTime: null,
+  endTime: null,
+  timeSpent: 0,
+  accuracy: 0,
+  timerInterval: null
+};
+
+const difficultyConfig = {
+  easy: { size: 3, taskCount: 3, timeTarget: 20 },
+  medium: { size: 5, taskCount: 3, timeTarget: 35 },
+  hard: { size: 7, taskCount: 3, timeTarget: 60 },
+  distraction: { size: 5, taskCount: 3, timeTarget: 25, hasInterference: true }
+};
+
+const encouragements = [
+  '太棒了！你的注意力正在提升！',
+  '完美！再接再厲，你做得很好！',
+  '驚人的專注力！',
+  '你的視覺反應在改善！',
+  '出色的表現！接下來的任務會更有挑戰性。',
+  '你的速度越來越快了！',
+  '保持專注！你正變得更聰慧！'
+];
+
+const badges = [
+  { id: 'speed-easy', icon: '⚡', name: '快手', condition: () => parseInt(localStorage.getItem('schulte_easy_best') || Infinity) <= 15 },
+  { id: 'speed-medium', icon: '🚀', name: '閃電俠', condition: () => parseInt(localStorage.getItem('schulte_medium_best') || Infinity) <= 15 },
+  { id: 'focus', icon: '🎯', name: '專注大師', condition: () => parseInt(localStorage.getItem('schulte_hard_best') || Infinity) <= 80 },
+  { id: 'perfect', icon: '✨', name: '完美', condition: () => localStorage.getItem('schulte_perfect') === 'true' }
+];
+
+// ════ NAVIGATION ════
+function goHome() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-complete').classList.remove('active');
+  document.getElementById('screen-home').classList.add('active');
+  if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+  updateAllProgress();
+}
+
+function startDifficulty(difficulty, taskNum) {
+  gameState.currentDifficulty = difficulty;
+  gameState.currentTask = taskNum;
+
+  const config = difficultyConfig[difficulty];
+  gameState.gridSize = config.size;
+  gameState.totalNumbers = config.size * config.size;
+  gameState.nextTarget = 1;
+  gameState.clickedCount = 0;
+  gameState.correctClicks = 0;
+  gameState.wrongClicks = 0;
+  gameState.startTime = Date.now();
+
+  // Update game header
+  document.getElementById('game-label').textContent = `任務 ${taskNum} / ${config.taskCount}`;
+  document.getElementById('game-title').textContent = getDifficultyName(difficulty);
+  document.getElementById('game-spec').textContent = `${config.size} × ${config.size} (1-${config.size * config.size})`;
+  document.getElementById('max-num').textContent = config.size * config.size;
+
+  generateGrid();
+  renderGrid();
+  startTimer();
+
+  document.getElementById('screen-home').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+}
+
+function getDifficultyName(d) {
+  const names = { easy: '入門級', medium: '標準級', hard: '進階級', distraction: '干擾級' };
+  return names[d];
+}
+
+// ════ GAME LOGIC ════
+function generateGrid() {
+  const config = difficultyConfig[gameState.currentDifficulty];
+  
+  if (config.hasInterference) {
+    // 干擾模式：使用 1-15 的數字 + A-J 的字母 = 25 個項目
+    const numbers = Array.from({ length: 15 }, (_, i) => i + 1);
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const combined = [...numbers, ...letters];
+    gameState.grid = combined.sort(() => Math.random() - 0.5);
+  } else {
+    const numbers = Array.from(
+      { length: gameState.totalNumbers },
+      (_, i) => i + 1
+    );
+    gameState.grid = numbers.sort(() => Math.random() - 0.5);
+  }
+}
+
+function renderGrid() {
+  const gridEl = document.getElementById('grid');
+  gridEl.innerHTML = '';
+  gridEl.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+
+  gameState.grid.forEach((content, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+
+    // Check if content is a number or letter
+    const isNumber = typeof content === 'number';
+    cell.textContent = content;
+    cell.dataset.idx = idx;
+
+    if (isNumber) {
+      cell.dataset.number = content;
+      cell.onclick = () => handleCellClick(idx, content);
+    } else {
+      // Interference element - make it non-clickable but styled differently
+      cell.dataset.interference = true;
+      cell.style.color = 'rgba(136, 122, 154, 0.3)';
+      cell.style.fontStyle = 'italic';
+      cell.style.opacity = '0.5';
+      cell.style.cursor = 'not-allowed';
+      cell.onclick = (e) => e.preventDefault();
+    }
+
+    gridEl.appendChild(cell);
+  });
+}
+
+function handleCellClick(idx, num) {
+  const cell = document.querySelector(`[data-idx="${idx}"]`);
+  
+  // 防止重複點擊同一格子
+  if (cell.dataset.clicked === 'true') {
+    return;
+  }
+  cell.dataset.clicked = 'true';
+  
+  gameState.clickedCount++;
+
+  if (num === gameState.nextTarget) {
+    // Correct
+    gameState.correctClicks++;
+    cell.classList.add('correct');
+    cell.onclick = null;
+    gameState.nextTarget++;
+    updateUI();
+
+    if (gameState.nextTarget > gameState.totalNumbers) {
+      completeTask();
+    }
+  } else {
+    // Wrong
+    gameState.wrongClicks++;
+    cell.classList.add('wrong');
+    setTimeout(() => cell.classList.remove('wrong'), 300);
+  }
+}
+
+function updateUI() {
+  document.getElementById('nextNum').textContent = gameState.nextTarget;
+  const accuracy = Math.round(
+    (gameState.correctClicks / gameState.clickedCount) * 100
+  );
+  document.getElementById('accuracy').textContent = accuracy + '%';
+}
+
+function startTimer() {
+  gameState.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    document.getElementById('timer').textContent = elapsed + 's';
+  }, 1000);
+}
+
+function completeTask() {
+  clearInterval(gameState.timerInterval);
+  gameState.endTime = Date.now();
+  gameState.timeSpent = Math.round(
+    (gameState.endTime - gameState.startTime) / 1000
+  );
+  gameState.accuracy = Math.round(
+    (gameState.correctClicks / gameState.clickedCount) * 100
+  );
+
+  // Save best time
+  const key = `schulte_${gameState.currentDifficulty}_best`;
+  const best = parseInt(localStorage.getItem(key)) || Infinity;
+  if (gameState.timeSpent < best) {
+    localStorage.setItem(key, gameState.timeSpent);
+  }
+
+  // Check if perfect
+  if (gameState.wrongClicks === 0) {
+    localStorage.setItem('schulte_perfect', 'true');
+    localStorage.setItem(`schulte_${gameState.currentDifficulty}_perfect`, 'true');
+  }
+
+  // 標記任務完成（直接在這裡調用，邏輯清晰）
+  markTaskComplete();
+  
+  showCompletion();
+}
+
+function showCompletion() {
+  const random = encouragements[Math.floor(Math.random() * encouragements.length)];
+
+  document.getElementById('completion-emoji').textContent = gameState.timeSpent <= difficultyConfig[gameState.currentDifficulty].timeTarget ? '🏆' : '🎉';
+  document.getElementById('completion-title').textContent = gameState.wrongClicks === 0 ? '完美！' : '任務完成！';
+  document.getElementById('completion-message').textContent = random;
+  document.getElementById('final-time').textContent = gameState.timeSpent + '秒';
+  document.getElementById('final-accuracy').textContent = gameState.accuracy + '%';
+  document.getElementById('final-errors').textContent = gameState.wrongClicks;
+
+  const config = difficultyConfig[gameState.currentDifficulty];
+  if (gameState.currentTask < config.taskCount) {
+    document.getElementById('btn-next').textContent = '下一任務';
+    document.getElementById('btn-next').onclick = () => nextTask();
+  } else {
+    document.getElementById('btn-next').textContent = '完成！';
+    document.getElementById('btn-next').onclick = () => goHome();
+  }
+
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-complete').classList.add('active');
+
+  // Rest reminder every 3 tasks
+  const totalTasks = Object.values(difficultyConfig).reduce((sum, cfg) => sum + cfg.taskCount, 0);
+  const completedTasks = getTotalCompletedTasks();
+  if (completedTasks % 3 === 0 && completedTasks > 0) {
+    setTimeout(() => {
+      alert('你已完成 ' + completedTasks + ' 個任務！\n\n休息一下眼睛，再繼續吧 😊');
+    }, 500);
+  }
+}
+
+function nextTask() {
+  const config = difficultyConfig[gameState.currentDifficulty];
+  if (!config) {
+    goHome();
+    return;
+  }
+  if (gameState.currentTask < config.taskCount) {
+    startDifficulty(gameState.currentDifficulty, gameState.currentTask + 1);
+  } else {
+    goHome();
+  }
+}
+
+// ════ PROGRESS & UI ════
+function updateAllProgress() {
+  Object.keys(difficultyConfig).forEach(difficulty => {
+    const completed = getCompletedTasks(difficulty);
+    const total = difficultyConfig[difficulty].taskCount;
+    const best = localStorage.getItem(`schulte_${difficulty}_best`) || '--';
+
+    document.getElementById(`progress-${difficulty}`).textContent = `${completed} / ${total}`;
+    document.getElementById(`fill-${difficulty}`).style.width = `${(completed / total) * 100}%`;
+    document.getElementById(`best-${difficulty}`).textContent = best === '--' ? '--' : best + 's';
+  });
+
+  updateAchievements();
+}
+
+function getCompletedTasks(difficulty) {
+  const count = parseInt(localStorage.getItem(`schulte_${difficulty}_completed`) || '0');
+  return Math.min(count, difficultyConfig[difficulty].taskCount);
+}
+
+function getTotalCompletedTasks() {
+  let total = 0;
+  Object.keys(difficultyConfig).forEach(d => {
+    total += getCompletedTasks(d);
+  });
+  return total;
+}
+
+function markTaskComplete() {
+  const key = `schulte_${gameState.currentDifficulty}_completed`;
+  const current = parseInt(localStorage.getItem(key) || '0');
+  localStorage.setItem(key, Math.min(current + 1, difficultyConfig[gameState.currentDifficulty].taskCount));
+}
+
+function updateAchievements() {
+  const earnedBadges = badges.filter(b => b.condition());
+  const container = document.getElementById('achievements');
+
+  if (earnedBadges.length === 0) {
+    container.innerHTML = '<span style="color: var(--dim); font-size: 0.9rem;">完成任務即可獲得成就</span>';
+  } else {
+    container.innerHTML = earnedBadges
+      .map(b => `<div class="badge"><span class="badge-icon">${b.icon}</span> ${b.name}</div>`)
+      .join('');
+  }
+}
+
+// ════ INIT ════
+document.addEventListener('DOMContentLoaded', () => {
+  updateAllProgress();
+});
+
+window.addEventListener('beforeunload', () => {
+  if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+});
+</script>
+</body>
+</html>

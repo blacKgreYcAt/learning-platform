@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>能源電力廠 | 四年級自然科</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #06080f;
+      --bg2:    #0d1020;
+      --cyan:   #00f5ff;
+      --yellow: #ffe566;
+      --orange: #ff9900;
+      --green:  #00ff88;
+      --red:    #ff2244;
+      --purple: #b400ff;
+      --blue:   #4fc3f7;
+      --text:   #e8f0ff;
+      --dim:    #6888aa;
+    }
+    html, body {
+      width:100%; height:100%;
+      font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text);
+      overflow: hidden; touch-action: manipulation;
+      -webkit-user-select: none; user-select: none;
+    }
+
+    /* ── SCREENS ── */
+    .screen { position:fixed; inset:0; display:none; flex-direction:column; align-items:center; overflow-y:auto; }
+    .screen.active { display:flex; }
+
+    .back-btn {
+      position:fixed; top:.9rem; left:.9rem; z-index:50;
+      background:rgba(0,245,255,.1); border:1px solid var(--cyan);
+      color:var(--cyan); border-radius:8px; padding:.35rem .9rem;
+      font-size:.82rem; cursor:pointer; transition:background .2s; display:none;
+    }
+    .back-btn.show { display:block; }
+    .back-btn:hover { background:rgba(0,245,255,.22); }
+
+    /* ══ HOME ══ */
+    #screen-home { padding:2rem 1.5rem 3rem; gap:2rem; }
+    .home-header { text-align:center; padding-top:.5rem; }
+    .home-label { font-size:.7rem; letter-spacing:.3em; text-transform:uppercase; color:var(--dim); margin-bottom:.5rem; }
+    .home-title {
+      font-size:clamp(2rem,6vw,3.5rem); font-weight:900; line-height:1.1;
+      background:linear-gradient(135deg,var(--yellow),var(--orange));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      filter:drop-shadow(0 0 20px rgba(255,220,0,.5));
+    }
+    .home-sub { color:var(--dim); font-size:.9rem; margin-top:.5rem; line-height:1.5; }
+    .home-sub span { color:var(--yellow); }
+
+    .missions-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:1.4rem; width:100%; max-width:960px; }
+    .mission-card {
+      background:var(--bg2); border-radius:18px;
+      border:1px solid rgba(255,255,255,.07);
+      padding:1.8rem 1.6rem; cursor:pointer;
+      transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    }
+    .mission-card:hover { transform:translateY(-7px); box-shadow:0 18px 50px var(--cg); }
+    .m1 { --cg:rgba(255,220,0,.22); } .m2 { --cg:rgba(79,195,247,.22); } .m3 { --cg:rgba(0,255,136,.22); }
+    .mission-num { font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; margin-bottom:.6rem; }
+    .m1 .mission-num { color:var(--yellow); }
+    .m2 .mission-num { color:var(--blue); }
+    .m3 .mission-num { color:var(--green); }
+    .mission-icon { font-size:2.8rem; margin-bottom:.7rem; display:block; }
+    .mission-title { font-size:1.25rem; font-weight:800; color:#fff; margin-bottom:.4rem; }
+    .mission-desc { color:var(--dim); font-size:.86rem; line-height:1.6; }
+    .mission-arrow { display:inline-flex; align-items:center; gap:.4rem; margin-top:1rem; font-size:.83rem; font-weight:700; }
+    .m1 .mission-arrow { color:var(--yellow); } .m2 .mission-arrow { color:var(--blue); } .m3 .mission-arrow { color:var(--green); }
+
+    /* ══ GAME COMMON ══ */
+    .game-screen { padding:3.8rem 1rem 2rem; gap:.9rem; min-height:100%; }
+    .game-header { text-align:center; }
+    .game-label { font-size:.68rem; letter-spacing:.25em; text-transform:uppercase; color:var(--dim); margin-bottom:.3rem; }
+    .game-title { font-size:clamp(1.3rem,3.5vw,1.9rem); font-weight:900; color:#fff; }
+    .game-title span { color:var(--accent,var(--yellow)); }
+    .game-desc { color:var(--dim); font-size:.86rem; text-align:center; max-width:540px; line-height:1.6; }
+
+    .canvas-wrap { position:relative; width:100%; max-width:600px; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:#000814; cursor:pointer; }
+    canvas { display:block; width:100%; touch-action:none; }
+
+    /* level nav */
+    .level-row { display:flex; gap:.6rem; }
+    .lvl-btn {
+      padding:.45rem 1.1rem; border-radius:50px;
+      border:1.5px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04);
+      color:var(--dim); font-size:.8rem; font-weight:700; cursor:pointer; transition:all .2s;
+    }
+    .lvl-btn.active { border-color:var(--accent,var(--yellow)); color:var(--accent,var(--yellow)); background:rgba(255,220,0,.08); box-shadow:0 0 12px rgba(255,220,0,.25); }
+
+    /* status banner */
+    .status-bar {
+      width:100%; max-width:600px; padding:.7rem 1.2rem;
+      border-radius:10px; font-size:.88rem; font-weight:700; text-align:center;
+      background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+      min-height:2.6rem; line-height:1.4;
+    }
+    .status-bar.ok    { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.07); }
+    .status-bar.warn  { border-color:var(--red);   color:var(--red);   background:rgba(255,34,68,.07); }
+    .status-bar.info  { border-color:var(--yellow); color:var(--yellow); background:rgba(255,220,0,.07); }
+
+    /* action buttons row */
+    .act-row { display:flex; gap:.7rem; flex-wrap:wrap; justify-content:center; width:100%; max-width:600px; }
+    .act-btn {
+      flex:1; min-width:80px;
+      padding:.65rem .5rem; border-radius:12px;
+      border:1.5px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04);
+      color:var(--text); font-size:.82rem; font-weight:700; cursor:pointer; transition:all .2s;
+      display:flex; flex-direction:column; align-items:center; gap:.25rem;
+    }
+    .act-btn .ai { font-size:1.6rem; }
+    .act-btn:hover { border-color:rgba(255,255,255,.3); background:rgba(255,255,255,.08); }
+    .act-btn.selected { border-color:var(--blue); color:var(--blue); background:rgba(79,195,247,.1); box-shadow:0 0 14px rgba(79,195,247,.3); }
+    .act-btn.correct  { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.12); }
+    .act-btn.wrong    { border-color:var(--red);   color:var(--red);   background:rgba(255,34,68,.1); }
+
+    /* reset btn */
+    .reset-btn {
+      padding:.55rem 1.5rem; border-radius:10px;
+      border:1.5px solid rgba(255,255,255,.15); background:rgba(255,255,255,.04);
+      color:var(--dim); font-size:.85rem; font-weight:700; cursor:pointer; transition:all .2s;
+    }
+    .reset-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+
+    /* ══ GAME 2: CONDUCTOR ══ */
+    #screen-conductor { --accent:var(--blue); }
+    .field-guide {
+      width:100%; max-width:600px;
+      background:var(--bg2); border-radius:12px;
+      border:1px solid rgba(79,195,247,.15);
+      padding:.9rem 1.2rem;
+    }
+    .fg-title { font-size:.75rem; letter-spacing:.15em; text-transform:uppercase; color:var(--blue); margin-bottom:.6rem; }
+    .fg-grid { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .fg-card {
+      padding:.3rem .7rem; border-radius:8px; font-size:.8rem; font-weight:700;
+      border:1px solid rgba(255,255,255,.1); color:var(--dim); background:rgba(255,255,255,.03);
+      transition:all .3s;
+    }
+    .fg-card.found { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.1); }
+
+    /* ══ GAME 3: ENERGY HUNT ══ */
+    #screen-energy { --accent:var(--green); }
+    .room-wrap {
+      position:relative; width:100%; max-width:600px;
+      background:#0a1520; border-radius:14px;
+      border:1px solid rgba(0,255,136,.15);
+      padding:0; overflow:hidden;
+      min-height:320px;
+    }
+    .room-canvas { display:block; width:100%; }
+    .room-hotspot {
+      position:absolute; border-radius:8px;
+      border:2px dashed rgba(255,153,0,.7);
+      background:rgba(255,153,0,.08);
+      cursor:pointer; transition:all .25s;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem;
+    }
+    .room-hotspot:hover { background:rgba(255,153,0,.22); border-color:var(--orange); transform:scale(1.05); }
+    .room-hotspot.fixed { border-color:var(--green); background:rgba(0,255,136,.1); cursor:default; pointer-events:none; }
+    .room-hotspot.fixed:hover { transform:none; }
+
+    .badge-panel {
+      width:100%; max-width:600px;
+      background:var(--bg2); border-radius:12px;
+      border:1px solid rgba(0,255,136,.15); padding:.9rem 1.2rem;
+    }
+    .badge-title { font-size:.75rem; letter-spacing:.15em; text-transform:uppercase; color:var(--green); margin-bottom:.6rem; }
+    .badge-row { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .badge-item {
+      padding:.3rem .8rem; border-radius:8px; font-size:.8rem; font-weight:700;
+      border:1px solid rgba(255,255,255,.1); color:var(--dim);
+      background:rgba(255,255,255,.03); transition:all .4s;
+    }
+    .badge-item.earned { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.1); }
+
+    .energy-score { text-align:center; font-size:2rem; font-weight:900; color:var(--green); }
+    .energy-score span { font-size:1rem; color:var(--dim); font-weight:400; margin-left:.3rem; }
+
+    /* ══ CELEBRATION ══ */
+    .celebration {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.88);
+      display:none; flex-direction:column;
+      align-items:center; justify-content:center;
+      text-align:center; padding:2rem;
+    }
+    .celebration.show { display:flex; }
+    .celeb-icon { font-size:5rem; animation:bounce .6s ease infinite alternate; }
+    @keyframes bounce { from { transform:translateY(0); } to { transform:translateY(-16px); } }
+    .celeb-title { font-size:clamp(1.8rem,5vw,3rem); font-weight:900; color:var(--yellow); text-shadow:0 0 30px rgba(255,220,0,.8); margin:1rem 0 .5rem; }
+    .celeb-desc { color:var(--dim); font-size:.95rem; line-height:1.65; margin-bottom:1.5rem; }
+    .celeb-home { padding:.8rem 2.5rem; background:linear-gradient(135deg,var(--yellow),var(--orange)); border:none; border-radius:12px; color:#000; font-size:1rem; font-weight:800; cursor:pointer; transition:transform .2s; }
+    .celeb-home:hover { transform:scale(1.05); }
+  </style>
+</head>
+<body>
+
+<button class="back-btn" id="backBtn" onclick="goHome()">← 返回任務選單</button>
+
+<!-- ═══════════════════════════════════
+     HOME
+═══════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div class="home-label">四年級自然科 · 第四單元</div>
+    <div class="home-title">能源電力廠</div>
+    <p class="home-sub">電池、燈泡、短路與節能，<span>用雙手玩出電學知識！</span></p>
+  </div>
+  <div class="missions-grid">
+
+    <div class="mission-card m1" data-screen="circuit">
+      <div class="mission-num">// 任務一</div>
+      <span class="mission-icon">⚡</span>
+      <div class="mission-title">黑暗村莊電路解謎</div>
+      <p class="mission-desc">點擊連接電線，讓村莊重見光明！挑戰串聯、並聯魔王關卡，小心別短路！</p>
+      <div class="mission-arrow">開始任務 →</div>
+    </div>
+
+    <div class="mission-card m2" data-screen="conductor">
+      <div class="mission-num">// 任務二</div>
+      <span class="mission-icon">🔬</span>
+      <div class="mission-title">抓出絕緣體</div>
+      <p class="mission-desc">把物品放入電路缺口，測試哪些是良導體！收集電學圖鑑，成為電學達人！</p>
+      <div class="mission-arrow">開始任務 →</div>
+    </div>
+
+    <div class="mission-card m3" data-screen="energy">
+      <div class="mission-num">// 任務三</div>
+      <span class="mission-icon">🌿</span>
+      <div class="mission-title">節能小尖兵</div>
+      <p class="mission-desc">找出房間裡浪費能源的地方並修正，集滿低碳徽章，拯救地球！</p>
+      <div class="mission-arrow">開始任務 →</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     GAME 1: CIRCUIT BUILDER
+═══════════════════════════════════ -->
+<div id="screen-circuit" class="screen game-screen">
+  <div class="game-header">
+    <div class="game-label">// 任務一</div>
+    <div class="game-title">黑暗村莊<span>電路解謎</span></div>
+  </div>
+
+  <div class="level-row" id="levelRow">
+    <button class="lvl-btn active" data-level="0">Lv.1 基本通路</button>
+    <button class="lvl-btn" data-level="1">Lv.2 短路危機</button>
+    <button class="lvl-btn" data-level="2">Lv.3 並聯燈泡</button>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="circuitCanvas" width="600" height="340"></canvas>
+  </div>
+
+  <div class="status-bar" id="circuitStatus">👆 點擊虛線電線來連接電路</div>
+
+  <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;justify-content:center">
+    <button class="reset-btn" id="resetBtn">↺ 重置電路</button>
+    <div id="circuitHint" style="font-size:.8rem;color:var(--dim);max-width:360px;text-align:center"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     GAME 2: CONDUCTOR TEST
+═══════════════════════════════════ -->
+<div id="screen-conductor" class="screen game-screen">
+  <div class="game-header">
+    <div class="game-label">// 任務二</div>
+    <div class="game-title">抓出<span style="color:var(--blue)">絕緣體</span></div>
+  </div>
+  <p class="game-desc">點擊物品，看看能不能讓燈泡發光！</p>
+
+  <div class="canvas-wrap" style="max-width:560px">
+    <canvas id="conductorCanvas" width="560" height="260"></canvas>
+  </div>
+
+  <div class="status-bar" id="conductorStatus">👆 從下方選擇一個物品，放入電路缺口測試！</div>
+
+  <div class="act-row" id="conductorItems"></div>
+
+  <div class="field-guide">
+    <div class="fg-title">⚡ 電學圖鑑 — 良導體</div>
+    <div class="fg-grid" id="fieldGuide">
+      <div class="fg-card" id="fg-銅片">銅片</div>
+      <div class="fg-card" id="fg-迴紋針">迴紋針</div>
+      <div class="fg-card" id="fg-鉛筆芯">鉛筆芯</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     GAME 3: ENERGY HUNT
+═══════════════════════════════════ -->
+<div id="screen-energy" class="screen game-screen">
+  <div class="game-header">
+    <div class="game-label">// 任務三</div>
+    <div class="game-title">節能<span style="color:var(--green)">小尖兵</span></div>
+  </div>
+  <p class="game-desc">找出房間裡浪費電的地方，點擊修正它！</p>
+
+  <div class="room-wrap" id="roomWrap">
+    <canvas id="roomCanvas" width="600" height="320" class="room-canvas"></canvas>
+    <!-- hotspots injected by JS -->
+  </div>
+
+  <div style="display:flex;gap:1.5rem;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;max-width:600px">
+    <div style="text-align:center">
+      <div class="energy-score" id="energyScore">0<span>/ 4 個問題修正</span></div>
+    </div>
+  </div>
+
+  <div class="badge-panel">
+    <div class="badge-title">🌿 低碳徽章</div>
+    <div class="badge-row" id="badgeRow">
+      <div class="badge-item" id="badge-ac">❄️ 節能空調</div>
+      <div class="badge-item" id="badge-light">💡 熄燈達人</div>
+      <div class="badge-item" id="badge-fridge">🧊 冰箱守護</div>
+      <div class="badge-item" id="badge-tv">📺 省電奇俠</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     CELEBRATION
+═══════════════════════════════════ -->
+<div class="celebration" id="celebration">
+  <span class="celeb-icon" id="celebIcon">🏆</span>
+  <div class="celeb-title" id="celebTitle"></div>
+  <div class="celeb-desc"  id="celebDesc"></div>
+  <button class="celeb-home" id="celebHomeBtn">返回任務選單</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   NAV
+═══════════════════════════════════ */
+const backBtn = document.getElementById('backBtn');
+
+function showScreen(id) {
+  if (!id || typeof id !== 'string') return;
+  const screenEl = document.getElementById('screen-' + id);
+  if (!screenEl) return;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  screenEl.classList.add('active');
+  backBtn.classList.add('show');
+
+  if (id === 'circuit')   { loadLevel(currentLevel, document.querySelectorAll('.lvl-btn')[currentLevel] || null); }
+  if (id === 'conductor') { initConductor(); }
+  if (id === 'energy')    { initEnergy(); }
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home')?.classList.add('active');
+  backBtn.classList.remove('show');
+
+  // Clean up animation frames
+  if (circuitRaf) cancelAnimationFrame(circuitRaf);
+  if (conductorRaf) cancelAnimationFrame(conductorRaf);
+  if (energyRaf) cancelAnimationFrame(energyRaf);
+
+  // Reset game states
+  currentLevel = 0;
+  activeSegs.clear();
+  burnedBulb = null;
+  circuitDone = {};
+  selectedItem = null;
+  foundConductors.clear();
+  fixedHS.clear();
+  celebratedGames = {};
+}
+
+// Event delegation for mission cards
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('[data-screen]');
+  if (card) {
+    const screenId = card.dataset.screen;
+    showScreen(screenId);
+  }
+});
+
+// Level button delegation
+const levelRow = document.getElementById('levelRow');
+if (levelRow) {
+  levelRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-level]');
+    if (btn) {
+      const level = parseInt(btn.dataset.level, 10);
+      if (!isNaN(level) && level >= 0 && level < LEVELS.length) {
+        loadLevel(level, btn);
+      }
+    }
+  });
+}
+
+// Reset button delegation
+const resetBtn = document.getElementById('resetBtn');
+if (resetBtn) {
+  resetBtn.addEventListener('click', resetLevel);
+}
+
+// Celebration home button delegation
+const celebHomeBtn = document.getElementById('celebHomeBtn');
+if (celebHomeBtn) {
+  celebHomeBtn.addEventListener('click', hideCelebration);
+}
+
+/* ═══════════════════════════════════
+   GAME 1 — CIRCUIT BUILDER
+═══════════════════════════════════ */
+/* Each level: segments (wire gaps the player clicks), components (drawn fixed),
+   plus a check function that returns 'ok'|'short'|'open' */
+
+const LEVELS = [
+  // ── LV 1: Basic circuit ──
+  {
+    title: 'Lv.1 基本通路',
+    hint: '點擊所有虛線電線，讓電流從電池流過燈泡！',
+    // Fixed drawn components + rails
+    // Clickable segments: player toggles them
+    segs: [
+      { id:'s1', x1:160,y1:80,  x2:310,y2:80  },
+      { id:'s2', x1:310,y1:80,  x2:430,y2:80  },
+      { id:'s3', x1:160,y1:260, x2:310,y2:260 },
+      { id:'s4', x1:310,y1:260, x2:430,y2:260 },
+    ],
+    // Components: battery center, bulb center
+    battery: { x:100, y:170, label:'電池' },
+    bulbs: [{ x:490, y:170, label:'💡', id:'b1' }],
+    switches: [],
+    checkFn(active) {
+      const top    = active.has('s1') && active.has('s2');
+      const bottom = active.has('s3') && active.has('s4');
+      if (top && bottom) return 'ok';
+      return 'open';
+    },
+    successMsg: '🎉 通路成功！電流可以流過燈泡了！',
+    failMsg:    '⚠️ 斷路！還有電線沒接好，燈泡無法發光。',
+  },
+
+  // ── LV 2: Short circuit ──
+  {
+    title: 'Lv.2 短路危機',
+    hint: '危險！有一條電線造成短路！點擊那條紅色虛線，把它斷開！',
+    segs: [
+      { id:'s1', x1:160,y1:80,  x2:430,y2:80  },
+      { id:'s2', x1:160,y1:260, x2:430,y2:260 },
+      { id:'s3', x1:430,y1:80,  x2:430,y2:155, isShort:true },
+      { id:'s4', x1:430,y1:185, x2:430,y2:260 },
+    ],
+    battery: { x:100, y:170, label:'電池' },
+    bulbs: [{ x:490, y:170, label:'💡', id:'b1' }],
+    switches: [],
+    startActive: ['s1','s2','s4'], // pre-connected, s3 is the short danger
+    checkFn(active) {
+      // correct: top+bottom+bulb, NO short (s3 NOT active)
+      const hasShort = active.has('s3');
+      const hasCircuit = active.has('s1') && active.has('s2') && active.has('s4');
+      if (hasShort) return 'short';
+      if (hasCircuit) return 'ok';
+      return 'open';
+    },
+    successMsg: '✅ 短路解除！電流乖乖通過燈泡，安全！',
+    failMsg:    '💥 短路！電流繞過燈泡直接回電池，很危險！',
+  },
+
+  // ── LV 3: Parallel bulbs ──
+  {
+    title: 'Lv.3 並聯燈泡',
+    hint: '接出並聯電路，讓兩顆燈泡都亮！然後點擊其中一顆燈泡，看看另一顆是否還亮！',
+    segs: [
+      { id:'s1', x1:160,y1:60,  x2:340,y2:60  },
+      { id:'s2', x1:340,y1:60,  x2:510,y2:60  },
+      { id:'s3', x1:160,y1:280, x2:340,y2:280 },
+      { id:'s4', x1:340,y1:280, x2:510,y2:280 },
+      { id:'s5', x1:340,y1:60,  x2:340,y2:120 },
+      { id:'s6', x1:340,y1:200, x2:340,y2:280 },
+    ],
+    battery: { x:100, y:170, label:'電池' },
+    bulbs: [
+      { x:430, y:120, label:'💡', id:'b1' },
+      { x:430, y:200, label:'💡', id:'b2' },
+    ],
+    switches: [],
+    burnedOut: null,
+    checkFn(active, burned) {
+      const top    = active.has('s1') && active.has('s2');
+      const bottom = active.has('s3') && active.has('s4');
+      const mid    = active.has('s5') && active.has('s6');
+      if (top && bottom && mid) return 'ok';
+      return 'open';
+    },
+    successMsg: '🌟 並聯完成！燒斷一顆，另一顆還亮，這就是並聯的優點！',
+    failMsg:    '電線還沒接好，需要連接所有6條電線！',
+  },
+];
+
+let currentLevel = 0;
+let activeSegs = new Set();
+let burnedBulb = null;
+let circuitRaf;
+let circuitDone = {};
+
+function loadLevel(idx, btnEl) {
+  if (idx == null || idx < 0 || idx >= LEVELS.length) return;
+
+  currentLevel = idx;
+  const lvl = LEVELS[idx];
+  if (!lvl) return;
+
+  activeSegs = new Set(lvl.startActive || []);
+  burnedBulb = null;
+
+  const statusEl = document.getElementById('circuitStatus');
+  if (statusEl) {
+    statusEl.className = 'status-bar';
+    statusEl.textContent = '👆 ' + (lvl.hint || '繼續連接電線！');
+  }
+
+  const hintEl = document.getElementById('circuitHint');
+  if (hintEl) hintEl.textContent = '';
+
+  document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  if (circuitRaf) cancelAnimationFrame(circuitRaf);
+  circuitLoop();
+}
+
+function resetLevel() {
+  loadLevel(currentLevel, document.querySelectorAll('.lvl-btn')[currentLevel]);
+}
+
+/* — Click detection — */
+const circuitCanvas = document.getElementById('circuitCanvas');
+function getCanvasPos(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  // touchend 時 e.touches 是空的，必須用 e.changedTouches
+  const src = e.changedTouches ? e.changedTouches[0] : (e.touches ? e.touches[0] : e);
+  return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+}
+
+circuitCanvas.addEventListener('click', e => handleCircuitClick(getCanvasPos(e, circuitCanvas)));
+circuitCanvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+circuitCanvas.addEventListener('touchend', e => { e.preventDefault(); handleCircuitClick(getCanvasPos(e, circuitCanvas)); }, { passive: false });
+
+function segHitTest(seg, px, py) {
+  const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+  const len2 = dx*dx + dy*dy;
+  if (len2 === 0) return false;
+  let t = ((px-seg.x1)*dx + (py-seg.y1)*dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx2 = seg.x1 + t*dx, cy2 = seg.y1 + t*dy;
+  return Math.hypot(px-cx2, py-cy2) < 28;
+}
+
+function bulbHitTest(bulb, px, py) {
+  return Math.hypot(px - bulb.x, py - bulb.y) < 30;
+}
+
+function handleCircuitClick(pos) {
+  const lvl = LEVELS[currentLevel];
+
+  // Check bulb click (level 3 only)
+  if (currentLevel === 2 && lvl.bulbs) {
+    for (const b of lvl.bulbs) {
+      if (bulbHitTest(b, pos.x, pos.y) && activeSegs.size >= 6) {
+        burnedBulb = burnedBulb === b.id ? null : b.id;
+        updateCircuitStatus();
+        return;
+      }
+    }
+  }
+
+  // Check segment click
+  for (const seg of lvl.segs) {
+    if (segHitTest(seg, pos.x, pos.y)) {
+      if (activeSegs.has(seg.id)) activeSegs.delete(seg.id);
+      else activeSegs.add(seg.id);
+      updateCircuitStatus();
+      return;
+    }
+  }
+}
+
+function updateCircuitStatus() {
+  const lvl = LEVELS[currentLevel];
+  const result = lvl.checkFn(activeSegs, burnedBulb);
+  const el = document.getElementById('circuitStatus');
+
+  if (result === 'ok') {
+    el.className = 'status-bar ok';
+    el.textContent = lvl.successMsg;
+    if (!circuitDone[currentLevel]) {
+      circuitDone[currentLevel] = true;
+      if (Object.keys(circuitDone).length === 3) {
+        setTimeout(() => showCelebration('circuit'), 800);
+      }
+    }
+  } else if (result === 'short') {
+    el.className = 'status-bar warn';
+    el.textContent = lvl.failMsg;
+  } else {
+    el.className = 'status-bar';
+    el.textContent = lvl.hint ? '👆 ' + lvl.hint : '👆 繼續連接電線！';
+  }
+}
+
+/* — Drawing — */
+function circuitLoop() {
+  drawCircuit();
+  circuitRaf = requestAnimationFrame(circuitLoop);
+}
+
+function drawCircuit() {
+  const canvas = document.getElementById('circuitCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const lvl = LEVELS[currentLevel];
+  const result = lvl.checkFn(activeSegs, burnedBulb);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Dark background with subtle grid
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(0,245,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Draw battery rails (fixed horizontal wires to battery)
+  const bat = lvl.battery;
+  ctx.strokeStyle = 'rgba(255,220,0,0.4)'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(bat.x+30, bat.y-90); ctx.lineTo(bat.x+30, bat.y-20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bat.x+30, bat.y+20); ctx.lineTo(bat.x+30, bat.y+90); ctx.stroke();
+
+  // Draw battery
+  drawBattery(ctx, bat.x, bat.y, result === 'short');
+
+  // Draw segments
+  lvl.segs.forEach(seg => {
+    const on = activeSegs.has(seg.id);
+    drawSegment(ctx, seg, on, result);
+  });
+
+  // Draw bulbs
+  if (lvl.bulbs) {
+    lvl.bulbs.forEach(b => {
+      const burned = burnedBulb === b.id;
+      const lit = result === 'ok' && !burned && activeSegs.size >= (currentLevel === 2 ? 6 : 4);
+      drawBulb(ctx, b.x, b.y, lit, burned);
+    });
+  }
+
+  // Level 1&2: draw vertical bulb rails
+  if (currentLevel < 2) {
+    const b = lvl.bulbs[0];
+    ctx.strokeStyle = 'rgba(255,220,0,0.4)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(b.x, 80); ctx.lineTo(b.x, b.y-30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(b.x, b.y+30); ctx.lineTo(b.x, 260); ctx.stroke();
+  }
+
+  // Level 3: draw bulb rails
+  if (currentLevel === 2) {
+    ctx.strokeStyle = 'rgba(255,220,0,0.4)'; ctx.lineWidth = 2.5;
+    // upper bulb rails
+    ctx.beginPath(); ctx.moveTo(510,60); ctx.lineTo(510,90); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(510,150); ctx.lineTo(510,280); ctx.stroke();
+    // lower bulb rails
+    ctx.beginPath(); ctx.moveTo(340,60); ctx.lineTo(340,80); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(340,200); ctx.lineTo(340,220); ctx.stroke();
+    // left rail
+    ctx.beginPath(); ctx.moveTo(160,60); ctx.lineTo(160,280); ctx.stroke();
+  }
+
+  // Village lights effect
+  if (result === 'ok') drawVillageLights(ctx, W, H);
+}
+
+function drawBattery(ctx, x, y, sparking) {
+  ctx.save();
+  // Body
+  const grad = ctx.createLinearGradient(x-25, 0, x+25, 0);
+  grad.addColorStop(0, '#1a2a1a'); grad.addColorStop(0.5, '#2a4a2a'); grad.addColorStop(1, '#1a2a1a');
+  ctx.fillStyle = grad;
+  roundRect(ctx, x-25, y-65, 50, 130, 8);
+  ctx.fill();
+  ctx.strokeStyle = '#4a8a4a'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Cells
+  for (let i = 0; i < 3; i++) {
+    ctx.fillStyle = i % 2 === 0 ? '#2a5a2a' : '#1e3e1e';
+    ctx.fillRect(x-20, y-55+i*38, 40, 32);
+  }
+
+  // + terminal
+  ctx.fillStyle = '#ff4444'; roundRect(ctx, x-10, y-80, 20, 18, 4); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('+', x, y-68);
+
+  // – terminal
+  ctx.fillStyle = '#4444ff'; roundRect(ctx, x-10, y+62, 20, 18, 4); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.fillText('−', x, y+75);
+
+  // Sparks if short circuit
+  if (sparking) {
+    const t = Date.now() / 100;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i/6)*Math.PI*2 + t;
+      const r = 35 + Math.sin(t*3+i)*10;
+      ctx.beginPath();
+      ctx.moveTo(x, y-68);
+      ctx.lineTo(x + Math.cos(angle)*r, y-68 + Math.sin(angle)*r*0.5);
+      ctx.strokeStyle = `rgba(255,${100+Math.random()*155},0,${0.5+Math.random()*0.5})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#ff4400';
+    ctx.fillText('⚠️ 短路！', x+40, y-80);
+  }
+  ctx.restore();
+}
+
+function drawSegment(ctx, seg, on, result) {
+  ctx.save();
+  const isShortSeg = seg.isShort;
+
+  if (on) {
+    // Active wire
+    const glow = isShortSeg ? '#ff4400' : '#ffe566';
+    ctx.strokeStyle = isShortSeg ? '#ff6600' : '#ffe566';
+    ctx.lineWidth   = isShortSeg ? 4 : 3;
+    ctx.shadowColor = glow; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.moveTo(seg.x1, seg.y1); ctx.lineTo(seg.x2, seg.y2); ctx.stroke();
+    // Junction dots
+    [seg.x1, seg.x2].forEach((x,i) => {
+      const y = i === 0 ? seg.y1 : seg.y2;
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2);
+      ctx.fillStyle = glow; ctx.shadowBlur = 16; ctx.fill();
+    });
+  } else {
+    // Inactive (dashed)
+    ctx.strokeStyle = isShortSeg ? 'rgba(255,100,0,0.7)' : 'rgba(255,220,0,0.35)';
+    ctx.lineWidth   = 2.5;
+    ctx.setLineDash([8, 6]); ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(seg.x1, seg.y1); ctx.lineTo(seg.x2, seg.y2); ctx.stroke();
+    ctx.setLineDash([]);
+    // Midpoint tap hint
+    const mx = (seg.x1+seg.x2)/2, my = (seg.y1+seg.y2)/2;
+    ctx.beginPath(); ctx.arc(mx, my, 7, 0, Math.PI*2);
+    ctx.strokeStyle = isShortSeg ? 'rgba(255,100,0,0.5)' : 'rgba(255,220,0,0.4)';
+    ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBulb(ctx, x, y, lit, burned) {
+  ctx.save();
+  const r = 28;
+
+  if (burned) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = '#111'; ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('💀', x, y);
+    ctx.font = 'bold 11px Microsoft JhengHei'; ctx.fillStyle = '#666';
+    ctx.fillText('燒斷', x, y+42);
+    ctx.restore(); return;
+  }
+
+  if (lit) {
+    // Glow
+    const glow = ctx.createRadialGradient(x, y, 5, x, y, r*2.5);
+    glow.addColorStop(0, 'rgba(255,240,100,0.5)');
+    glow.addColorStop(1, 'rgba(255,200,0,0)');
+    ctx.beginPath(); ctx.arc(x, y, r*2.5, 0, Math.PI*2);
+    ctx.fillStyle = glow; ctx.fill();
+
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    const fill = ctx.createRadialGradient(x-8, y-8, 4, x, y, r);
+    fill.addColorStop(0, '#fff8aa'); fill.addColorStop(0.6, '#ffd700'); fill.addColorStop(1, '#ff8800');
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = '#ffe566'; ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#ffe566'; ctx.shadowBlur = 20; ctx.stroke();
+    // filament
+    ctx.beginPath(); ctx.moveTo(x-10,y+8); ctx.lineTo(x,y-8); ctx.lineTo(x+10,y+8);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.strokeStyle = 'rgba(255,220,0,0.3)'; ctx.lineWidth = 2; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-10,y+8); ctx.lineTo(x,y-8); ctx.lineTo(x+10,y+8);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // Label
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 12px Microsoft JhengHei';
+  ctx.fillStyle = lit ? '#ffe566' : 'rgba(255,220,0,0.4)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(lit ? '✨ 亮！' : '燈泡', x, y+r+6);
+  ctx.restore();
+}
+
+function drawVillageLights(ctx, W, H) {
+  const t = Date.now() / 1000;
+  const houses = [{x:20,y:H-60},{x:W-100,y:H-70},{x:W/2-60,y:H-50}];
+  houses.forEach(h => {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(h.x+30, h.y-20, 8+Math.sin(t*2)*2, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,240,100,${0.6+Math.sin(t*2)*0.3})`; ctx.shadowColor='#ffd700'; ctx.shadowBlur=20;
+    ctx.fill(); ctx.restore();
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w,y, x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h, x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h, x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y, x+r,y);
+  ctx.closePath();
+}
+
+/* ═══════════════════════════════════
+   GAME 2 — CONDUCTOR TEST
+═══════════════════════════════════ */
+const ITEMS = [
+  { id:'銅片',   icon:'🟡', conductor:true,  desc:'金屬是良導體！' },
+  { id:'迴紋針', icon:'📎', conductor:true,  desc:'金屬迴紋針也是良導體！' },
+  { id:'鉛筆芯', icon:'✏️', conductor:true,  desc:'石墨（鉛筆芯）可以導電！' },
+  { id:'塑膠尺', icon:'📏', conductor:false, desc:'塑膠是絕緣體，不導電。' },
+  { id:'橡皮擦', icon:'🩷', conductor:false, desc:'橡皮擦是絕緣體，不導電。' },
+  { id:'木頭',   icon:'🪵', conductor:false, desc:'乾燥木材是絕緣體，不導電。' },
+];
+let selectedItem = null;
+let foundConductors = new Set();
+let conductorRaf;
+
+function initConductor() {
+  selectedItem = null;
+  foundConductors = new Set();
+
+  const statusEl = document.getElementById('conductorStatus');
+  if (statusEl) {
+    statusEl.className = 'status-bar';
+    statusEl.textContent = '👆 從下方選擇一個物品，放入電路缺口測試！';
+  }
+
+  ITEMS.forEach(it => {
+    const fgEl = document.getElementById('fg-' + it.id);
+    if (fgEl) fgEl.className = 'fg-card';
+  });
+
+  buildItemBtns();
+  if (conductorRaf) cancelAnimationFrame(conductorRaf);
+  conductorLoop();
+}
+
+function buildItemBtns() {
+  const row = document.getElementById('conductorItems');
+  if (!row) return;
+
+  // Clear existing buttons
+  while (row.firstChild) row.removeChild(row.firstChild);
+
+  ITEMS.forEach(it => {
+    const btn = document.createElement('button');
+    btn.className = 'act-btn';
+    btn.id = 'itbtn-' + it.id;
+    btn.dataset.itemId = it.id;
+
+    // Use DOM API instead of innerHTML
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'ai';
+    iconSpan.textContent = it.icon;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = it.id;
+
+    btn.appendChild(iconSpan);
+    btn.appendChild(labelSpan);
+
+    btn.addEventListener('click', () => testItem(it, btn));
+    row.appendChild(btn);
+  });
+}
+
+function testItem(item, btn) {
+  if (!item || !btn) return;
+
+  document.querySelectorAll('.act-btn').forEach(b => b.classList.remove('selected', 'correct', 'wrong'));
+  selectedItem = item;
+  btn.classList.add('selected');
+
+  setTimeout(() => {
+    const el = document.getElementById('conductorStatus');
+    if (!el) {
+      selectedItem = null;
+      return;
+    }
+
+    if (item?.conductor) {
+      btn.classList.remove('selected');
+      btn.classList.add('correct');
+      el.className = 'status-bar ok';
+      el.textContent = `✅ ${item.icon} ${item.id} — ${item.desc} 燈泡亮了！`;
+      foundConductors.add(item.id);
+
+      const fg = document.getElementById('fg-' + item.id);
+      if (fg) fg.className = 'fg-card found';
+
+      if (foundConductors.size === 3) {
+        setTimeout(() => showCelebration('conductor'), 600);
+      }
+    } else {
+      btn.classList.remove('selected');
+      btn.classList.add('wrong');
+      el.className = 'status-bar warn';
+      el.textContent = `❌ ${item.icon} ${item.id} — ${item.desc} 燈泡沒亮。`;
+    }
+    selectedItem = null;
+  }, 500);
+}
+
+function conductorLoop() {
+  drawConductor();
+  conductorRaf = requestAnimationFrame(conductorLoop);
+}
+
+function drawConductor() {
+  const canvas = document.getElementById('conductorCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const isLit = selectedItem?.conductor || false;
+  const testing = selectedItem !== null;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#000814'; ctx.fillRect(0, 0, W, H);
+
+  const bx = 80, by = H/2;
+  const gx1 = 260, gx2 = 310, gy = H/2;
+  const lx = 440, ly = H/2;
+  const topY = 60, botY = H-60;
+
+  // Wires
+  ctx.strokeStyle = '#ffe566'; ctx.lineWidth = 3;
+  // top rail
+  ctx.beginPath(); ctx.moveTo(bx+25, by-80); ctx.lineTo(bx+25, topY);
+  ctx.lineTo(gx1, topY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gx2, topY); ctx.lineTo(lx, topY);
+  ctx.lineTo(lx, ly-28); ctx.stroke();
+  // bottom rail
+  ctx.beginPath(); ctx.moveTo(bx+25, by+80); ctx.lineTo(bx+25, botY);
+  ctx.lineTo(lx, botY); ctx.lineTo(lx, ly+28); ctx.stroke();
+
+  // Gap
+  ctx.save();
+  ctx.setLineDash([6,5]);
+  ctx.strokeStyle = testing ? (isLit ? '#ffe566' : 'rgba(255,100,0,0.6)') : 'rgba(255,220,0,0.4)';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(gx1, topY); ctx.lineTo(gx2, topY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Gap label
+  if (!testing) {
+    ctx.font = 'bold 13px Microsoft JhengHei';
+    ctx.fillStyle = 'rgba(255,220,0,0.7)';
+    ctx.textAlign = 'center';
+    ctx.fillText('? 放入物品', (gx1+gx2)/2, topY-14);
+  }
+
+  // Testing item in gap
+  if (testing) {
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(selectedItem.icon, (gx1+gx2)/2, topY-2);
+  }
+
+  // Battery
+  drawBattery(ctx, bx, by, false);
+
+  // Bulb
+  drawBulb(ctx, lx, ly, isLit && testing, false);
+}
+
+/* ═══════════════════════════════════
+   GAME 3 — ENERGY HUNT
+═══════════════════════════════════ */
+const HOTSPOTS = [
+  {
+    id: 'ac', icon: '❄️', label: 'AC設20°C',
+    x:'8%', y:'12%', w:'18%', h:'14%',
+    badge: 'badge-ac',
+    fixedMsg: '✅ 冷氣調回26°C，省電又健康！',
+    desc: '冷氣開太強（20°C）！調回26~28°C最省電喔。',
+  },
+  {
+    id: 'light', icon: '💡', label: '白天開燈',
+    x:'55%', y:'5%', w:'16%', h:'14%',
+    badge: 'badge-light',
+    fixedMsg: '✅ 白天關燈，充分利用自然光！',
+    desc: '白天已經很亮了，為什麼還開著大燈？',
+  },
+  {
+    id: 'fridge', icon: '🧊', label: '冰箱沒關',
+    x:'75%', y:'35%', w:'16%', h:'30%',
+    badge: 'badge-fridge',
+    fixedMsg: '✅ 冰箱關好，冷氣不會跑掉！',
+    desc: '冰箱門沒關好，冷氣一直跑出來，很耗電！',
+  },
+  {
+    id: 'tv', icon: '📺', label: '無人看電視',
+    x:'20%', y:'45%', w:'22%', h:'20%',
+    badge: 'badge-tv',
+    fixedMsg: '✅ 沒人看就關掉，省電達人！',
+    desc: '沒有人在看，電視卻一直開著！',
+  },
+];
+let fixedHS = new Set();
+let energyRaf;
+const celebratedGames = {};
+
+function initEnergy() {
+  fixedHS = new Set();
+
+  const scoreEl = document.getElementById('energyScore');
+  if (scoreEl) {
+    while (scoreEl.firstChild) scoreEl.removeChild(scoreEl.firstChild);
+    const countNode = document.createTextNode('0');
+    scoreEl.appendChild(countNode);
+    const spanEl = document.createElement('span');
+    spanEl.textContent = '/ 4 個問題修正';
+    scoreEl.appendChild(spanEl);
+  }
+
+  HOTSPOTS.forEach(h => {
+    const badgeEl = document.getElementById(h.badge);
+    if (badgeEl) badgeEl.className = 'badge-item';
+  });
+
+  buildHotspots();
+  if (energyRaf) cancelAnimationFrame(energyRaf);
+  energyLoop();
+}
+
+function buildHotspots() {
+  const wrap = document.getElementById('roomWrap');
+  if (!wrap) return;
+
+  wrap.querySelectorAll('.room-hotspot').forEach(el => el.remove());
+
+  HOTSPOTS.forEach(hs => {
+    const div = document.createElement('div');
+    div.className = 'room-hotspot';
+    div.id = 'hs-' + hs.id;
+    div.style.left = hs.x;
+    div.style.top = hs.y;
+    div.style.width = hs.w;
+    div.style.height = hs.h;
+    div.title = hs.desc;
+    div.dataset.hsId = hs.id;
+
+    // Use DOM API instead of innerHTML
+    const span = document.createElement('span');
+    span.style.fontSize = '1.8rem';
+    span.textContent = hs.icon;
+    div.appendChild(span);
+
+    div.addEventListener('click', () => fixHotspot(hs));
+    wrap.appendChild(div);
+  });
+}
+
+function fixHotspot(hs) {
+  if (fixedHS.has(hs.id)) return;
+  fixedHS.add(hs.id);
+
+  const div = document.getElementById('hs-' + hs.id);
+  if (div) {
+    div.classList.add('fixed');
+    // Clear and use DOM API instead of innerHTML
+    while (div.firstChild) div.removeChild(div.firstChild);
+    const span = document.createElement('span');
+    span.style.fontSize = '1.8rem';
+    span.textContent = '✅';
+    div.appendChild(span);
+  }
+
+  const badgeEl = document.getElementById(hs.badge);
+  if (badgeEl) badgeEl.className = 'badge-item earned';
+
+  const scoreEl = document.getElementById('energyScore');
+  if (scoreEl) {
+    // Clear and rebuild score display
+    while (scoreEl.firstChild) scoreEl.removeChild(scoreEl.firstChild);
+    const countNode = document.createTextNode(String(fixedHS.size));
+    scoreEl.appendChild(countNode);
+    const spanEl = document.createElement('span');
+    spanEl.textContent = '/ 4 個問題修正';
+    scoreEl.appendChild(spanEl);
+  }
+
+  if (fixedHS.size === HOTSPOTS.length) {
+    setTimeout(() => showCelebration('energy'), 600);
+  }
+}
+
+function energyLoop() {
+  drawRoom();
+  energyRaf = requestAnimationFrame(energyLoop);
+}
+
+function drawRoom() {
+  const canvas = document.getElementById('roomCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Wall
+  const wallG = ctx.createLinearGradient(0,0,0,H);
+  wallG.addColorStop(0,'#1a2535'); wallG.addColorStop(1,'#111820');
+  ctx.fillStyle = wallG; ctx.fillRect(0, 0, W, H);
+
+  // Floor
+  ctx.fillStyle = '#0d1520'; ctx.fillRect(0, H*0.72, W, H*0.28);
+  ctx.strokeStyle = 'rgba(0,245,255,0.08)'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x+=60) { ctx.beginPath(); ctx.moveTo(x,H*0.72); ctx.lineTo(x+(W*0.28)*0.5,H); ctx.stroke(); }
+
+  // Window (daytime light)
+  const t = Date.now()/2000;
+  ctx.fillStyle = '#1a3a5a';
+  roundRect(ctx, W*0.35, H*0.05, W*0.28, H*0.38, 8); ctx.fill();
+  const sunG = ctx.createRadialGradient(W*0.49,H*0.24,5,W*0.49,H*0.24,80);
+  sunG.addColorStop(0,'rgba(255,240,150,0.35)'); sunG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = sunG; ctx.fillRect(W*0.35,H*0.05,W*0.28,H*0.38);
+  ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 3;
+  roundRect(ctx, W*0.35, H*0.05, W*0.28, H*0.38, 8); ctx.stroke();
+  ctx.strokeStyle = '#2a5a8a'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W*0.49,H*0.05); ctx.lineTo(W*0.49,H*0.43); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.35,H*0.24); ctx.lineTo(W*0.63,H*0.24); ctx.stroke();
+
+  // AC unit
+  if (!fixedHS.has('ac')) {
+    ctx.fillStyle = '#1e3040'; roundRect(ctx,W*0.04,H*0.1,W*0.22,H*0.18,6); ctx.fill();
+    ctx.strokeStyle='rgba(0,200,255,0.4)'; ctx.lineWidth=1.5; roundRect(ctx,W*0.04,H*0.1,W*0.22,H*0.18,6); ctx.stroke();
+    ctx.font='bold 12px Microsoft JhengHei'; ctx.fillStyle='#ff4444'; ctx.textAlign='center';
+    ctx.fillText('20°C ❄️❄️❄️', W*0.15, H*0.205);
+    // Cold air puffs
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(W*0.08+i*W*0.05,H*0.35+Math.sin(t+i)*8,6,0,Math.PI*2);ctx.fillStyle='rgba(150,220,255,0.15)';ctx.fill();}
+  } else {
+    ctx.fillStyle='#1e3040'; roundRect(ctx,W*0.04,H*0.1,W*0.22,H*0.18,6); ctx.fill();
+    ctx.strokeStyle='rgba(0,255,136,0.5)'; ctx.lineWidth=1.5; roundRect(ctx,W*0.04,H*0.1,W*0.22,H*0.18,6); ctx.stroke();
+    ctx.font='bold 12px Microsoft JhengHei'; ctx.fillStyle='#00ff88'; ctx.textAlign='center';
+    ctx.fillText('26°C ✅', W*0.15, H*0.205);
+  }
+
+  // Overhead light
+  ctx.beginPath(); ctx.arc(W*0.63,H*0.08,10,0,Math.PI*2);
+  if(!fixedHS.has('light')){
+    const lg=ctx.createRadialGradient(W*0.63,H*0.08,2,W*0.63,H*0.08,80);
+    lg.addColorStop(0,'rgba(255,240,100,0.5)');lg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lg; ctx.fill();
+    ctx.beginPath();ctx.arc(W*0.63,H*0.08,10,0,Math.PI*2);
+    ctx.fillStyle='#ffd700';ctx.shadowColor='#ffd700';ctx.shadowBlur=20;ctx.fill();ctx.shadowBlur=0;
+  } else {
+    ctx.fillStyle='#333';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // TV
+  ctx.fillStyle='#1a1a2e'; roundRect(ctx,W*0.17,H*0.44,W*0.25,H*0.22,6); ctx.fill();
+  if(!fixedHS.has('tv')){
+    const tvG=ctx.createLinearGradient(W*0.17,H*0.44,W*0.42,H*0.66);
+    tvG.addColorStop(0,'#0d2040');tvG.addColorStop(1,'#0a1a35');
+    ctx.fillStyle=tvG; roundRect(ctx,W*0.19,H*0.46,W*0.21,H*0.18,4); ctx.fill();
+    ctx.strokeStyle='rgba(79,195,247,0.5)';ctx.lineWidth=1.5;roundRect(ctx,W*0.17,H*0.44,W*0.25,H*0.22,6);ctx.stroke();
+    ctx.font='11px Microsoft JhengHei';ctx.fillStyle='rgba(79,195,247,0.9)';ctx.textAlign='center';
+    ctx.fillText('📺 沒人看…',W*0.295,H*0.565);
+  } else {
+    ctx.strokeStyle='rgba(0,255,136,0.5)';ctx.lineWidth=1.5;roundRect(ctx,W*0.17,H*0.44,W*0.25,H*0.22,6);ctx.stroke();
+    ctx.fillStyle='#0d0d0d'; roundRect(ctx,W*0.19,H*0.46,W*0.21,H*0.18,4); ctx.fill();
+    ctx.font='11px Microsoft JhengHei';ctx.fillStyle='rgba(0,255,136,0.8)';ctx.textAlign='center';
+    ctx.fillText('已關閉 ✅',W*0.295,H*0.565);
+  }
+
+  // Fridge
+  ctx.fillStyle='#1e3030'; roundRect(ctx,W*0.76,H*0.3,W*0.2,H*0.44,8); ctx.fill();
+  if(!fixedHS.has('fridge')){
+    ctx.strokeStyle='rgba(150,220,255,0.5)';ctx.lineWidth=2;roundRect(ctx,W*0.76,H*0.3,W*0.2,H*0.44,8);ctx.stroke();
+    // Door ajar
+    ctx.save();ctx.translate(W*0.76,H*0.3);ctx.rotate(-0.2);
+    ctx.fillStyle='#1e3030';roundRect(ctx,0,0,W*0.2,H*0.22,8);ctx.fill();
+    ctx.strokeStyle='rgba(150,220,255,0.5)';ctx.lineWidth=2;roundRect(ctx,0,0,W*0.2,H*0.22,8);ctx.stroke();
+    ctx.restore();
+    ctx.font='10px Microsoft JhengHei';ctx.fillStyle='rgba(150,220,255,0.8)';ctx.textAlign='center';
+    ctx.fillText('門沒關！',W*0.86,H*0.78);
+  } else {
+    ctx.strokeStyle='rgba(0,255,136,0.5)';ctx.lineWidth=2;roundRect(ctx,W*0.76,H*0.3,W*0.2,H*0.44,8);ctx.stroke();
+    ctx.font='10px Microsoft JhengHei';ctx.fillStyle='rgba(0,255,136,0.8)';ctx.textAlign='center';
+    ctx.fillText('已關好 ✅',W*0.86,H*0.55);
+  }
+}
+
+/* ═══════════════════════════════════
+   CELEBRATION
+═══════════════════════════════════ */
+function showCelebration(game) {
+  if (!game || celebratedGames[game]) return;
+
+  celebratedGames[game] = true;
+
+  const configs = {
+    circuit:   { icon:'⚡', title:'電路大師誕生！',   desc:'你已經學會通路、短路和並聯電路了！\n電學難不倒你！' },
+    conductor: { icon:'🔬', title:'電學圖鑑集滿了！', desc:'銅、迴紋針、鉛筆芯是良導體，\n塑膠、橡皮擦、木頭是絕緣體，記住了嗎？' },
+    energy:    { icon:'🌿', title:'低碳小英雄！',     desc:'你找出了所有浪費電的地方並修正！\n節能愛地球，你是最棒的！' },
+  };
+
+  const cfg = configs[game];
+  if (!cfg) return;
+
+  const iconEl = document.getElementById('celebIcon');
+  const titleEl = document.getElementById('celebTitle');
+  const descEl = document.getElementById('celebDesc');
+  const celebEl = document.getElementById('celebration');
+
+  if (iconEl) iconEl.textContent = cfg.icon;
+  if (titleEl) titleEl.textContent = cfg.title;
+  if (descEl) descEl.textContent = cfg.desc;
+  if (celebEl) celebEl.classList.add('show');
+}
+
+function hideCelebration() {
+  const celebEl = document.getElementById('celebration');
+  if (celebEl) celebEl.classList.remove('show');
+  goHome();
+}
+
+// Init circuit on first load
+loadLevel(0, document.querySelectorAll('.lvl-btn')[0]);
+</script>
+</body>
+</html>

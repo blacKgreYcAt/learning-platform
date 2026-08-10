@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="600" fill="#E8F5E9"/>
+        <text x="400" y="60" text-anchor="middle" font-size="48" font-weight="bold" fill="#00C853">Level 7 Module 4</text>
+        <circle cx="700" cy="100" r="60" fill="#00C853" opacity="0.2"/>
+        <circle cx="100" cy="500" r="80" fill="#00C853" opacity="0.15"/>
+        <rect x="100" y="150" width="600" height="350" rx="20" fill="#FFFFFF" stroke="#00C853" stroke-width="3" opacity="0.95"/>
+        <text x="400" y="300" text-anchor="middle" font-size="32" fill="#00C853">English Learning</text>
+        <text x="400" y="360" text-anchor="middle" font-size="18" fill="#333">Vocabulary Lesson 28</text>
+      </svg>

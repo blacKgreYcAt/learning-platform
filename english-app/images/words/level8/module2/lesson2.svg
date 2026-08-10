@@ -1,0 +1,13 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="600" fill="#E3F2FD"/>
+        <circle cx="200" cy="280" r="100" fill="#FF6B6B" opacity="0.2"/>
+        <text x="200" y="290" text-anchor="middle" font-size="60">📚</text>
+        <g transform="translate(380, 100)">
+          <text x="0" y="0" font-size="42" font-weight="bold" fill="#FF6B6B">Word Study</text>
+          <text x="0" y="60" font-size="18" fill="#333">Learning Context:</text>
+          <text x="0" y="110" font-size="16" fill="#333">Common Usage in Sentences</text>
+          <line x1="0" y1="130" x2="400" y2="130" stroke="#FF6B6B" stroke-width="2" opacity="0.3"/>
+          <text x="0" y="200" font-size="18" fill="#333">Example:</text>
+          <text x="0" y="250" font-size="20" font-weight="bold" fill="#FF6B6B">"Let's practice this word!"</text>
+        </g>
+      </svg>

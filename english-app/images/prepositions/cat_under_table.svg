@@ -1,0 +1,33 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#e8f4f8"/>
+
+  <!-- Table top -->
+  <rect x="80" y="120" width="240" height="20" fill="#8B4513" rx="4"/>
+
+  <!-- Table legs -->
+  <rect x="100" y="140" width="20" height="100" fill="#8B4513"/>
+  <rect x="280" y="140" width="20" height="100" fill="#8B4513"/>
+
+  <!-- Cat body (under table) -->
+  <ellipse cx="200" cy="200" rx="50" ry="35" fill="#FF9900"/>
+
+  <!-- Cat head -->
+  <circle cx="200" cy="160" r="30" fill="#FF9900"/>
+
+  <!-- Cat ears -->
+  <polygon points="180,140 175,110 185,135" fill="#FF9900"/>
+  <polygon points="220,140 225,110 215,135" fill="#FF9900"/>
+
+  <!-- Cat eyes -->
+  <circle cx="190" cy="155" r="5" fill="black"/>
+  <circle cx="210" cy="155" r="5" fill="black"/>
+
+  <!-- Cat nose -->
+  <circle cx="200" cy="165" r="3" fill="pink"/>
+
+  <!-- Label -->
+  <text x="200" y="280" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">
+    Cat UNDER Table
+  </text>
+</svg>

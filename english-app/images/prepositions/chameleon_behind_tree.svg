@@ -1,0 +1,29 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#c8e6c9"/>
+
+  <!-- Tree trunk -->
+  <rect x="150" y="120" width="100" height="150" fill="#8B4513"/>
+
+  <!-- Tree foliage -->
+  <circle cx="130" cy="90" r="60" fill="#228B22"/>
+  <circle cx="200" cy="50" r="70" fill="#228B22"/>
+  <circle cx="270" cy="90" r="60" fill="#228B22"/>
+
+  <!-- Chameleon body (partially behind tree) -->
+  <ellipse cx="180" cy="180" rx="40" ry="30" fill="#00AA44"/>
+
+  <!-- Chameleon head -->
+  <circle cx="140" cy="170" r="25" fill="#00AA44"/>
+
+  <!-- Chameleon tail (curled) -->
+  <path d="M 220 180 Q 260 160 280 200" stroke="#00AA44" stroke-width="15" fill="none" stroke-linecap="round"/>
+
+  <!-- Chameleon eye -->
+  <circle cx="130" cy="160" r="6" fill="black"/>
+
+  <!-- Label -->
+  <text x="200" y="280" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">
+    Chameleon BEHIND Tree
+  </text>
+</svg>

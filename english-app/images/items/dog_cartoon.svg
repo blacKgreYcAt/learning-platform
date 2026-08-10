@@ -1,0 +1,69 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .dog-body { fill: #D2691E; stroke: #8B4513; stroke-width: 2; }
+      .dog-feature { fill: #8B4513; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="200" fill="#FFF8E1"/>
+
+  <!-- Dog body -->
+  <ellipse cx="100" cy="110" rx="50" ry="45" class="dog-body"/>
+
+  <!-- Dog head -->
+  <circle cx="95" cy="65" r="38" class="dog-body"/>
+
+  <!-- Ears -->
+  <ellipse cx="70" cy="45" rx="18" ry="32" class="dog-feature"/>
+  <ellipse cx="120" cy="45" rx="18" ry="32" class="dog-feature"/>
+
+  <!-- Inner ears (pink) -->
+  <ellipse cx="70" cy="52" rx="10" ry="18" fill="#FFB3BA"/>
+  <ellipse cx="120" cy="52" rx="10" ry="18" fill="#FFB3BA"/>
+
+  <!-- Snout (lighter) -->
+  <ellipse cx="95" cy="80" rx="25" ry="20" fill="#CD853F" stroke="#8B4513" stroke-width="2"/>
+
+  <!-- Eyes (big and cute) -->
+  <circle cx="82" cy="62" r="8" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/>
+  <circle cx="108" cy="62" r="8" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/>
+
+  <!-- Pupils (happy) -->
+  <circle cx="83" cy="64" r="5" fill="#333333"/>
+  <circle cx="109" cy="64" r="5" fill="#333333"/>
+
+  <!-- Eye shine -->
+  <circle cx="85" cy="61" r="2" fill="#FFFFFF"/>
+  <circle cx="111" cy="61" r="2" fill="#FFFFFF"/>
+
+  <!-- Nose (black) -->
+  <ellipse cx="95" cy="83" rx="7" ry="8" fill="#333333"/>
+
+  <!-- Mouth (happy) -->
+  <path d="M 95 83 Q 88 92 82 88" stroke="#333333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 95 83 Q 102 92 108 88" stroke="#333333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Tongue -->
+  <ellipse cx="95" cy="96" rx="6" ry="8" fill="#FF6B9D"/>
+
+  <!-- Tail (wagging) -->
+  <path d="M 150 105 Q 175 75 180 130" stroke="#D2691E" stroke-width="18" fill="none" stroke-linecap="round"/>
+  <path d="M 150 105 Q 175 75 180 130" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Front legs -->
+  <rect x="75" y="150" width="16" height="35" class="dog-feature" rx="8"/>
+  <rect x="109" y="150" width="16" height="35" class="dog-feature" rx="8"/>
+
+  <!-- Paws -->
+  <ellipse cx="83" cy="187" rx="10" ry="8" fill="#FFB3BA"/>
+  <ellipse cx="117" cy="187" rx="10" ry="8" fill="#FFB3BA"/>
+
+  <!-- Spots (to add personality) -->
+  <circle cx="130" cy="100" r="8" class="dog-feature" opacity="0.6"/>
+  <circle cx="65" cy="125" r="6" class="dog-feature" opacity="0.6"/>
+
+  <!-- Chest patch -->
+  <ellipse cx="100" cy="125" rx="12" ry="15" fill="#CD853F" opacity="0.7"/>
+</svg>
