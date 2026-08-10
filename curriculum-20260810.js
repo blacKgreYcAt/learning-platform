@@ -46,6 +46,14 @@ window.CURRICULUM = {
       title: '社會科統合平臺',
       path: 'social-studies-app/',
     },
+    classics: {
+      name: '國學',
+      icon: '📜',
+      title: '經典大作戰',
+      path: 'classics-splat-app/',
+      // 論語和世說新語不是按年級編的，所以不走年級/學期那一套，首頁直接連過去
+      byGrade: false,
+    },
   },
 
   /**

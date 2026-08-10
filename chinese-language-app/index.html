@@ -626,10 +626,10 @@
       <h1 class="home-title">📚 語文閣樓</h1>
       <p class="home-subtitle" id="homeSubtitle">國小四下 語文互動學習</p>
       <div class="mode-selector">
-        <button class="mode-btn card" onclick="startCardMode()">
+        <button class="mode-btn card" id="cardModeBtn">
           📖 卡牌模式<br><span style="font-size: 0.8em; opacity: 0.8;">逐課複習</span>
         </button>
-        <button class="mode-btn challenge" onclick="startChallengeMode()">
+        <button class="mode-btn challenge" id="challengeModeBtn">
           ⚡ 智慧闖關<br><span style="font-size: 0.8em; opacity: 0.8;">隨機混合</span>
         </button>
       </div>
@@ -639,7 +639,7 @@
   <!-- 課程選擇頁面 -->
   <div class="lessons-page" id="lessonsPage">
     <div class="container">
-      <button class="back-btn" onclick="goHome()">← 返回首頁</button>
+      <button class="back-btn action-back">← 返回首頁</button>
       <div class="page-header">
         <h2 class="page-title">📖 卡牌模式</h2>
         <p class="page-subtitle">選擇課程開始學習</p>
@@ -651,7 +651,7 @@
   <!-- 答題頁面 -->
   <div class="question-page" id="questionPage">
     <div class="container">
-      <button class="back-btn" onclick="goHome()">← 返回首頁</button>
+      <button class="back-btn action-back">← 返回首頁</button>
       <div class="question-container">
         <div class="progress-bar">
           <div class="progress-fill" id="progressFill"></div>
@@ -709,6 +709,8 @@
     };
 
     // ===== 初始化 =====
+    let resizeListener = null;
+
     async function init() {
       // 從 URL 參數讀取年級
       const params = new URLSearchParams(window.location.search);
@@ -723,8 +725,33 @@
       // 初始化星場背景
       drawStars();
 
+      // 移除舊的監聽器
+      if (resizeListener) {
+        window.removeEventListener('resize', resizeListener);
+      }
+
       // 監聽窗口大小變化
-      window.addEventListener('resize', drawStars);
+      resizeListener = drawStars;
+      window.addEventListener('resize', resizeListener);
+
+      // 設置事件監聽器
+      setupEventListeners();
+    }
+
+    function setupEventListeners() {
+      // 模式選擇按鈕
+      const cardModeBtn = document.getElementById('cardModeBtn');
+      const challengeModeBtn = document.getElementById('challengeModeBtn');
+
+      if (cardModeBtn) cardModeBtn.addEventListener('click', startCardMode);
+      if (challengeModeBtn) challengeModeBtn.addEventListener('click', startChallengeMode);
+
+      // 返回按鈕
+      const backBtns = document.querySelectorAll('.action-back');
+      backBtns.forEach(btn => {
+        btn.removeEventListener('click', goHome);
+        btn.addEventListener('click', goHome);
+      });
     }
 
     function updateHomeSubtitle() {
@@ -751,6 +778,11 @@
 
     // ===== 頁面導航 =====
     function showPage(pageName) {
+      if (!pageName) {
+        console.error('頁面名稱不能為空');
+        return;
+      }
+
       document.getElementById('homePage').classList.add('hidden');
       document.getElementById('lessonsPage').classList.add('hidden');
       document.getElementById('questionPage').classList.add('hidden');
@@ -774,6 +806,10 @@
           document.getElementById('resultsPage').classList.remove('hidden');
           state.currentPage = 'results';
           break;
+        default:
+          console.error(`未知的頁面名稱: ${pageName}`);
+          document.getElementById('homePage').classList.remove('hidden');
+          state.currentPage = 'home';
       }
     }
 
@@ -823,8 +859,11 @@
         });
       }
 
-      // 隨機排序
-      state.questions.sort(() => Math.random() - 0.5);
+      // 隨機排序 (Fisher-Yates 洗牌算法)
+      for (let i = state.questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [state.questions[i], state.questions[j]] = [state.questions[j], state.questions[i]];
+      }
       state.currentQuestionIndex = 0;
       state.startTime = Date.now();
       showPage('question');
@@ -832,7 +871,16 @@
     }
 
     function goHome() {
+      // 重置狀態
+      state.currentLesson = null;
+      state.currentQuestionIndex = 0;
+      state.questions = [];
+      state.correctAnswers = 0;
+      state.currentMode = 'card';
+      state.startTime = null;
+
       showPage('home');
+      window.scrollTo(0, 0);
     }
 
     // ===== 課程頁面 =====
@@ -948,9 +996,22 @@
     }
 
     function renderConfusingWord(question, header, content, buttons) {
-      header.innerHTML = `<div class="question-type-label">易混淆字詞</div>`;
+      if (!question?.question || !Array.isArray(question?.options)) {
+        header.innerHTML = '<div style="color: red;">題目數據不完整</div>';
+        return;
+      }
 
-      content.innerHTML = `<div class="question-text">${question.question}</div>`;
+      const typeLabel = document.createElement('div');
+      typeLabel.className = 'question-type-label';
+      typeLabel.textContent = '易混淆字詞';
+      header.innerHTML = '';
+      header.appendChild(typeLabel);
+
+      const questionDiv = document.createElement('div');
+      questionDiv.className = 'question-text';
+      questionDiv.textContent = question.question;
+      content.innerHTML = '';
+      content.appendChild(questionDiv);
 
       const optionsGrid = document.createElement('div');
       optionsGrid.className = 'options-grid';
@@ -965,11 +1026,13 @@
 
       content.appendChild(optionsGrid);
 
-      buttons.innerHTML = `
-        <button class="submit-btn" onclick="checkConfusingWord(this)" disabled>
-          提交答案
-        </button>
-      `;
+      buttons.innerHTML = '';
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'submit-btn';
+      submitBtn.textContent = '提交答案';
+      submitBtn.disabled = true;
+      submitBtn.onclick = () => checkConfusingWord(submitBtn);
+      buttons.appendChild(submitBtn);
     }
 
     function selectConfusingWordOption(btn, option, question) {
@@ -1033,39 +1096,76 @@
     }
 
     function renderIdiom(question, header, content, buttons) {
-      header.innerHTML = `<div class="question-type-label">成語理解</div>`;
+      if (!question?.idiom || !question?.explanation) {
+        header.innerHTML = '<div style="color: red;">題目數據不完整</div>';
+        return;
+      }
+
+      const typeLabel = document.createElement('div');
+      typeLabel.className = 'question-type-label';
+      typeLabel.textContent = '成語理解';
+      header.innerHTML = '';
+      header.appendChild(typeLabel);
 
       const idiomCard = document.createElement('div');
       idiomCard.className = 'idiom-card';
-      idiomCard.innerHTML = `
-        <div class="idiom-title">${question.idiom}</div>
-        <div class="idiom-meaning">${question.explanation}</div>
-      `;
+
+      const idiomTitle = document.createElement('div');
+      idiomTitle.className = 'idiom-title';
+      idiomTitle.textContent = question.idiom;
+      idiomCard.appendChild(idiomTitle);
+
+      const idiomMeaning = document.createElement('div');
+      idiomMeaning.className = 'idiom-meaning';
+      idiomMeaning.textContent = question.explanation;
+      idiomCard.appendChild(idiomMeaning);
+
+      content.innerHTML = '';
       content.appendChild(idiomCard);
 
       if (question.questionType === 'fill') {
         const exampleText = document.createElement('div');
         exampleText.style.marginBottom = '20px';
-        exampleText.innerHTML = `<strong>例句：</strong><br><span style="color: #b8c5d6;">${question.example}</span>`;
+
+        const exampleLabel = document.createElement('strong');
+        exampleLabel.textContent = '例句：';
+        exampleText.appendChild(exampleLabel);
+
+        const exampleBr = document.createElement('br');
+        exampleText.appendChild(exampleBr);
+
+        const exampleSpan = document.createElement('span');
+        exampleSpan.style.color = '#b8c5d6';
+        exampleSpan.textContent = question.example || '無例句';
+        exampleText.appendChild(exampleSpan);
+
         content.appendChild(exampleText);
 
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'fill-input';
         input.placeholder = '請輸入正確的成語';
+        input.dataset.correctAnswer = question.idiom;
         content.appendChild(input);
 
-        buttons.innerHTML = `
-          <button class="submit-btn" onclick="checkIdiom(this, '${question.idiom}')">
-            提交答案
-          </button>
-        `;
+        buttons.innerHTML = '';
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'submit-btn';
+        submitBtn.textContent = '提交答案';
+        submitBtn.onclick = () => checkIdiom(submitBtn);
+        buttons.appendChild(submitBtn);
       }
     }
 
-    function checkIdiom(btn, correctAnswer) {
+    function checkIdiom(btn) {
       const input = document.querySelector('.fill-input');
+      if (!input) return;
       const userAnswer = input.value.trim();
+      const correctAnswer = input.dataset.correctAnswer;
+      if (!correctAnswer) {
+        console.error('缺少正確答案數據');
+        return;
+      }
       const isCorrect = userAnswer === correctAnswer;
 
       if (isCorrect) {
@@ -1103,8 +1203,12 @@
       questionText.textContent = question.question;
       content.appendChild(questionText);
 
-      // 隨機排序顯示順序
-      const shuffledParts = [...question.parts].sort(() => Math.random() - 0.5);
+      // 隨機排序顯示順序 (Fisher-Yates 洗牌算法)
+      const shuffledParts = [...question.parts];
+      for (let i = shuffledParts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledParts[i], shuffledParts[j]] = [shuffledParts[j], shuffledParts[i]];
+      }
 
       const partsContainer = document.createElement('div');
       partsContainer.className = 'sentence-parts';
