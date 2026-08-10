@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>自然科綜合版 | 科學探險</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #0a0810;
+      --bg2:    #10121d;
+      --text:   #f0e8ff;
+      --dim:    #8a7a9a;
+    }
+    :root[data-chapter="1"] { --accent: #00d4ff; }
+    :root[data-chapter="2"] { --accent: #ff9900; }
+    :root[data-chapter="3"] { --accent: #00f5ff; }
+    :root[data-chapter="4"] { --accent: #00ff88; }
+    :root[data-chapter="5"] { --accent: #ffd700; }
+    :root[data-chapter="6"] { --accent: #ff3366; }
+    :root[data-chapter="home"] { --accent: #a78bfa; }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family:'Microsoft JhengHei','Segoe UI',sans-serif;
+      background: var(--bg); color: var(--text);
+      overflow: hidden; touch-action: manipulation;
+      -webkit-user-select: none; user-select: none;
+    }
+
+    .screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+      padding: 2rem;
+      z-index: 100;
+      box-sizing: border-box;
+    }
+    .screen.active { display: flex; }
+
+    .back-btn {
+      position: fixed; top: .9rem; left: .9rem; z-index: 50;
+      background: rgba(var(--accent-rgb),.1); border: 1px solid var(--accent);
+      color: var(--accent); border-radius: 8px; padding: .35rem .9rem;
+      font-size: .82rem; cursor: pointer; transition: background .2s; display: none;
+    }
+    .back-btn.show { display: block; }
+    .back-btn:hover { background: rgba(var(--accent-rgb),.25); }
+
+    /* ════ HOME ════ */
+    #screen-home { padding: 2rem 1.5rem 8rem; gap: 2rem; }
+    .home-header { text-align: center; padding-top: .5rem; }
+    .home-label { font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: var(--dim); margin-bottom: .5rem; }
+    .home-title {
+      font-size: clamp(2rem,6vw,3.5rem); font-weight: 900; line-height: 1.1;
+      background: linear-gradient(135deg,#00d4ff,#ff9900,#00ff88);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(0,212,255,.5));
+    }
+    .home-sub { color: var(--dim); font-size: .9rem; margin-top: .5rem; line-height: 1.55; }
+
+    .chapters-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 1.4rem; width: 100%; max-width: 1200px; }
+    .chapter-card {
+      background: var(--bg2); border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.07);
+      padding: 2rem 1.8rem; cursor: pointer;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    }
+    .chapter-card:hover { transform: translateY(-8px); }
+    .chapter-card[data-chapter="1"] { border-color: rgba(0,212,255,.3); }
+    .chapter-card[data-chapter="1"]:hover { box-shadow: 0 18px 50px rgba(0,212,255,.2); }
+    .chapter-card[data-chapter="2"] { border-color: rgba(255,153,0,.3); }
+    .chapter-card[data-chapter="2"]:hover { box-shadow: 0 18px 50px rgba(255,153,0,.2); }
+    .chapter-card[data-chapter="3"] { border-color: rgba(0,245,255,.3); }
+    .chapter-card[data-chapter="3"]:hover { box-shadow: 0 18px 50px rgba(0,245,255,.2); }
+    .chapter-card[data-chapter="4"] { border-color: rgba(0,255,136,.3); }
+    .chapter-card[data-chapter="4"]:hover { box-shadow: 0 18px 50px rgba(0,255,136,.2); }
+    .chapter-card[data-chapter="5"] { border-color: rgba(255,215,0,.3); }
+    .chapter-card[data-chapter="5"]:hover { box-shadow: 0 18px 50px rgba(255,215,0,.2); }
+    .chapter-card[data-chapter="6"] { border-color: rgba(255,51,102,.3); }
+    .chapter-card[data-chapter="6"]:hover { box-shadow: 0 18px 50px rgba(255,51,102,.2); }
+
+    .chapter-num { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; margin-bottom: .6rem; color: var(--dim); }
+    .chapter-icon { font-size: 2.8rem; margin-bottom: .7rem; display: block; }
+    .chapter-title { font-size: 1.35rem; font-weight: 800; color: #fff; margin-bottom: .4rem; }
+    .chapter-tasks { color: var(--dim); font-size: .82rem; margin-bottom: .8rem; }
+    .chapter-arrow { display: inline-flex; align-items: center; gap: .4rem; font-size: .83rem; font-weight: 700; color: var(--accent); }
+
+    /* ════ FOOTER ════ */
+    .home-footer {
+      margin-top: 3rem; padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,.1);
+      text-align: center; color: var(--dim); font-size: .8rem; line-height: 1.6;
+    }
+    .home-footer a { color: var(--accent); text-decoration: none; transition: color .2s; }
+    .home-footer a:hover { color: #fff; text-decoration: underline; }
+
+    /* ════ CHAPTER HOME ════ */
+    #screen-chapter1-home, #screen-chapter2-home, #screen-chapter3-home,
+    #screen-chapter4-home, #screen-chapter5-home, #screen-chapter6-home { padding: 3rem 1.5rem 3rem; gap: 2rem; }
+    .chapter-header { text-align: center; }
+    .chapter-label { font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: var(--dim); margin-bottom: .5rem; }
+    .chapter-title-large {
+      font-size: clamp(1.6rem,5vw,2.4rem); font-weight: 900; line-height: 1.1;
+      color: #fff;
+    }
+    .chapter-title-large .accent { color: var(--accent); }
+
+    .missions-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1.4rem; width: 100%; max-width: 900px; }
+    .mission-card {
+      background: var(--bg2); border-radius: 16px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      padding: 1.6rem 1.5rem; cursor: pointer;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    }
+    .mission-card:hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(var(--accent-rgb),.2); }
+    .mission-num { font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); margin-bottom: .5rem; }
+    .mission-icon { font-size: 2.4rem; margin-bottom: .6rem; display: block; }
+    .mission-title { font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: .3rem; }
+    .mission-desc { color: var(--dim); font-size: .82rem; line-height: 1.5; margin-bottom: .8rem; }
+    .mission-arrow { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 700; color: var(--accent); }
+
+    /* ════ GAME COMMON ════ */
+    .game-screen { padding: 3.5rem 1rem 2rem; gap: .8rem; min-height: 100%; }
+    .game-header { text-align: center; }
+    .game-label { font-size: .68rem; letter-spacing: .25em; text-transform: uppercase; color: var(--dim); margin-bottom: .25rem; }
+    .game-title { font-size: clamp(1.2rem,3.5vw,1.7rem); font-weight: 900; color: #fff; }
+    .game-title span { color: var(--accent); }
+
+    .prog-wrap { width: 100%; max-width: 580px; }
+    .prog-row { display: flex; justify-content: space-between; font-size: .75rem; color: var(--dim); margin-bottom: .3rem; }
+    .prog-row span { color: var(--accent); font-weight: 700; }
+    .prog-bg { height: 7px; background: rgba(255,255,255,.08); border-radius: 8px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg,var(--accent),rgba(var(--accent-rgb),.6)); transition: width .4s; box-shadow: 0 0 8px var(--accent); }
+
+    /* ════ QUIZ ════ */
+    .quiz-box {
+      width: 100%; max-width: 600px;
+      background: var(--bg2); border-radius: 16px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      padding: 1.8rem 1.8rem 1.5rem; text-align: center;
+    }
+    .quiz-icon { font-size: 3rem; margin-bottom: .8rem; display: block; }
+    .quiz-q { font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.6; margin-bottom: 1rem; }
+    .quiz-choices { display: flex; flex-direction: column; gap: .5rem; }
+    .quiz-choice {
+      padding: .8rem 1.2rem; border-radius: 11px;
+      border: 1.5px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      cursor: pointer; font-size: .9rem; font-weight: 600;
+      text-align: left; transition: all .18s; color: var(--text);
+    }
+    .quiz-choice:hover:not(:disabled) { border-color: rgba(var(--accent-rgb),.5); background: rgba(var(--accent-rgb),.08); }
+    .quiz-choice:disabled { cursor: default; }
+    .quiz-choice.correct { border-color: #00ff88; background: rgba(0,255,136,.1); color: #00ff88; }
+    .quiz-choice.wrong { border-color: #ff2244; background: rgba(255,34,68,.08); color: #ff2244; }
+    .quiz-explain {
+      margin-top: .8rem; padding: .75rem 1rem;
+      background: rgba(var(--accent-rgb),.08); border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      font-size: .85rem; line-height: 1.5; color: var(--text); text-align: left;
+    }
+
+    /* ════ CELEBRATION ════ */
+    .celebration-box {
+      text-align: center; padding: 2rem 1.5rem;
+      animation: celebrate-in .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes celebrate-in {
+      0% { opacity: 0; transform: scale(.8) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .celebration-emoji { font-size: 4rem; margin-bottom: 1rem; display: block; animation: float 2s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .celebration-text { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: .5rem; }
+    .celebration-sub { font-size: .9rem; color: var(--dim); margin-bottom: 1.5rem; }
+    .celebration-btn {
+      background: linear-gradient(135deg,rgba(var(--accent-rgb),.8),rgba(var(--accent-rgb),.5));
+      border: 1px solid var(--accent); color: #fff; padding: .8rem 2rem;
+      border-radius: 10px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; transition: all .3s;
+    }
+    .celebration-btn:hover { background: linear-gradient(135deg,rgba(var(--accent-rgb),1),rgba(var(--accent-rgb),.7)); transform: translateY(-2px); }
+
+    /* Canvas sizing fix */
+    canvas {
+      max-width: 95%;
+      height: auto;
+      display: block;
+      margin: 1rem auto;
+    }
+
+    @media (max-width:640px) {
+      .chapters-grid, .missions-grid { grid-template-columns: 1fr; }
+      .home-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ HOME ════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div class="home-label">自然科綜合版</div>
+    <h1 class="home-title">科學探險</h1>
+    <p class="home-sub">探索物理、地球與能源<br>6 個篇章，18 個任務，無限發現</p>
+  </div>
+  <div class="chapters-grid">
+    <div class="chapter-card" data-chapter="1" onclick="gotoChapter(1)">
+      <div class="chapter-num">篇章 一</div>
+      <div class="chapter-icon">⚡</div>
+      <div class="chapter-title">力與運動</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+    <div class="chapter-card" data-chapter="2" onclick="gotoChapter(2)">
+      <div class="chapter-num">篇章 二</div>
+      <div class="chapter-icon">💪</div>
+      <div class="chapter-title">動力傳送</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+    <div class="chapter-card" data-chapter="3" onclick="gotoChapter(3)">
+      <div class="chapter-num">篇章 三</div>
+      <div class="chapter-icon">💧</div>
+      <div class="chapter-title">液體與壓力</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+    <div class="chapter-card" data-chapter="4" onclick="gotoChapter(4)">
+      <div class="chapter-num">篇章 四</div>
+      <div class="chapter-icon">🌍</div>
+      <div class="chapter-title">大地科學</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+    <div class="chapter-card" data-chapter="5" onclick="gotoChapter(5)">
+      <div class="chapter-num">篇章 五</div>
+      <div class="chapter-icon">☀️</div>
+      <div class="chapter-title">能源基礎</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+    <div class="chapter-card" data-chapter="6" onclick="gotoChapter(6)">
+      <div class="chapter-num">篇章 六</div>
+      <div class="chapter-icon">⚙️</div>
+      <div class="chapter-title">電與節能</div>
+      <div class="chapter-tasks">3 個任務</div>
+      <div class="chapter-arrow">開始探險 →</div>
+    </div>
+  </div>
+  <div class="home-footer">
+    <div>© 2026 BERK STUDIO 超能學習</div>
+    <div><a href="mailto:glitch.remover_1i@icloud.com">聯繫我們</a></div>
+    <div style="font-size: .75rem; margin-top: .5rem; color: rgba(255,255,255,.4);">v1.0.0</div>
+  </div>
+</div>
+
+<!-- ════ CHAPTER HOME (6 個) ════ -->
+<div id="screen-chapter1-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 一</div>
+    <h1 class="chapter-title-large">力與<span class="accent">運動</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(1,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">⚡</div>
+      <div class="mission-title">力的特性</div>
+      <div class="mission-desc">認識推力、拉力、摩擦力</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(1,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">📏</div>
+      <div class="mission-title">力的測量</div>
+      <div class="mission-desc">力的單位與比較</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(1,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">🚀</div>
+      <div class="mission-title">生活中的力</div>
+      <div class="mission-desc">日常運動與應用</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-chapter2-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 二</div>
+    <h1 class="chapter-title-large">動力<span class="accent">傳送</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(2,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">💪</div>
+      <div class="mission-title">動力傳送基礎</div>
+      <div class="mission-desc">液體傳力的原理</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(2,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">🔬</div>
+      <div class="mission-title">液體傳力科學</div>
+      <div class="mission-desc">帕斯卡定律與應用</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(2,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">🏗️</div>
+      <div class="mission-title">生活應用設計</div>
+      <div class="mission-desc">液壓系統的發現</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-chapter3-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 三</div>
+    <h1 class="chapter-title-large">液體與<span class="accent">壓力</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(3,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">💧</div>
+      <div class="mission-title">連通管現象</div>
+      <div class="mission-desc">水位平衡的奧秘</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(3,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">🌊</div>
+      <div class="mission-title">虹吸現象</div>
+      <div class="mission-desc">水流的神奇轉移</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(3,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">💦</div>
+      <div class="mission-title">引水裝置</div>
+      <div class="mission-desc">生活中的取水方案</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-chapter4-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 四</div>
+    <h1 class="chapter-title-large">大地<span class="accent">科學</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(4,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">🪨</div>
+      <div class="mission-title">認識大地</div>
+      <div class="mission-desc">岩石、砂、土壤</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(4,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">⛏️</div>
+      <div class="mission-title">地殼的變化</div>
+      <div class="mission-desc">風化與侵蝕作用</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(4,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">🌍</div>
+      <div class="mission-title">地震與保護</div>
+      <div class="mission-desc">自然災害防治</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-chapter5-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 五</div>
+    <h1 class="chapter-title-large">能源<span class="accent">基礎</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(5,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">☀️</div>
+      <div class="mission-title">認識能源</div>
+      <div class="mission-desc">各種能源的來源</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(5,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">⚙️</div>
+      <div class="mission-title">能源轉換</div>
+      <div class="mission-desc">光、熱、電的變化</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(5,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">💡</div>
+      <div class="mission-title">電與電路</div>
+      <div class="mission-desc">電的基礎知識</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-chapter6-home" class="screen">
+  <button class="back-btn show" onclick="goHome()">← 返回</button>
+  <div class="chapter-header">
+    <div class="chapter-label">篇章 六</div>
+    <h1 class="chapter-title-large">電與<span class="accent">節能</span></h1>
+  </div>
+  <div class="missions-grid">
+    <div class="mission-card" onclick="startGame(6,1)">
+      <div class="mission-num">任務 一</div>
+      <div class="mission-icon">⚡</div>
+      <div class="mission-title">串聯與並聯</div>
+      <div class="mission-desc">電路的兩種連接</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(6,2)">
+      <div class="mission-num">任務 二</div>
+      <div class="mission-icon">🏠</div>
+      <div class="mission-title">家庭電路</div>
+      <div class="mission-desc">居家用電的安全</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+    <div class="mission-card" onclick="startGame(6,3)">
+      <div class="mission-num">任務 三</div>
+      <div class="mission-icon">♻️</div>
+      <div class="mission-title">節約能源</div>
+      <div class="mission-desc">綠色生活的選擇</div>
+      <div class="mission-arrow">開始 →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 3 FLUID GAME ════ -->
+<div id="screen-game-fluid" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 三 | 液體與壓力</div>
+    <h1 class="game-title"><span id="fluid-title">連通管原理</span></h1>
+  </div>
+  <div style="display:flex; gap:.6rem; justify-content:center; margin:1rem 0; flex-wrap:wrap;">
+    <button class="lvl-btn active" onclick="loadFluidLevel(0,this)" style="background:rgba(0,245,255,.15); border-color:rgba(0,245,255,.5);">Lv.1 連通管</button>
+    <button class="lvl-btn" onclick="loadFluidLevel(1,this)" style="background:rgba(0,245,255,.08); border-color:rgba(0,245,255,.3);">Lv.2 虹吸現象</button>
+    <button class="lvl-btn" onclick="loadFluidLevel(2,this)" style="background:rgba(0,245,255,.08); border-color:rgba(0,245,255,.3);">Lv.3 引水裝置</button>
+  </div>
+  <canvas id="canvas-fluid" width="600" height="350" style="border:1px solid rgba(0,245,255,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="fluid-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 拖拽倒水以開始</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextFluidTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 4 EARTH GAME ════ -->
+<div id="screen-game-earth" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 四 | 大地科學</div>
+    <h1 class="game-title"><span id="earth-title">地球結構</span></h1>
+  </div>
+  <div style="display:flex; gap:.6rem; justify-content:center; margin:1rem 0; flex-wrap:wrap;">
+    <button class="lvl-btn active" onclick="loadEarthLevel(0,this)" style="background:rgba(0,255,136,.15); border-color:rgba(0,255,136,.5);">Lv.1 地球結構</button>
+    <button class="lvl-btn" onclick="loadEarthLevel(1,this)" style="background:rgba(0,255,136,.08); border-color:rgba(0,255,136,.3);">Lv.2 岩石分類</button>
+    <button class="lvl-btn" onclick="loadEarthLevel(2,this)" style="background:rgba(0,255,136,.08); border-color:rgba(0,255,136,.3);">Lv.3 地震防護</button>
+  </div>
+  <canvas id="canvas-earth" width="600" height="350" style="border:1px solid rgba(0,255,136,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="earth-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 點擊探索</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextEarthTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 5 ENERGY GAME ════ -->
+<div id="screen-game-energy-conv" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 五 | 能源基礎</div>
+    <h1 class="game-title"><span id="energy-conv-title">能源轉換</span></h1>
+  </div>
+  <div style="display:flex; gap:.6rem; justify-content:center; margin:1rem 0; flex-wrap:wrap;">
+    <button class="lvl-btn active" onclick="loadEnergyConvLevel(0,this)" style="background:rgba(255,215,0,.15); border-color:rgba(255,215,0,.5);">Lv.1 太陽能</button>
+    <button class="lvl-btn" onclick="loadEnergyConvLevel(1,this)" style="background:rgba(255,215,0,.08); border-color:rgba(255,215,0,.3);">Lv.2 風能</button>
+    <button class="lvl-btn" onclick="loadEnergyConvLevel(2,this)" style="background:rgba(255,215,0,.08); border-color:rgba(255,215,0,.3);">Lv.3 多能混合</button>
+  </div>
+  <canvas id="canvas-energy-conv" width="600" height="350" style="border:1px solid rgba(255,215,0,.2); border-radius:12px; background:#000814; max-width:95%; display:block; margin:1rem auto;"></canvas>
+  <div id="energy-conv-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 點擊虛線連接能源轉換</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextEnergyConvTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 2 HYDRAULIC GAME ════ -->
+<div id="screen-game-hydraulic" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 二 | 動力傳送</div>
+    <h1 class="game-title"><span id="hydraulic-title">液壓系統</span></h1>
+  </div>
+  <div style="display:flex; gap:.6rem; justify-content:center; margin:1rem 0; flex-wrap:wrap;">
+    <button class="lvl-btn active" onclick="loadHydraulicLevel(0,this)" style="background:rgba(255,153,0,.15); border-color:rgba(255,153,0,.5);">Lv.1 簡單液壓</button>
+    <button class="lvl-btn" onclick="loadHydraulicLevel(1,this)" style="background:rgba(255,153,0,.08); border-color:rgba(255,153,0,.3);">Lv.2 帕斯卡定律</button>
+    <button class="lvl-btn" onclick="loadHydraulicLevel(2,this)" style="background:rgba(255,153,0,.08); border-color:rgba(255,153,0,.3);">Lv.3 多級液壓</button>
+  </div>
+  <canvas id="canvas-hydraulic" width="600" height="350" style="border:1px solid rgba(255,153,0,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="hydraulic-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 點擊活塞以啟動液壓系統</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextHydraulicTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 6 CIRCUIT GAME ════ -->
+<div id="screen-game-circuit" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 六 | 電路與節能</div>
+    <h1 class="game-title"><span id="circuit-title">黑暗村莊電路解謎</span></h1>
+  </div>
+  <div style="display:flex; gap:.6rem; justify-content:center; margin:1rem 0; flex-wrap:wrap;">
+    <button class="lvl-btn active" onclick="loadCircuitLevel(0,this)" style="background:rgba(255,51,102,.15); border-color:rgba(255,51,102,.5);">Lv.1 基本通路</button>
+    <button class="lvl-btn" onclick="loadCircuitLevel(1,this)" style="background:rgba(255,51,102,.08); border-color:rgba(255,51,102,.3);">Lv.2 短路危機</button>
+    <button class="lvl-btn" onclick="loadCircuitLevel(2,this)" style="background:rgba(255,51,102,.08); border-color:rgba(255,51,102,.3);">Lv.3 並聯燈泡</button>
+  </div>
+  <canvas id="canvas-circuit" width="600" height="350" style="border:1px solid rgba(255,51,102,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="circuit-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 點擊虛線連接電線！</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextCircuitTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 6 CONDUCTOR GAME ════ -->
+<div id="screen-game-conductor" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 六 | 電路與節能</div>
+    <h1 class="game-title"><span>抓出<span style="color:var(--accent);">絕緣體</span></span></h1>
+  </div>
+  <p style="text-align:center; color:var(--dim); font-size:.9rem; max-width:500px; margin-bottom:1rem;">把物品放入電路缺口，測試是否為良導體！</p>
+  <canvas id="canvas-conductor" width="600" height="300" style="border:1px solid rgba(255,51,102,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="conductor-items" style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin:1rem 0;"></div>
+  <div id="conductor-status" style="text-align:center; color:var(--dim); font-size:.9rem; height:2.6rem; display:flex; align-items:center; justify-content:center;">👆 選擇物品進行測試</div>
+  <div id="conductor-collection" style="display:flex; gap:.4rem; justify-content:center; flex-wrap:wrap; margin:1rem 0;"></div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextConductorTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 6 ENERGY HUNT GAME ════ -->
+<div id="screen-game-energy" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 六 | 電路與節能</div>
+    <h1 class="game-title"><span>節能<span style="color:var(--accent);">小尖兵</span></span></h1>
+  </div>
+  <div id="energy-score" style="text-align:center; font-size:2rem; font-weight:900; color:var(--accent); margin:1rem 0;">0<span style="font-size:1rem; color:var(--dim); font-weight:400; margin-left:.3rem;">/ 4 個問題修正</span></div>
+  <canvas id="canvas-energy" width="600" height="380" style="border:1px solid rgba(255,51,102,.2); border-radius:12px; background:#000814; max-width:95%; margin:1rem 0;"></canvas>
+  <div id="energy-badges" style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin:1rem 0;"></div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextEnergyTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ CHAPTER 1 FORCE GAME ════ -->
+<div id="screen-game-force" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label">篇章 一 | 力的互動演示</div>
+    <h1 class="game-title"><span id="force-title">推力演示</span></h1>
+  </div>
+  <p style="text-align:center; color:var(--dim); font-size:.9rem; max-width:500px;">拖拽木箱體驗力的作用。根據拖拽的距離和方向，木箱會如何運動呢？</p>
+  <canvas id="canvas-force" width="600" height="400" style="border:1px solid rgba(255,255,255,.1); border-radius:12px; background:#000814; max-width:95%; margin:1.5rem 0;"></canvas>
+  <div id="force-status" style="text-align:center; color:var(--dim); font-size:.9rem; margin:1rem 0;">👆 拖拽木箱開始</div>
+  <div style="display:flex; gap:.6rem; margin-top:1.5rem;">
+    <button class="celebration-btn" onclick="nextForceTask()" style="flex:1;">下一任務</button>
+  </div>
+</div>
+
+<!-- ════ GAME SCREEN (Template) ════ -->
+<div id="screen-game" class="screen game-screen">
+  <button class="back-btn show" onclick="gotoChapter(currentChapter)">← 返回</button>
+  <div class="game-header">
+    <div class="game-label" id="game-label"></div>
+    <h1 class="game-title"><span id="game-title"></span></h1>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-row"><span id="progress">1</span> / <span id="total">8</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+  <div class="quiz-box" id="quiz-box"></div>
+</div>
+
+<!-- ════ COMPLETION ════ -->
+<div id="screen-complete" class="screen game-screen">
+  <div class="celebration-box">
+    <span class="celebration-emoji">🎉</span>
+    <div class="celebration-text">太棒了！</div>
+    <div class="celebration-sub" id="completion-message"></div>
+    <button class="celebration-btn" id="btn-next" onclick="nextTask()">下一任務</button>
+    <button class="celebration-btn" onclick="goHome()">返回首頁</button>
+  </div>
+</div>
+
+<script>
+// ════ URL 參數讀取 & 頁面標題動態更新 ════
+function getGradeParameter() {
+  const params = new URLSearchParams(window.location.search);
+  const grade = params.get('grade'); // 會得到 '4-2', '5-1' 等
+  return grade || '4-2'; // 默認 4-2
+}
+
+const gradeLabels = {
+  '4-2': '四年級下學期',
+  '5-1': '五年級上學期',
+  '5-2': '五年級下學期',
+  '6-1': '六年級上學期',
+  '6-2': '六年級下學期'
+};
+
+const currentGrade = getGradeParameter();
+const gradeLabel = gradeLabels[currentGrade] || gradeLabels['4-2'];
+
+// 更新頁面標題
+document.title = `🔬 自然科綜合版 - ${gradeLabel}科學探險`;
+
+// 更新首頁標題（在頁面加載後）
+document.addEventListener('DOMContentLoaded', () => {
+  const homeTitle = document.querySelector('.home-title');
+  if (homeTitle) {
+    homeTitle.textContent = `🔬 ${gradeLabel}自然科學`;
+  }
+});
+
+// ════ QUIZ DATA (18 tasks, 8-10 questions each) ════
+const quizData = {
+  // ═══ CHAPTER 1: 力與運動 ═══
+  '1-1': [
+    { q: '力是什麼？', choices: ['物體的動作', '推或拉的作用', '速度的變化'], correct: 1, explain: '力是一個物體對另一個物體的推或拉作用。' },
+    { q: '下列哪個是推力的例子？', choices: ['用繩子拉物體', '推開門', '掛在樹上'], correct: 1, explain: '推力就是往前推，例如推門。' },
+    { q: '摩擦力的作用是什麼？', choices: ['增加物體速度', '減少物體運動', '改變方向'], correct: 1, explain: '摩擦力會阻礙物體運動。' },
+    { q: '下列哪個不是力的例子？', choices: ['風吹樹葉', '磁鐵吸鐵釘', '顏色'], correct: 2, explain: '顏色是物質的性質，不是力。' },
+    { q: '拉力最常見於什麼地方？', choices: ['推車', '拉車', '踢球'], correct: 1, explain: '拉力就是往後拉，例如拉車。' },
+    { q: '力可以改變物體的什麼？', choices: ['形狀', '運動', '以上都是'], correct: 2, explain: '力既可以改變形狀，也可以改變運動。' },
+    { q: '重力是什麼方向的力？', choices: ['向上', '向下', '向前'], correct: 1, explain: '重力總是向下的，指向地心。' },
+    { q: '彈簧受力會發生什麼變化？', choices: ['鬆弛', '拉長或壓縮', '消失'], correct: 1, explain: '彈簧被力改變形狀，鬆開後恢復原狀。' }
+  ],
+  '1-2': [
+    { q: '力的大小用什麼單位測量？', choices: ['公尺', '牛頓', '秒'], correct: 1, explain: '力的單位是牛頓（N）。' },
+    { q: '測量力的工具叫什麼？', choices: ['刻度尺', '天平', '測力計'], correct: 2, explain: '測力計可以測量力的大小。' },
+    { q: '力的三個要素是什麼？', choices: ['大小、方向、作用點', '重量、速度、時間', '顏色、形狀、硬度'], correct: 0, explain: '力有大小、方向和作用點三個要素。' },
+    { q: '如果兩個人拉同一根繩子會怎樣？', choices: ['力會相加', '力會相消', '力不變'], correct: 0, explain: '同向的力會相加，產生更大的力。' },
+    { q: '相反方向的力會發生什麼？', choices: ['互相抵消', '相加', '停止'], correct: 0, explain: '相反方向的力會互相抵消或減弱。' },
+    { q: '怎樣判斷力的方向？', choices: ['看物體顏色', '看物體移動或變形的方向', '看物體大小'], correct: 1, explain: '力的方向就是物體移動或變形的方向。' },
+    { q: '1牛頓大約相當於什麼的重量？', choices: ['1克', '100克', '1公斤'], correct: 1, explain: '1牛頓大約是100克物體的重量。' },
+    { q: '同時施加多個力叫什麼？', choices: ['合力', '反力', '彈力'], correct: 0, explain: '多個力合在一起稱為合力。' }
+  ],
+  '1-3': [
+    { q: '踢足球時用的是什麼力？', choices: ['拉力', '推力', '摩擦力'], correct: 1, explain: '踢球就是用推力將球踢出去。' },
+    { q: '騎自行車時，什麼力幫助我們前進？', choices: ['重力', '空氣阻力', '人腿的推力'], correct: 2, explain: '腳踏踏板產生的推力使自行車前進。' },
+    { q: '跳躍時什麼力讓我們向上？', choices: ['重力', '地面的推力', '空氣'], correct: 1, explain: '地面推我們向上，我們才能跳起。' },
+    { q: '什麼力讓我們在跑步時不會滑倒？', choices: ['摩擦力', '浮力', '彈力'], correct: 0, explain: '摩擦力讓腳與地面有握力。' },
+    { q: '投擲物體時，物體會怎樣運動？', choices: ['一直向前', '向下掉落', '先向前再向下'], correct: 2, explain: '重力和初始推力合作，物體做拋物線運動。' },
+    { q: '物體在斜坡上會怎樣？', choices: ['靜止不動', '滑下去', '浮起來'], correct: 1, explain: '重力的一部分使物體沿斜坡滑下。' },
+    { q: '握著球不放，什麼力在起作用？', choices: ['摩擦力', '推力', '彈力'], correct: 0, explain: '手與球之間的摩擦力使球不掉落。' },
+    { q: '汽車加速時乘客會往後傾，這是什麼現象？', choices: ['力的作用', '慣性', '重力'], correct: 1, explain: '身體習慣保持原來的運動狀態，這是慣性。' }
+  ],
+
+  // ═══ CHAPTER 2: 動力傳送 ═══
+  '2-1': [
+    { q: '什麼是動力傳送？', choices: ['物體移動', '力通過液體傳遞', '電的傳輸'], correct: 1, explain: '動力傳送是指力通過液體從一個地方傳到另一個地方。' },
+    { q: '液體傳力的原理叫什麼？', choices: ['牛頓定律', '帕斯卡定律', '浮力定律'], correct: 1, explain: '帕斯卡定律說明液體可以均勻傳遞力。' },
+    { q: '液體傳力有什麼特點？', choices: ['只向一個方向', '向各個方向均勻傳遞', '不能傳遞'], correct: 1, explain: '液體受力會向所有方向傳遞壓力。' },
+    { q: '下列哪個是液體傳力的應用？', choices: ['自行車輪胎', '液壓機', '電燈開關'], correct: 1, explain: '液壓機用油液傳送力進行工作。' },
+    { q: '液體為什麼能傳送力？', choices: ['液體流動', '液體是流體，受力可均勻分散', '液體有重量'], correct: 1, explain: '液體分子可以自由移動，均勻傳遞壓力。' },
+    { q: '液壓系統的優點是什麼？', choices: ['便宜', '可以產生很大的力', '不需要能量'], correct: 1, explain: '液壓系統可以用小力通過液體傳送大力。' },
+    { q: '什麼是密閉容器中的液體特性？', choices: ['會蒸發', '受力時各部分壓力相等', '會凍結'], correct: 1, explain: '帕斯卡定律正是描述這個性質。' },
+    { q: '日常生活中的液壓應用有哪些？', choices: ['汽車煞車', '牙醫鑽牙', '以上都是'], correct: 2, explain: '液壓在許多機械中被應用。' }
+  ],
+  '2-2': [
+    { q: '帕斯卡定律的內容是什麼？', choices: ['力等於質量乘加速度', '密閉液體受力均勻傳遞', '液體只能向上傳力'], correct: 1, explain: '帕斯卡定律是液體傳力的基本原理。' },
+    { q: '一個密閉的充滿油的方形容器，在頂部施加10N的力，底部會受到多少壓力？', choices: ['10N', '5N', '小於10N'], correct: 0, explain: '液體均勻傳遞壓力，各處壓力相等。' },
+    { q: '液壓機有什麼機械優勢？', choices: ['減少力的損失', '將小力變成大力', '增加速度'], correct: 1, explain: '液壓機利用面積比改變力的大小。' },
+    { q: '如果液壓機小活塞面積是1平方公分，大活塞是100平方公分，施加10N力會產生多大的力？', choices: ['10N', '100N', '1000N'], correct: 2, explain: '力的比等於面積比：10N × (100/1) = 1000N。' },
+    { q: '液體受力會產生什麼結果？', choices: ['溫度升高', '壓力傳遞到各個方向', '體積增大'], correct: 1, explain: '液體受到的力會向各方向傳遞相同的壓力。' },
+    { q: '什麼是液壓的缺點？', choices: ['太強力', '傳輸速度慢', '不能產生大力'], correct: 1, explain: '液壓傳輸相對較慢，但力量很大。' },
+    { q: '為什麼液壓系統需要密閉？', choices: ['防止液體洩漏', '保證力的均勻傳遞', '以上都是'], correct: 2, explain: '密閉保證了帕斯卡定律的應用。' },
+    { q: '液壓與氣壓的主要區別是什麼？', choices: ['液壓更強', '液體不可壓縮，氣體可壓縮', '氣壓更精確'], correct: 1, explain: '液體基本不可壓縮，氣體可以壓縮。' }
+  ],
+  '2-3': [
+    { q: '日常生活中最常見的液壓應用是什麼？', choices: ['電梯', '汽車煞車系統', '電視遙控'], correct: 1, explain: '汽車煞車用液壓傳遞制動力。' },
+    { q: '牙鑽為什麼能產生很大的力？', choices: ['馬達很強', '使用液壓原理', '特殊設計'], correct: 1, explain: '牙鑽使用液壓或氣壓產生工作力。' },
+    { q: '什麼是液壓挖掘機工作的原理？', choices: ['電動馬達', '液壓系統傳送力', '人工操作'], correct: 1, explain: '液壓系統驅動挖掘機的各個臂。' },
+    { q: '液壓梯形車的升降原理是什麼？', choices: ['齒輪驅動', '液壓缸推動', '繩索牽引'], correct: 1, explain: '液壓缸產生力使車斗升降。' },
+    { q: '醫療設備中的液壓應用有哪些？', choices: ['手術床升降', '牙鑽', '以上都是'], correct: 2, explain: '液壓在醫療中被廣泛應用。' },
+    { q: '如何設計一個液壓系統？', choices: ['隨意放置', '計算力和面積的比例', '不需要計算'], correct: 1, explain: '液壓系統設計需要考慮力的傳遞比。' },
+    { q: '液壓系統有什麼安全考慮？', choices: ['無需考慮', '防止洩漏，防止過壓', '定期檢查'], correct: 1, explain: '液壓系統需要定期維護和檢查。' },
+    { q: '未來液壓技術會如何發展？', choices: ['逐漸淘汰', '更加智能化和高效', '保持不變'], correct: 1, explain: '液壓技術仍在不斷改進和應用。' }
+  ],
+
+  // ═══ CHAPTER 3: 液體與壓力 ═══
+  '3-1': [
+    { q: '什麼是連通管？', choices: ['兩個管子連在一起', '液體可以流通的連接容器', '彎曲的管子'], correct: 1, explain: '連通管是指底部相通、液體可以互通的容器。' },
+    { q: '連通管中的液體有什麼特徵？', choices: ['液面不同高', '液面相同高度', '液面隨意'], correct: 1, explain: '連通管中各管液面高度必定相等。' },
+    { q: '這個原理叫什麼？', choices: ['浮力原理', '水位一致原理', '壓力原理'], correct: 1, explain: '這就是著名的連通管原理。' },
+    { q: '生活中的連通管應用有哪些？', choices: ['茶壺', '水管系統', '以上都是'], correct: 2, explain: '連通管原理廣泛應用於日常生活。' },
+    { q: '為什麼連通管中液面會保持一致？', choices: ['重力', '液體的流動性和壓力平衡', '管子設計'], correct: 1, explain: '底部的壓力相等導致液面高度相同。' },
+    { q: '如果連通管的一邊比另一邊細，液面會怎樣？', choices: ['細的一邊更高', '仍然相等', '無法判斷'], correct: 1, explain: '液面高度與管子寬度無關，只與液體流通有關。' },
+    { q: '連通管原理用什麼方式解釋？', choices: ['光學原理', '液體的壓力平衡原理', '重量'], correct: 1, explain: '液體的重量導致底部壓力相等。' },
+    { q: '浴缸放水的管道用什麼原理設計？', choices: ['連通管', '虹吸管', '過濾'], correct: 0, explain: '浴缸系統使用連通管原理。' }
+  ],
+  '3-2': [
+    { q: '什麼是虹吸現象？', choices: ['彩虹', '液體通過彎曲管道自動流出', '水的蒸發'], correct: 1, explain: '虹吸是指液體在管道內流動後，即使管口低於液面也會繼續流出。' },
+    { q: '虹吸發生需要什麼條件？', choices: ['管子必須彎曲', '充滿液體，出口低於液面', '管子垂直'], correct: 1, explain: '虹吸需要管子內先充滿液體，出口低於液面。' },
+    { q: '虹吸為什麼會發生？', choices: ['液體有生命', '液體的重量和壓力差', '魔法'], correct: 1, explain: '液體的重量和大氣壓力共同作用。' },
+    { q: '什麼是虹吸的危險性？', choices: ['很安全', '液體可能吸入口腔', '無危害'], correct: 1, explain: '直接用嘴吸虹吸是危險的，要用專業方法。' },
+    { q: '水族箱換水常用什麼方法？', choices: ['手動舀水', '虹吸法', '倒掉所有水'], correct: 1, explain: '虹吸法可以安全地換水族箱的水。' },
+    { q: '虹吸何時會停止？', choices: ['永不停止', '液面低於進液口', '管子變短'], correct: 1, explain: '當液面低於進液口時虹吸停止。' },
+    { q: '如何啟動虹吸？', choices: ['等待', '充滿管子、降低出口', '敲打管子'], correct: 1, explain: '需要管子內充滿液體，出口在液面下。' },
+    { q: '虹吸和連通管的區別是什麼？', choices: ['沒有區別', '虹吸需要液體持續流動', '連通管有彎曲'], correct: 1, explain: '虹吸涉及液體動流，連通管是靜態平衡。' }
+  ],
+  '3-3': [
+    { q: '什麼是引水裝置？', choices: ['裝飾品', '從水源引水到使用地點的系統', '過濾器'], correct: 1, explain: '引水裝置是引導水流的系統。' },
+    { q: '水塔的作用是什麼？', choices: ['裝飾', '儲存和供應水，利用高度提供壓力', '冷卻'], correct: 1, explain: '水塔高度產生的壓力驅動水流。' },
+    { q: '高度與水壓的關係是什麼？', choices: ['無關', '高度越高，底部壓力越大', '相反'], correct: 1, explain: '水的重量導致底部壓力隨高度增加。' },
+    { q: '為什麼高樓需要水塔或加壓系統？', choices: ['美觀', '自然高度不足，需要額外壓力供應頂樓', '傳統習慣'], correct: 1, explain: '重力不足以推水到高樓，需要額外裝置。' },
+    { q: '什麼是虹吸取水？', choices: ['用嘴吸', '用虹吸管原理自動取水', '手動打水'], correct: 1, explain: '虹吸可以用來自動引水。' },
+    { q: '井水如何提上來？', choices: ['自動上升', '用打水筒或電泵', '等待'], correct: 1, explain: '需要機械力將井水提起。' },
+    { q: '灌溉系統如何工作？', choices: ['人工澆水', '利用高度差或泵驅動水流到田地', '雨水'], correct: 1, explain: '灌溉使用連通管、虹吸或電泵原理。' },
+    { q: '現代城市的供水系統用什麼原理？', choices: ['全靠水塔', '水塔加電泵加管網', '井水'], correct: 1, explain: '現代供水結合多種方法確保穩定供應。' }
+  ],
+
+  // ═══ CHAPTER 4: 大地科學 ═══
+  '4-1': [
+    { q: '地球由什麼組成？', choices: ['只有岩石', '岩石、砂、土壤', '金屬'], correct: 1, explain: '地球表面主要是岩石、砂和土壤的組合。' },
+    { q: '岩石是什麼？', choices: ['裝飾品', '礦物的集合體', '死物'], correct: 1, explain: '岩石由一種或多種礦物組成。' },
+    { q: '砂是如何形成的？', choices: ['人工製造', '岩石風化破碎而成', '海洋沉積'], correct: 1, explain: '砂來自岩石的破碎和風化。' },
+    { q: '土壤有什麼特點？', choices: ['沒有生命', '含有礦物、有機質和水分', '只是砂'], correct: 1, explain: '土壤是適合植物生長的物質。' },
+    { q: '土壤中的有機質來自哪裡？', choices: ['天空', '動植物遺骸的分解', '地下'], correct: 1, explain: '死亡的生物分解成有機質富集土壤。' },
+    { q: '什麼是礦物？', choices: ['寶石', '天然的固體晶體物質，有特定化學成分和結構', '金屬'], correct: 1, explain: '礦物有規則的晶體結構。' },
+    { q: '地球的內部結構是什麼？', choices: ['全是岩石', '地殼、地幔、地核', '空心的'], correct: 1, explain: '地球分為三個主要層次。' },
+    { q: '花崗岩含有什麼礦物？', choices: ['只有石英', '石英、長石、雲母', '鑽石'], correct: 1, explain: '花崗岩是常見的混合岩石。' }
+  ],
+  '4-2': [
+    { q: '什麼是風化作用？', choices: ['風吹樹葉', '岩石被風、水、溫度等自然力破碎', '人工破壞'], correct: 1, explain: '風化是自然過程，改變岩石的物理或化學性質。' },
+    { q: '物理風化的例子有什麼？', choices: ['生鏽', '溫度變化導致岩石裂開', '溶解'], correct: 1, explain: '溫度變化使岩石膨脹收縮導致破裂。' },
+    { q: '化學風化是什麼？', choices: ['氣味改變', '岩石與空氣或水發生化學反應', '顏色改變'], correct: 1, explain: '水和空氣中的物質與岩石反應。' },
+    { q: '侵蝕作用與風化的區別？', choices: ['沒有區別', '風化是破碎，侵蝕是移動', '相反意思'], correct: 1, explain: '風化原地破壞，侵蝕帶走物質。' },
+    { q: '流水侵蝕產生什麼地形？', choices: ['山峰', '山谷和峽谷', '平原'], correct: 1, explain: '流水沖刻形成山谷和峽谷。' },
+    { q: '海浪侵蝕造成什麼？', choices: ['平坦海灘', '海蝕崖和海蝕洞', '山脈'], correct: 1, explain: '海浪侵蝕海邊形成崖壁和洞穴。' },
+    { q: '沉積作用是什麼？', choices: ['風吹', '水或風運來的物質在低窪處堆積', '下雨'], correct: 1, explain: '沉積形成平原、沙洲等地形。' },
+    { q: '土壤形成需要多長時間？', choices: ['一年', '幾十年到幾百年', '一天'], correct: 1, explain: '土壤形成是緩慢的自然過程。' }
+  ],
+  '4-3': [
+    { q: '什麼是地震？', choices: ['地面搖動', '地殼運動引起的地面搖動', '颶風'], correct: 1, explain: '地震是由於板塊運動釋放能量。' },
+    { q: '地震的原因是什麼？', choices: ['天氣', '地殼板塊移動和岩石破裂', '火山'], correct: 1, explain: '板塊構造理論解釋地震成因。' },
+    { q: '地震的危害有什麼？', choices: ['沒有危害', '建築倒塌、人員傷亡、地形改變', '只是聲音'], correct: 1, explain: '強烈地震造成严重破坏。' },
+    { q: '地震時應該怎樣保護自己？', choices: ['跑到街上', '躲在堅固的桌子下', '靜止不動'], correct: 1, explain: '安全的防震方法包括躲在安全處。' },
+    { q: '什麼是斷層？', choices: ['普通裂縫', '地殼受力產生的大規模破裂面', '山谷'], correct: 1, explain: '斷層是地殼運動的結果。' },
+    { q: '如何保護土壤？', choices: ['不管它', '植樹造林、減少侵蝕、避免污染', '覆蓋'], correct: 1, explain: '土壤保護需要多方面的努力。' },
+    { q: '過度開採資源對地球的影響？', choices: ['無影響', '導致地形改變和土壤流失', '有益'], correct: 1, explain: '採礦造成地表破壞和生態問題。' },
+    { q: '什麼是可持續發展的地球管理？', choices: ['開採不停止', '在滿足當代需求的同時保護環境', '只保護'], correct: 1, explain: '平衡開發與保護是未來方向。' }
+  ],
+
+  // ═══ CHAPTER 5: 能源基礎 ═══
+  '5-1': [
+    { q: '什麼是能源？', choices: ['電', '能做功或產生熱的物質或現象', '油'], correct: 1, explain: '能源是可以被利用進行工作的資源。' },
+    { q: '太陽能是什麼？', choices: ['太陽產生的光', '太陽輻射的光和熱', '陽光'], correct: 1, explain: '太陽是無限的能源來源。' },
+    { q: '風能如何被利用？', choices: ['吹動物體', '風車或風力發電機', '做功'], correct: 1, explain: '風力發電機將風能轉為電能。' },
+    { q: '水能是什麼形式的能源？', choices: ['靜止的水', '流動的水具有的動能和位能', '冰'], correct: 1, explain: '流水和瀑布可以產生電力。' },
+    { q: '化石燃料包括什麼？', choices: ['草木', '煤、石油、天然氣', '礦石'], correct: 1, explain: '化石燃料是地下數百萬年形成的。' },
+    { q: '核能是什麼？', choices: ['放射性物質的', '原子核分裂或融合釋放的能量', '電'], correct: 1, explain: '核能是非常強大但需小心使用的能源。' },
+    { q: '可再生能源有什麼優點？', choices: ['無法使用', '取之不盡、污染少', '稀缺'], correct: 1, explain: '可再生能源是未來的方向。' },
+    { q: '能源與環境的關係？', choices: ['無關', '大多數傳統能源產生污染', '相反'], correct: 1, explain: '能源使用對環境有重要影響。' }
+  ],
+  '5-2': [
+    { q: '什麼是能源轉換？', choices: ['能源消失', '一種能源轉變成另一種形式', '停止'], correct: 1, explain: '能源可以轉換但總量不變。' },
+    { q: '太陽能如何轉為熱？', choices: ['直接照射', '太陽能電池板吸收陽光產生熱', '燃燒'], correct: 1, explain: '太陽能熱水器利用這個原理。' },
+    { q: '太陽能如何轉為電？', choices: ['磁鐵', '太陽能電池板將光轉為電', '電池'], correct: 1, explain: '光伏效應是太陽能電池的原理。' },
+    { q: '什麼是發電機？', choices: ['儲電裝置', '將機械能轉為電能的裝置', '電池'], correct: 1, explain: '發電機利用電磁感應原理。' },
+    { q: '風力發電的原理？', choices: ['直接儲電', '風推動葉片，帶動發電機產生電', '風儲存'], correct: 1, explain: '風力發電是轉換能源的好方法。' },
+    { q: '水力發電用什麼原理？', choices: ['流水發光', '落水推動渦輪驅動發電機', '波浪'], correct: 1, explain: '重力位能轉為電能。' },
+    { q: '燃煤發電的步驟？', choices: ['直接發電', '燃燒產熱→加熱水→蒸汽推動渦輪→發電', '儲存'], correct: 1, explain: '這是傳統火力發電的過程。' },
+    { q: '能源轉換過程中會發生什麼？', choices: ['能量增加', '部分能量變成熱損失', '完全轉換'], correct: 1, explain: '任何轉換都有能量損失。' }
+  ],
+  '5-3': [
+    { q: '什麼是電？', choices: ['光', '電子的流動產生的現象', '磁'], correct: 1, explain: '電是電荷的運動形成的。' },
+    { q: '電池的作用是什麼？', choices: ['儲存光', '提供電力的電源', '儲存水'], correct: 1, explain: '電池通過化學反應產生電流。' },
+    { q: '什麼是正極和負極？', choices: ['顏色不同', '電池的兩個終端，表示電荷不同', '位置'], correct: 1, explain: '正負極產生電勢差推動電流。' },
+    { q: '電路是什麼？', choices: ['圓形', '電流流通的完整迴路', '方形'], correct: 1, explain: '完整電路電流才能流通。' },
+    { q: '什麼是導體？', choices: ['指揮官', '容易傳導電流的物質如銅', '樹木'], correct: 1, explain: '金屬通常是良好導體。' },
+    { q: '什麼是絕緣體？', choices: ['導電體', '不容易傳導電流的物質如橡膠', '金屬'], correct: 1, explain: '絕緣體用來阻擋電流。' },
+    { q: '電開關的作用？', choices: ['控制方向', '控制電路的開閉', '改變顏色'], correct: 1, explain: '開關可以打開或關閉電路。' },
+    { q: '什麼是電源？', choices: ['電線', '提供電流動力的裝置', '燈'], correct: 1, explain: '電池、發電機都是電源。' }
+  ],
+
+  // ═══ CHAPTER 6: 電與節能 ═══
+  '6-1': [
+    { q: '什麼是串聯電路？', choices: ['並排放置', '元件首尾相連形成一條路徑', '混合放置'], correct: 1, explain: '串聯電路中電流只有一條路。' },
+    { q: '串聯電路中斷開一處會怎樣？', choices: ['其他燈亮', '全部燈熄滅', '更亮'], correct: 1, explain: '因為電路被斷開，電流無法流通。' },
+    { q: '並聯電路是什麼？', choices: ['線性排列', '各元件並排連接，電流分路流通', '串連'], correct: 1, explain: '並聯電路有多條電流路徑。' },
+    { q: '並聯電路中斷開一盞燈會怎樣？', choices: ['全部熄滅', '其他燈仍亮', '全部更亮'], correct: 1, explain: '並聯中各支路獨立工作。' },
+    { q: '串聯與並聯在亮度上的區別？', choices: ['一樣亮', '並聯更亮，串聯較暗', '串聯更亮'], correct: 1, explain: '並聯每盞燈得到全部電壓。' },
+    { q: '家庭電路用什麼方式連接？', choices: ['串聯', '並聯', '混合'], correct: 1, explain: '家庭電器用並聯方便獨立控制。' },
+    { q: '聖誕樹上的小燈用什麼連接？', choices: ['全部並聯', '全部串聯', '兩種混合'], correct: 2, explain: '現代裝飾燈通常是混合連接。' },
+    { q: '為什麼需要兩種電路方式？', choices: ['無特別原因', '不同用途需要不同特性', '隨意選擇'], correct: 1, explain: '根據需要選擇合適的電路方式。' }
+  ],
+  '6-2': [
+    { q: '家庭電路的主要組成？', choices: ['只有燈', '電源、開關、用電器、保護裝置', '只有電線'], correct: 1, explain: '完整的家庭電路需要各個部分。' },
+    { q: '什麼是斷路器？', choices: ['開關', '當電流過大時自動切斷電路以保護', '插座'], correct: 1, explain: '斷路器防止火災和設備損壞。' },
+    { q: '什麼是接地線？', choices: ['普通電線', '保護線，防止漏電傷人', '地下的線'], correct: 1, explain: '接地線是安全保護的重要部分。' },
+    { q: '為什麼不能用濕手觸碰電器？', choices: ['會弄濕', '水導電會造成觸電', '不好看'], correct: 1, explain: '水使電流容易通過身體。' },
+    { q: '電線為什麼要絕緣？', choices: ['美觀', '防止漏電和觸電', '冷卻'], correct: 1, explain: '絕緣層保護使用者安全。' },
+    { q: '什麼是漏電保護器？', choices: ['過濾器', '檢測漏電並切斷電源的裝置', '延長線'], correct: 1, explain: '漏電保護器是重要的安全裝置。' },
+    { q: '在浴室用電時要注意什麼？', choices: ['無所謂', '避免接觸水和濕氣', '隨意使用'], correct: 1, explain: '浴室環境潮濕，要特別小心。' },
+    { q: '老舊電線為什麼危險？', choices: ['只是舊', '絕緣層老化容易漏電', '沒有危害'], correct: 1, explain: '老舊電線需要及時更換。' }
+  ],
+  '6-3': [
+    { q: '什麼是節能？', choices: ['停止用電', '減少不必要的能源消耗', '只用少量'], correct: 1, explain: '節能是指高效地使用能源。' },
+    { q: '家庭中哪個電器最耗電？', choices: ['電燈', '空調或電熱水器', '電視'], correct: 1, explain: '供暖或冷卻最耗能。' },
+    { q: 'LED燈與白熾燈的區別？', choices: ['只是顏色', 'LED更省電、更耐用', '相同'], correct: 1, explain: 'LED技術革新了照明。' },
+    { q: '什麼是綠色能源？', choices: ['綠色的能源', '可再生、污染少的能源', '植物'], correct: 1, explain: '太陽能、風能等是綠色能源。' },
+    { q: '如何在家中實施節能？', choices: ['沒有方法', '關燈、用LED、調控溫度等', '停止生活'], correct: 1, explain: '節能需要習慣改變。' },
+    { q: '節能的經濟效益是什麼？', choices: ['無效益', '減少電費開支', '增加成本'], correct: 1, explain: '節能既環保又省錢。' },
+    { q: '什麼是低碳生活？', choices: ['生活在寒冷地方', '減少碳排放的生活方式', '沒有碳'], correct: 1, explain: '低碳生活有益環境和健康。' },
+    { q: '未來能源的發展方向？', choices: ['更多化石燃料', '轉向可再生能源', '無法確定'], correct: 1, explain: '可再生能源是未來趨勢。' }
+  ]
+};
+
+let currentChapter = null;
+let currentGame = null;
+let currentQuestion = 0;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  document.documentElement.setAttribute('data-chapter', 'home');
+  currentChapter = null;
+  showScreen('screen-home');
+}
+
+function resetGameStates() {
+  // Reset all game state objects to initial values
+  forceGameState = { currentTask: 0, boxX: 100, boxY: 200, dragX: -1, dragY: -1, isDragging: false, completed: false, forceVector: { x: 0, y: 0 } };
+  hydraulicState = { currentLevel: 0, activePistons: new Set(), done: {}, animationProgress: {} };
+  fluidState = { currentLevel: 0, liquidLevel: { left: 0, right: 0 }, isPouring: false, done: {} };
+  earthState = { currentLevel: 0, selectedRocks: [], done: {}, layersRevealed: false };
+  energyConvState = { currentLevel: 0, activeSteps: new Set(), done: {} };
+  circuitState = { currentLevel: 0, activeSegs: new Set(), burnedBulb: null, done: {} };
+  conductorState = { selectedItem: null, foundConductors: new Set(), done: false };
+  energyState = { fixedHS: new Set(), done: false };
+}
+
+function gotoChapter(ch) {
+  // Reset all game states to prevent state pollution
+  resetGameStates();
+
+  // Clean up all game RAF and event listeners
+  cancelAnimationFrame(forceRaf);
+  cancelAnimationFrame(hydraulicRaf);
+  cancelAnimationFrame(fluidRaf);
+  cancelAnimationFrame(earthRaf);
+  cancelAnimationFrame(energyConvRaf);
+  cancelAnimationFrame(circuitRaf);
+  cancelAnimationFrame(conductorRaf);
+  cancelAnimationFrame(energyRaf);
+
+  // Remove all canvas event listeners
+  const canvases = document.querySelectorAll('canvas');
+  canvases.forEach(canvas => {
+    canvas.onclick = null;
+    canvas.onmousedown = null;
+    canvas.onmouseup = null;
+    canvas.ontouchstart = null;
+    canvas.ontouchend = null;
+  });
+
+  // Remove force game event listeners
+  const forceCanvas = document.getElementById('canvas-force');
+  if (forceCanvas) {
+    forceCanvas.removeEventListener('mousedown', handleForceMouseDown);
+    forceCanvas.removeEventListener('mousemove', handleForceMouseMove);
+    forceCanvas.removeEventListener('mouseup', handleForceMouseUp);
+    forceCanvas.removeEventListener('touchstart', handleForceTouchStart);
+    forceCanvas.removeEventListener('touchmove', handleForceTouchMove);
+    forceCanvas.removeEventListener('touchend', handleForceTouchEnd);
+  }
+
+  document.documentElement.setAttribute('data-chapter', ch);
+  currentChapter = ch;
+  showScreen(`screen-chapter${ch}-home`);
+}
+
+function startGame(chapter, task) {
+  document.documentElement.setAttribute('data-chapter', chapter);
+  currentChapter = chapter;
+  currentGame = `${chapter}-${task}`;
+  currentQuestion = 0;
+
+  // Show game phase first, then quiz after
+  if (chapter === 1) {
+    // Chapter 1: Force Game
+    initForceGame();
+    showScreen('screen-game-force');
+  } else if (chapter === 2) {
+    // Chapter 2: Hydraulic System Game
+    hydraulicState = { currentLevel: 0, activePistons: new Set(), done: {}, animationProgress: {} };
+    loadHydraulicLevel(0, document.querySelectorAll('#screen-game-hydraulic .lvl-btn')[0]);
+    showScreen('screen-game-hydraulic');
+  } else if (chapter === 3) {
+    // Chapter 3: Fluid & Pressure Game
+    fluidState = { currentLevel: 0, liquidLevel: { left: 0, right: 0 }, isPouring: false, done: {} };
+    loadFluidLevel(0, document.querySelectorAll('#screen-game-fluid .lvl-btn')[0]);
+    showScreen('screen-game-fluid');
+  } else if (chapter === 4) {
+    // Chapter 4: Earth Science Game
+    earthState = { currentLevel: 0, selectedRocks: [], done: {}, layersRevealed: false };
+    loadEarthLevel(0, document.querySelectorAll('#screen-game-earth .lvl-btn')[0]);
+    showScreen('screen-game-earth');
+  } else if (chapter === 5) {
+    // Chapter 5: Energy Conversion Game
+    energyConvState = { currentLevel: 0, activeSteps: new Set(), done: {} };
+    loadEnergyConvLevel(0, document.querySelectorAll('#screen-game-energy-conv .lvl-btn')[0]);
+    showScreen('screen-game-energy-conv');
+  } else if (chapter === 6) {
+    // Chapter 6: Circuit + Conductor + Energy games
+    if (task === 1) {
+      // Start with circuit game
+      circuitState = { currentLevel: 0, activeSegs: new Set(), burnedBulb: null, done: {} };
+      loadCircuitLevel(0, document.querySelectorAll('#screen-game-circuit .lvl-btn')[0]);
+      showScreen('screen-game-circuit');
+    } else if (task === 2) {
+      // Start conductor game
+      startConductorGame();
+    } else if (task === 3) {
+      // Start energy game
+      startEnergyGame();
+    }
+  } else {
+    // Other chapters: go directly to quiz (games to be added later)
+    renderQuestion();
+    showScreen('screen-game');
+  }
+}
+
+function renderQuestion() {
+  const quiz = quizData[currentGame];
+  const q = quiz[currentQuestion];
+  const total = quiz.length;
+
+  document.getElementById('game-label').textContent = `篇章 ${currentGame.split('-')[0]} | 任務 ${currentGame.split('-')[1]}`;
+  document.getElementById('game-title').textContent = Object.keys(quizData).find(k => k === currentGame) ? '科學挑戰' : '學習';
+  document.getElementById('progress').textContent = currentQuestion + 1;
+  document.getElementById('total').textContent = total;
+  document.getElementById('prog-fill').style.width = ((currentQuestion + 1) / total * 100) + '%';
+
+  const el = document.getElementById('quiz-box');
+  el.innerHTML = `
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-choices">
+      ${q.choices.map((c, i) => `
+        <button class="quiz-choice" onclick="selectAnswer(${i}, ${q.correct})">${c}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectAnswer(selected, correct) {
+  const quiz = quizData[currentGame];
+  const q = quiz[currentQuestion];
+  const buttons = document.querySelectorAll('.quiz-choice');
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    if (i === selected && selected !== correct) btn.classList.add('wrong');
+  });
+
+  const el = document.getElementById('quiz-box');
+  const explain = document.createElement('div');
+  explain.className = 'quiz-explain';
+  explain.textContent = q.explain;
+  el.appendChild(explain);
+
+  setTimeout(() => {
+    currentQuestion++;
+    if (currentQuestion < quiz.length) {
+      renderQuestion();
+    } else {
+      showCompletion();
+    }
+  }, 2200);
+}
+
+function showCompletion() {
+  const encouragements = [
+    '太棒了！你正在成為科學家！',
+    '完美！再接再厲，你做得很好！',
+    '驚人的科學知識！',
+    '你的科學理解在提升！',
+    '出色的表現！繼續探索吧！'
+  ];
+  const random = encouragements[Math.floor(Math.random() * encouragements.length)];
+  document.getElementById('completion-message').textContent = random;
+  document.getElementById('btn-next').textContent = currentQuestion < quizData[currentGame].length ? '下一任務' : '完成';
+  showScreen('screen-complete');
+}
+
+function nextTask() {
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    gotoChapter(ch);
+  }
+}
+
+// ════ CHAPTER 6: CIRCUIT + CONDUCTOR + ENERGY GAMES ════
+const CIRCUIT_LEVELS = [
+  {
+    title: '基本通路',
+    hint: '連接簡單上下路徑',
+    battery: { x: 90, y: 150, label: '🔋' },
+    bulbs: [{ x: 480, y: 150, label: '💡', id: 'b1' }],
+    segs: [
+      { id: 's1', x1: 120, y1: 130, x2: 200, y2: 130 },
+      { id: 's2', x1: 200, y1: 130, x2: 380, y2: 130 },
+      { id: 's3', x1: 380, y1: 130, x2: 450, y2: 130 },
+      { id: 's4', x1: 450, y1: 130, x2: 450, y2: 170 },
+      { id: 's5', x1: 450, y1: 170, x2: 120, y2: 170 },
+      { id: 's6', x1: 120, y1: 170, x2: 120, y2: 130 }
+    ],
+    checkFn: (active) => {
+      if (active.size >= 6) return 'ok';
+      return 'incomplete';
+    },
+    successMsg: '✅ 電路完成！燈泡亮了！'
+  },
+  {
+    title: '短路危機',
+    hint: '識別並移除危險短路',
+    battery: { x: 90, y: 150 },
+    bulbs: [{ x: 480, y: 150, id: 'b1' }],
+    segs: [
+      { id: 's1', x1: 120, y1: 130, x2: 250, y2: 130 },
+      { id: 's2', x1: 250, y1: 130, x2: 450, y2: 130 },
+      { id: 's3', x1: 450, y1: 130, x2: 450, y2: 170, isShort: true },
+      { id: 's4', x1: 250, y1: 130, x2: 250, y2: 170, isShort: true },
+      { id: 's5', x1: 450, y1: 170, x2: 120, y2: 170 },
+      { id: 's6', x1: 120, y1: 170, x2: 120, y2: 130 }
+    ],
+    checkFn: (active) => {
+      const hasShort = Array.from(active).some(id => {
+        const seg = this.segs.find(s => s.id === id);
+        return seg && seg.isShort;
+      });
+      if (hasShort) return 'short';
+      if (active.size >= 4 && !Array.from(active).some(id => this.segs.find(s => s.id === id && s.isShort))) return 'ok';
+      return 'incomplete';
+    },
+    successMsg: '✅ 避免了短路！電路安全運作！'
+  },
+  {
+    title: '並聯燈泡',
+    hint: '建立並聯電路',
+    battery: { x: 90, y: 150 },
+    bulbs: [
+      { x: 510, y: 90, id: 'b1' },
+      { x: 340, y: 90, id: 'b2' }
+    ],
+    segs: [
+      { id: 's1', x1: 120, y1: 130, x2: 200, y2: 130 },
+      { id: 's2', x1: 200, y1: 130, x2: 200, y2: 60 },
+      { id: 's3', x1: 200, y1: 60, x2: 310, y2: 60 },
+      { id: 's4', x1: 310, y1: 60, x2: 480, y2: 60 },
+      { id: 's5', x1: 200, y1: 60, x2: 200, y2: 200 },
+      { id: 's6', x1: 200, y1: 200, x2: 120, y2: 200 },
+      { id: 's7', x1: 120, y1: 200, x2: 120, y2: 130 }
+    ],
+    checkFn: (active) => {
+      if (active.size >= 7) return 'ok';
+      return 'incomplete';
+    },
+    successMsg: '✅ 並聯完成！兩個燈泡一起亮！'
+  }
+];
+
+const CONDUCTOR_ITEMS = [
+  { id: '銅片', icon: '🟡', conductor: true, desc: '金屬是良導體！' },
+  { id: '迴紋針', icon: '📎', conductor: true, desc: '金屬製品導電！' },
+  { id: '鉛筆芯', icon: '✏️', conductor: true, desc: '石墨可導電！' },
+  { id: '塑膠尺', icon: '📏', conductor: false, desc: '塑膠是絕緣體！' },
+  { id: '橡皮擦', icon: '🧹', conductor: false, desc: '橡膠絕緣！' },
+  { id: '木頭', icon: '🪵', conductor: false, desc: '木質絕緣！' }
+];
+
+const ENERGY_HOTSPOTS = [
+  {
+    id: 'ac',
+    icon: '❄️',
+    label: '空調設20°C',
+    x: '8%',
+    y: '12%',
+    w: '18%',
+    h: '14%',
+    fixedMsg: '✅ 冷氣調回26°C，省電又健康！',
+    desc: '冷氣開太強！調回26~28°C最省電喔。'
+  },
+  {
+    id: 'light',
+    icon: '💡',
+    label: '白天開燈',
+    x: '65%',
+    y: '8%',
+    w: '15%',
+    h: '16%',
+    fixedMsg: '✅ 關掉白天的燈，使用自然光！',
+    desc: '白天不必要地開燈浪費電！'
+  },
+  {
+    id: 'fridge',
+    icon: '🧊',
+    label: '冰箱未關',
+    x: '8%',
+    y: '60%',
+    w: '16%',
+    h: '20%',
+    fixedMsg: '✅ 關好冰箱門，冷氣不外漏！',
+    desc: '冰箱門沒關好，冷氣漏出來！'
+  },
+  {
+    id: 'tv',
+    icon: '📺',
+    label: '無人看電視',
+    x: '65%',
+    y: '55%',
+    w: '20%',
+    h: '25%',
+    fixedMsg: '✅ 關掉不看的電視，節能又環保！',
+    desc: '沒有人看電視卻還開著！'
+  }
+];
+
+let circuitState = {
+  currentLevel: 0,
+  activeSegs: new Set(),
+  burnedBulb: null,
+  done: {}
+};
+
+let conductorState = {
+  selectedItem: null,
+  foundConductors: new Set(),
+  done: false
+};
+
+let energyState = {
+  fixedHS: new Set(),
+  done: false
+};
+
+function loadCircuitLevel(level, btn) {
+  cancelAnimationFrame(circuitRaf);
+  circuitState.currentLevel = level;
+  circuitState.activeSegs = new Set();
+  circuitState.burnedBulb = null;
+
+  document.querySelectorAll('#screen-game-circuit .lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const canvas = document.getElementById('canvas-circuit');
+  canvas.removeEventListener('click', handleCircuitClick);
+  canvas.addEventListener('click', handleCircuitClick);
+
+  circuitGameLoop();
+}
+
+function handleCircuitClick(e) {
+  const rect = e.target.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (e.clientY - rect.top) * (e.target.height / rect.height);
+
+  const lvl = CIRCUIT_LEVELS[circuitState.currentLevel];
+
+  // Check bulb click (for parallel circuit)
+  if (circuitState.currentLevel === 2 && lvl.bulbs) {
+    for (const b of lvl.bulbs) {
+      if (Math.hypot(x - b.x, y - b.y) < 30) {
+        if (circuitState.activeSegs.size >= 6) {
+          circuitState.burnedBulb = circuitState.burnedBulb === b.id ? null : b.id;
+          updateCircuitStatus();
+        }
+        return;
+      }
+    }
+  }
+
+  // Check segment click
+  for (const seg of lvl.segs) {
+    const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+    const len2 = dx * dx + dy * dy;
+    let t = ((x - seg.x1) * dx + (y - seg.y1) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    const cx = seg.x1 + t * dx, cy = seg.y1 + t * dy;
+
+    if (Math.hypot(x - cx, y - cy) < 28) {
+      if (circuitState.activeSegs.has(seg.id)) {
+        circuitState.activeSegs.delete(seg.id);
+      } else {
+        circuitState.activeSegs.add(seg.id);
+      }
+      updateCircuitStatus();
+      return;
+    }
+  }
+}
+
+function updateCircuitStatus() {
+  const lvl = CIRCUIT_LEVELS[circuitState.currentLevel];
+  const result = lvl.checkFn.call(lvl, circuitState.activeSegs);
+  const el = document.getElementById('circuit-status');
+
+  if (result === 'ok') {
+    el.style.color = '#00ff88';
+    el.textContent = lvl.successMsg;
+    circuitState.done[circuitState.currentLevel] = true;
+  } else if (result === 'short') {
+    el.style.color = '#ff2244';
+    el.textContent = '⚠️ 短路！移除紅色的危險電線！';
+  } else {
+    el.style.color = 'var(--dim)';
+    el.textContent = '👆 點擊虛線連接電線！';
+  }
+}
+
+let circuitRaf;
+function circuitGameLoop() {
+  drawCircuitGame();
+  circuitRaf = requestAnimationFrame(circuitGameLoop);
+}
+
+function drawCircuitGame() {
+  const canvas = document.getElementById('canvas-circuit');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const lvl = CIRCUIT_LEVELS[circuitState.currentLevel];
+  const result = lvl.checkFn.call(lvl, circuitState.activeSegs);
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(0,245,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Draw battery rails
+  const bat = lvl.battery;
+  ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(bat.x + 30, bat.y - 90); ctx.lineTo(bat.x + 30, bat.y - 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bat.x + 30, bat.y + 20); ctx.lineTo(bat.x + 30, bat.y + 90); ctx.stroke();
+
+  // Draw battery
+  ctx.save();
+  ctx.fillStyle = '#2a4a2a';
+  ctx.fillRect(bat.x - 25, bat.y - 65, 50, 130);
+  ctx.strokeStyle = '#4a8a4a';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(bat.x - 25, bat.y - 65, 50, 130);
+  ctx.fillStyle = '#ff4444';
+  ctx.fillRect(bat.x - 10, bat.y - 80, 20, 18);
+  ctx.fillStyle = '#4444ff';
+  ctx.fillRect(bat.x - 10, bat.y + 62, 20, 18);
+  ctx.restore();
+
+  // Draw segments
+  lvl.segs.forEach(seg => {
+    const on = circuitState.activeSegs.has(seg.id);
+    const isShortSeg = seg.isShort;
+
+    if (on) {
+      const glow = isShortSeg ? '#ff4400' : '#ffe566';
+      ctx.strokeStyle = isShortSeg ? '#ff6600' : '#ffe566';
+      ctx.lineWidth = isShortSeg ? 4 : 3;
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = isShortSeg ? 'rgba(255,100,0,0.7)' : 'rgba(255,220,0,0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([8, 6]);
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  // Draw bulbs
+  if (lvl.bulbs) {
+    lvl.bulbs.forEach(b => {
+      const burned = circuitState.burnedBulb === b.id;
+      const lit = result === 'ok' && !burned && circuitState.activeSegs.size >= 4;
+
+      if (burned) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 28, 0, Math.PI * 2);
+        ctx.fillStyle = '#111';
+        ctx.fill();
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else if (lit) {
+        ctx.fillStyle = '#fff8aa';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffe566';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,220,0,0.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    });
+  }
+  ctx.shadowBlur = 0;
+}
+
+function nextCircuitTask() {
+  if (Object.keys(circuitState.done).length < 3) {
+    console.log('⚠️ 請完成所有3個關卡！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(circuitRaf);
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task === 1) {
+    startConductorGame();
+  } else if (task === 2) {
+    startEnergyGame();
+  } else {
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+// ════ CONDUCTOR GAME ════
+function startConductorGame() {
+  currentGame = '6-2';
+  conductorState.selectedItem = null;
+  conductorState.foundConductors = new Set();
+  conductorState.done = false;
+
+  const itemsDiv = document.getElementById('conductor-items');
+  itemsDiv.innerHTML = '';
+  CONDUCTOR_ITEMS.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'act-btn';
+    btn.style.cssText = 'padding:.5rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05); color:var(--text); cursor:pointer; font-size:.9rem; font-weight:700; transition:all .2s;';
+    btn.innerHTML = `${item.icon} ${item.id}`;
+    btn.onclick = () => testConductor(item, btn);
+    itemsDiv.appendChild(btn);
+  });
+
+  const collectionDiv = document.getElementById('conductor-collection');
+  collectionDiv.innerHTML = '';
+  CONDUCTOR_ITEMS.filter(i => i.conductor).forEach(item => {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'width:50px; height:50px; border-radius:10px; border:2px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; background:rgba(255,255,255,.02); transition:all .3s;';
+    badge.textContent = item.icon;
+    badge.id = 'badge-' + item.id;
+    collectionDiv.appendChild(badge);
+  });
+
+  cancelAnimationFrame(conductorRaf);
+  showScreen('screen-game-conductor');
+  conductorGameLoop();
+}
+
+function testConductor(item, btn) {
+  if (conductorState.selectedItem) return;
+
+  conductorState.selectedItem = item;
+  btn.style.background = 'rgba(255,255,255,.1)';
+
+  setTimeout(() => {
+    const el = document.getElementById('conductor-status');
+    if (item.conductor) {
+      btn.style.background = 'rgba(0,255,136,.2)';
+      btn.style.borderColor = '#00ff88';
+      el.style.color = '#00ff88';
+      el.textContent = `✅ ${item.icon} ${item.id} — ${item.desc} 燈泡亮了！`;
+
+      conductorState.foundConductors.add(item.id);
+      const badge = document.getElementById('badge-' + item.id);
+      if (badge) badge.style.background = 'rgba(0,255,136,.3)';
+
+      if (conductorState.foundConductors.size === 3) {
+        conductorState.done = true;
+        el.innerHTML = '✅ 集滿了所有良導體！完成了！';
+      }
+    } else {
+      btn.style.background = 'rgba(255,34,68,.2)';
+      btn.style.borderColor = '#ff2244';
+      el.style.color = '#ff2244';
+      el.textContent = `❌ ${item.icon} ${item.id} — ${item.desc} 燈泡沒亮。`;
+    }
+
+    conductorState.selectedItem = null;
+  }, 500);
+}
+
+let conductorRaf;
+function conductorGameLoop() {
+  drawConductorGame();
+  conductorRaf = requestAnimationFrame(conductorGameLoop);
+}
+
+function drawConductorGame() {
+  const canvas = document.getElementById('canvas-conductor');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw circuit
+  ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+  ctx.lineWidth = 2.5;
+
+  // Battery (left)
+  ctx.fillStyle = '#2a4a2a';
+  ctx.fillRect(40, 100, 50, 100);
+  ctx.strokeStyle = '#4a8a4a';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(40, 100, 50, 100);
+
+  // Wires
+  ctx.strokeStyle = 'rgba(255,220,0,0.4)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(90, 130); ctx.lineTo(200, 130); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(200, 130); ctx.lineTo(200, 170); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(200, 170); ctx.lineTo(90, 170); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(90, 170); ctx.lineTo(90, 200); ctx.stroke();
+
+  // Gap in middle
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(280, 120, 40, 60);
+  ctx.strokeStyle = 'rgba(255,220,0,0.3)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(280, 120, 40, 60);
+
+  // Wires after gap
+  ctx.strokeStyle = 'rgba(255,220,0,0.4)';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(320, 150); ctx.lineTo(450, 150); ctx.stroke();
+
+  // Bulb (right)
+  const testing = conductorState.selectedItem !== null;
+  const isLit = conductorState.selectedItem?.conductor || false;
+
+  if (isLit && testing) {
+    ctx.fillStyle = '#fff8aa';
+    ctx.beginPath();
+    ctx.arc(500, 150, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffe566';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(500, 150, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,220,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // Labels
+  ctx.fillStyle = 'var(--dim)';
+  ctx.font = 'bold 12px Microsoft JhengHei';
+  ctx.textAlign = 'center';
+  ctx.fillText('電池', 65, 210);
+  ctx.fillText(isLit && testing ? '✨ 亮！' : '燈泡', 500, 185);
+  ctx.fillText('測試口', 300, 195);
+}
+
+function nextConductorTask() {
+  if (!conductorState.done) {
+    console.log('⚠️ 請先找出所有良導體！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(conductorRaf);
+  startEnergyGame();
+}
+
+// ════ ENERGY GAME ════
+function startEnergyGame() {
+  currentGame = '6-3';
+  energyState.fixedHS = new Set();
+  energyState.done = false;
+
+  const badgesDiv = document.getElementById('energy-badges');
+  badgesDiv.innerHTML = '';
+  ENERGY_HOTSPOTS.forEach(h => {
+    const badge = document.createElement('div');
+    badge.id = 'badge-' + h.id;
+    badge.style.cssText = 'width:50px; height:50px; border-radius:50%; border:2px solid rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:1.5rem; background:rgba(255,255,255,.02); transition:all .3s;';
+    badge.textContent = '❌';
+    badgesDiv.appendChild(badge);
+  });
+
+  cancelAnimationFrame(energyRaf);
+  showScreen('screen-game-energy');
+
+  // Set up canvas click handler
+  const energyCanvas = document.getElementById('canvas-energy');
+  if (energyCanvas) {
+    energyCanvas.onclick = (e) => {
+      const rect = e.target.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      for (const h of ENERGY_HOTSPOTS) {
+        const x1 = parseFloat(h.x) / 100;
+        const y1 = parseFloat(h.y) / 100;
+        const x2 = x1 + parseFloat(h.w) / 100;
+        const y2 = y1 + parseFloat(h.h) / 100;
+
+        if (x >= x1 && x <= x2 && y >= y1 && y <= y2) {
+          clickEnergyHotspot(h.id);
+          break;
+        }
+      }
+    };
+  }
+
+  energyGameLoop();
+}
+
+let energyRaf;
+function energyGameLoop() {
+  drawEnergyGame();
+  energyRaf = requestAnimationFrame(energyGameLoop);
+}
+
+function drawEnergyGame() {
+  const canvas = document.getElementById('canvas-energy');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const t = Date.now() / 1000;
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  // Room background
+  ctx.fillStyle = '#1a2a3a';
+  ctx.fillRect(0, 0, W, H * 0.7);
+  ctx.fillStyle = '#3a3a2a';
+  ctx.fillRect(0, H * 0.7, W, H * 0.3);
+
+  // Window (on right)
+  ctx.fillStyle = 'rgba(150,200,255,0.3)';
+  ctx.fillRect(W * 0.65, H * 0.08, W * 0.3, H * 0.25);
+
+  // AC unit
+  if (!energyState.fixedHS.has('ac')) {
+    ctx.fillStyle = '#1e3040';
+    ctx.fillRect(W * 0.04, H * 0.1, W * 0.22, H * 0.18);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    ctx.fillText('20°C ❄️❄️', W * 0.15, H * 0.2);
+
+    // Cold air effect
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.arc(W * 0.08 + i * W * 0.05, H * 0.35 + Math.sin(t + i) * 8, 6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(150,220,255,0.15)';
+      ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = '#1e3040';
+    ctx.fillRect(W * 0.04, H * 0.1, W * 0.22, H * 0.18);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = 'bold 14px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    ctx.fillText('26°C ✅', W * 0.15, H * 0.2);
+  }
+
+  // Ceiling light
+  if (!energyState.fixedHS.has('light')) {
+    ctx.fillStyle = 'rgba(255,200,0,0.4)';
+    ctx.beginPath();
+    ctx.arc(W * 0.75, H * 0.15, 20, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillStyle = 'rgba(255,200,0,0.1)';
+    ctx.beginPath();
+    ctx.arc(W * 0.75, H * 0.15, 20, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // TV
+  if (!energyState.fixedHS.has('tv')) {
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(W * 0.65, H * 0.55, W * 0.3, H * 0.25);
+    ctx.fillStyle = 'rgba(0,255,200,0.3)';
+    ctx.fillRect(W * 0.67, H * 0.57, W * 0.26, H * 0.21);
+  } else {
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(W * 0.65, H * 0.55, W * 0.3, H * 0.25);
+  }
+
+  // Fridge
+  if (!energyState.fixedHS.has('fridge')) {
+    ctx.fillStyle = '#1e3040';
+    ctx.fillRect(W * 0.08, H * 0.6, W * 0.16, H * 0.2);
+    ctx.strokeStyle = 'rgba(100,100,100,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.16, H * 0.6);
+    ctx.lineTo(W * 0.16, H * 0.8);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#1e3040';
+    ctx.fillRect(W * 0.08, H * 0.6, W * 0.16, H * 0.2);
+  }
+
+  // Hotspot overlay for clickable areas
+  ENERGY_HOTSPOTS.forEach(h => {
+    if (!energyState.fixedHS.has(h.id)) {
+      ctx.fillStyle = 'rgba(255,100,100,0.2)';
+      ctx.fillRect(W * parseFloat(h.x), H * parseFloat(h.y), W * parseFloat(h.w), H * parseFloat(h.h));
+    }
+  });
+}
+
+function clickEnergyHotspot(hsId) {
+  if (energyState.fixedHS.has(hsId)) return;
+
+  energyState.fixedHS.add(hsId);
+
+  const badge = document.getElementById('badge-' + hsId);
+  if (badge) badge.textContent = '✅';
+
+  document.getElementById('energy-score').innerHTML = `${energyState.fixedHS.size}<span>/ 4 個問題修正</span>`;
+
+  if (energyState.fixedHS.size === ENERGY_HOTSPOTS.length) {
+    energyState.done = true;
+    document.getElementById('energy-score').innerHTML = `4<span style="color:#00ff88;">/ 4 個問題修正 ✅ 完成！</span>`;
+  }
+}
+
+function nextEnergyTask() {
+  if (!energyState.done) {
+    console.log('⚠️ 請先修正所有4個問題！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(energyRaf);
+  const canvas = document.getElementById('canvas-energy');
+  if (canvas) canvas.onclick = null;
+
+  showScreen('screen-game');
+  renderQuestion();
+}
+
+// ════ CHAPTER 3: FLUID GAME ════
+let fluidState = {
+  currentLevel: 0,
+  liquidLevel: { left: 0, right: 0 },
+  isPouring: false,
+  done: {}
+};
+
+function loadFluidLevel(level, btn) {
+  cancelAnimationFrame(fluidRaf);
+  fluidState.currentLevel = level;
+  fluidState.liquidLevel = { left: 0, right: 0 };
+  fluidState.isPouring = false;
+
+  document.querySelectorAll('#screen-game-fluid .lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const canvas = document.getElementById('canvas-fluid');
+  canvas.removeEventListener('mousedown', handleFluidDrag);
+  canvas.removeEventListener('mouseup', handleFluidUp);
+  canvas.removeEventListener('touchstart', handleFluidDrag);
+  canvas.removeEventListener('touchend', handleFluidUp);
+  canvas.addEventListener('mousedown', handleFluidDrag);
+  canvas.addEventListener('mouseup', handleFluidUp);
+  canvas.addEventListener('touchstart', handleFluidDrag);
+  canvas.addEventListener('touchend', handleFluidUp);
+
+  fluidGameLoop();
+}
+
+function handleFluidDrag() {
+  fluidState.isPouring = true;
+}
+
+function handleFluidUp() {
+  fluidState.isPouring = false;
+}
+
+function updateFluidStatus() {
+  const el = document.getElementById('fluid-status');
+  const level = fluidState.currentLevel;
+
+  if (level === 0 && Math.abs(fluidState.liquidLevel.left - fluidState.liquidLevel.right) < 10) {
+    el.style.color = '#00ff88';
+    el.textContent = '✅ 連通管原理成立！液面等高！';
+    fluidState.done[level] = true;
+  } else if (level === 1 && fluidState.liquidLevel.right > 80) {
+    el.style.color = '#00ff88';
+    el.textContent = '✅ 虹吸現象成功！水流向低處！';
+    fluidState.done[level] = true;
+  } else if (level === 2 && fluidState.liquidLevel.right > 70) {
+    el.style.color = '#00ff88';
+    el.textContent = '✅ 引水成功！水塔供水系統運作！';
+    fluidState.done[level] = true;
+  } else {
+    el.style.color = 'var(--dim)';
+    el.textContent = level === 0 ? '倒水直到兩邊液面等高' : (level === 1 ? '持續倒水建立虹吸' : '通過虹吸引水');
+  }
+}
+
+let fluidRaf;
+function fluidGameLoop() {
+  if (fluidState.isPouring) {
+    fluidState.liquidLevel.left = Math.min(100, fluidState.liquidLevel.left + 1);
+    if (fluidState.currentLevel > 0) {
+      fluidState.liquidLevel.right = Math.min(100, fluidState.liquidLevel.right + 0.8);
+    } else {
+      fluidState.liquidLevel.right = fluidState.liquidLevel.left * 0.95;
+    }
+  }
+
+  updateFluidStatus();
+  drawFluidGame();
+  fluidRaf = requestAnimationFrame(fluidGameLoop);
+}
+
+function drawFluidGame() {
+  const canvas = document.getElementById('canvas-fluid');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const level = fluidState.currentLevel;
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  const containerHeight = 150;
+  const leftX = 120, rightX = 420;
+  const topY = 80;
+
+  // Draw containers
+  ctx.strokeStyle = 'rgba(0,245,255,0.5)';
+  ctx.lineWidth = 2;
+
+  // Left container
+  ctx.beginPath();
+  ctx.moveTo(leftX - 40, topY);
+  ctx.lineTo(leftX - 40, topY + containerHeight);
+  ctx.lineTo(leftX + 40, topY + containerHeight);
+  ctx.lineTo(leftX + 40, topY);
+  ctx.stroke();
+
+  // Right container
+  ctx.beginPath();
+  ctx.moveTo(rightX - 40, topY);
+  ctx.lineTo(rightX - 40, topY + containerHeight);
+  ctx.lineTo(rightX + 40, topY + containerHeight);
+  ctx.lineTo(rightX + 40, topY);
+  ctx.stroke();
+
+  // Draw liquid
+  const liquidColor = 'rgba(0,200,255,0.6)';
+  ctx.fillStyle = liquidColor;
+
+  // Left liquid
+  const leftLiquidH = (fluidState.liquidLevel.left / 100) * containerHeight;
+  ctx.fillRect(leftX - 40, topY + containerHeight - leftLiquidH, 80, leftLiquidH);
+
+  // Right liquid
+  const rightLiquidH = (fluidState.liquidLevel.right / 100) * containerHeight;
+  ctx.fillRect(rightX - 40, topY + containerHeight - rightLiquidH, 80, rightLiquidH);
+
+  // Draw tube connecting containers
+  if (level === 0) {
+    // Connected at bottom
+    ctx.strokeStyle = 'rgba(0,200,255,0.7)';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(leftX + 40, topY + containerHeight);
+    ctx.quadraticCurveTo(W / 2, topY + containerHeight + 30, rightX - 40, topY + containerHeight);
+    ctx.stroke();
+  } else if (level === 1) {
+    // Siphon tube (goes up)
+    ctx.strokeStyle = 'rgba(0,200,255,0.7)';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(leftX + 30, topY + 20);
+    ctx.quadraticCurveTo(W / 2, topY - 50, rightX - 30, topY + 100);
+    ctx.stroke();
+  } else {
+    // Water tower setup
+    ctx.strokeStyle = 'rgba(0,200,255,0.7)';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(leftX + 40, topY + containerHeight - 20);
+    ctx.lineTo(rightX - 40, topY + containerHeight);
+    ctx.stroke();
+  }
+
+  // Labels
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = 'bold 12px Microsoft JhengHei';
+  ctx.textAlign = 'center';
+  ctx.fillText('容器A', leftX, topY + containerHeight + 30);
+  ctx.fillText('容器B', rightX, topY + containerHeight + 30);
+  ctx.fillText(Math.round(fluidState.liquidLevel.left) + '%', leftX, topY - 20);
+  ctx.fillText(Math.round(fluidState.liquidLevel.right) + '%', rightX, topY - 20);
+}
+
+function nextFluidTask() {
+  if (Object.keys(fluidState.done).length < 3) {
+    console.log('⚠️ 請完成所有3個關卡！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(fluidRaf);
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+// ════ CHAPTER 4: EARTH GAME ════
+let earthState = {
+  currentLevel: 0,
+  selectedRocks: [],
+  done: {},
+  layersRevealed: false
+};
+
+const ROCKS_ITEMS = [
+  { name: '花崗岩', icon: '🟤', type: 'igneous' },
+  { name: '砂岩', icon: '🟡', type: 'sedimentary' },
+  { name: '大理岩', icon: '🔲', type: 'metamorphic' },
+  { name: '頁岩', icon: '📋', type: 'sedimentary' },
+  { name: '火山岩', icon: '🌋', type: 'igneous' },
+  { name: '片岩', icon: '〰️', type: 'metamorphic' }
+];
+
+function loadEarthLevel(level, btn) {
+  cancelAnimationFrame(earthRaf);
+  earthState.currentLevel = level;
+  earthState.selectedRocks = [];
+  earthState.layersRevealed = false;
+
+  document.querySelectorAll('#screen-game-earth .lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (level === 1) {
+    // Rock classification level
+    document.getElementById('earth-status').innerHTML = '👆 將岩石拖拽到正確的分類區域';
+  } else {
+    document.getElementById('earth-status').innerHTML = '👆 點擊地球不同圖層以探索';
+  }
+
+  earthGameLoop();
+}
+
+let earthRaf;
+function earthGameLoop() {
+  drawEarthGame();
+  earthRaf = requestAnimationFrame(earthGameLoop);
+}
+
+function drawEarthGame() {
+  const canvas = document.getElementById('canvas-earth');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const level = earthState.currentLevel;
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  if (level === 0) {
+    // Earth layers
+    const centerX = W / 2, centerY = H / 2;
+    const layers = [
+      { r: 100, color: '#ffaa00', label: '地殼' },
+      { r: 150, color: '#ff6600', label: '地幔' },
+      { r: 180, color: '#ff3300', label: '外核' },
+      { r: 200, color: '#ffff00', label: '內核' }
+    ];
+
+    layers.forEach(layer => {
+      ctx.fillStyle = layer.color;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, layer.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // Labels
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    layers.forEach(layer => {
+      ctx.fillText(layer.label, centerX, centerY - layer.r / 2 - 10);
+    });
+  } else if (level === 1) {
+    // Rock classification
+    const categories = [
+      { x: 80, y: 150, label: '火成岩', rocks: ['花崗岩', '火山岩'] },
+      { x: 300, y: 150, label: '沉積岩', rocks: ['砂岩', '頁岩'] },
+      { x: 520, y: 150, label: '變質岩', rocks: ['大理岩', '片岩'] }
+    ];
+
+    categories.forEach(cat => {
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cat.x - 50, cat.y, 100, 120);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = 'bold 12px Microsoft JhengHei';
+      ctx.textAlign = 'center';
+      ctx.fillText(cat.label, cat.x, cat.y - 10);
+
+      let yOffset = cat.y + 30;
+      cat.rocks.forEach(rockName => {
+        const rock = ROCKS_ITEMS.find(r => r.name === rockName);
+        if (rock) {
+          ctx.fillText(rock.icon + ' ' + rockName, cat.x, yOffset);
+          yOffset += 30;
+        }
+      });
+    });
+  } else {
+    // Earthquake
+    ctx.fillStyle = '#1a2a3a';
+    ctx.fillRect(50, 100, 200, 200);
+    ctx.fillStyle = '#3a4a5a';
+    ctx.fillRect(350, 100, 200, 200);
+
+    ctx.strokeStyle = 'rgba(255,100,100,0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(50, 100, 200, 200);
+    ctx.strokeRect(350, 100, 200, 200);
+
+    const t = Date.now() / 500;
+    const shake = Math.sin(t) * 3;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    ctx.fillText('未加固', 150 + shake, 200);
+    ctx.fillText('已加固', 450, 200);
+  }
+}
+
+function nextEarthTask() {
+  if (!earthState.done[earthState.currentLevel]) {
+    const level = earthState.currentLevel;
+    if (level < 3) {
+      earthState.done[level] = true;
+    }
+  }
+
+  if (Object.keys(earthState.done).length < 3) {
+    earthState.done[earthState.currentLevel] = true;
+  }
+
+  cancelAnimationFrame(earthRaf);
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+// ════ CHAPTER 5: ENERGY CONVERSION GAME ════
+// ════ CHAPTER 5: ENERGY CONVERSION GAME ════
+const ENERGY_LEVELS = [
+  {
+    // Level 0: Solar Energy
+    name: '太陽能轉換',
+    sources: [{ x: 60, y: 120, r: 25, emoji: '☀️', id: 'sun', label: '太陽光' }],
+    steps: [
+      { x: 180, y: 80, w: 70, h: 50, label: '集熱\n↓', color: '#ff6600', emoji: '🔥' },
+      { x: 180, y: 160, w: 70, h: 50, label: '發電\n↓', color: '#ffaa00', emoji: '⚡' }
+    ],
+    output: { x: 340, y: 120, r: 30, emoji: '💡', label: '電力' },
+    requiredSteps: 2,
+    hint: '點擊太陽光開始轉換！'
+  },
+  {
+    // Level 1: Wind Energy
+    name: '風能轉換',
+    sources: [{ x: 60, y: 120, r: 25, emoji: '💨', id: 'wind', label: '風力' }],
+    steps: [
+      { x: 180, y: 60, w: 70, h: 50, label: '旋轉\n↓', color: '#0099ff', emoji: '🌪️' },
+      { x: 180, y: 140, w: 70, h: 50, label: '發電\n↓', color: '#00ccff', emoji: '⚡' }
+    ],
+    output: { x: 340, y: 100, r: 30, emoji: '💡', label: '電力' },
+    requiredSteps: 2,
+    hint: '點擊風力開始轉換！'
+  },
+  {
+    // Level 2: Mixed Energy
+    name: '多能源混合',
+    sources: [
+      { x: 50, y: 80, r: 20, emoji: '☀️', id: 'sun', label: '太陽' },
+      { x: 50, y: 160, r: 20, emoji: '💨', id: 'wind', label: '風' }
+    ],
+    steps: [
+      { x: 160, y: 60, w: 60, h: 45, label: '轉換', color: '#ff6600', emoji: '⚡' },
+      { x: 160, y: 130, w: 60, h: 45, label: '轉換', color: '#0099ff', emoji: '⚡' },
+      { x: 240, y: 95, w: 70, h: 50, label: '混合\n儲存', color: '#ffaa00', emoji: '🔋' }
+    ],
+    output: { x: 350, y: 120, r: 30, emoji: '💡', label: '電力' },
+    requiredSteps: 3,
+    hint: '同時啟動太陽能和風能！'
+  }
+];
+
+let energyConvState = {
+  currentLevel: 0,
+  activeSteps: new Set(),
+  done: {}
+};
+
+function loadEnergyConvLevel(level, btn) {
+  cancelAnimationFrame(energyConvRaf);
+  energyConvState.currentLevel = level;
+  energyConvState.activeSteps = new Set();
+
+  document.querySelectorAll('#screen-game-energy-conv .lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const canvas = document.getElementById('canvas-energy-conv');
+  canvas.removeEventListener('click', handleEnergyConvClick);
+  canvas.addEventListener('click', handleEnergyConvClick);
+
+  energyConvGameLoop();
+}
+
+function handleEnergyConvClick(e) {
+  const canvas = e.target;
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+  const level = ENERGY_LEVELS[energyConvState.currentLevel];
+
+  // Check if clicking on source
+  for (const source of level.sources) {
+    if (Math.hypot(x - source.x, y - source.y) < source.r) {
+      // Start the conversion process
+      energyConvState.activeSteps = new Set();
+      for (let i = 0; i < level.steps.length; i++) {
+        energyConvState.activeSteps.add(i);
+      }
+      updateEnergyConvStatus();
+      return;
+    }
+  }
+}
+
+function updateEnergyConvStatus() {
+  const el = document.getElementById('energy-conv-status');
+  const level = ENERGY_LEVELS[energyConvState.currentLevel];
+
+  if (energyConvState.activeSteps.size >= level.requiredSteps) {
+    el.style.color = '#00ff88';
+    el.textContent = '✅ 能源轉換完成！電力產生了！';
+    energyConvState.done[energyConvState.currentLevel] = true;
+  } else {
+    el.style.color = 'var(--dim)';
+    el.textContent = level.hint;
+  }
+}
+
+let energyConvRaf;
+function energyConvGameLoop() {
+  drawEnergyConvGame();
+  energyConvRaf = requestAnimationFrame(energyConvGameLoop);
+}
+
+function drawEnergyConvGame() {
+  const canvas = document.getElementById('canvas-energy-conv');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const level = ENERGY_LEVELS[energyConvState.currentLevel];
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.font = 'bold 13px Microsoft JhengHei';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+
+  // Draw sources
+  for (const source of level.sources) {
+    ctx.fillStyle = source.id === 'sun' ? 'rgba(255, 170, 0, 0.2)' : 'rgba(0, 100, 200, 0.2)';
+    ctx.beginPath();
+    ctx.arc(source.x, source.y, source.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (energyConvState.activeSteps.size > 0) {
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText(source.emoji, source.x, source.y + 6);
+    ctx.font = '11px Microsoft JhengHei';
+    ctx.fillText(source.label, source.x, source.y + 40);
+  }
+
+  // Draw conversion steps
+  for (let i = 0; i < level.steps.length; i++) {
+    const step = level.steps[i];
+    const isActive = energyConvState.activeSteps.has(i);
+
+    ctx.fillStyle = isActive ? step.color : 'rgba(100,100,100,0.2)';
+    ctx.fillRect(step.x, step.y, step.w, step.h);
+
+    if (isActive) {
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2;
+    } else {
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+    }
+    ctx.strokeRect(step.x, step.y, step.w, step.h);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    ctx.fillText(step.label, step.x + step.w / 2, step.y + step.h / 2);
+
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(step.emoji, step.x + step.w / 2, step.y + step.h / 2 + 15);
+  }
+
+  // Draw arrows
+  ctx.strokeStyle = energyConvState.activeSteps.size > 0 ? '#00ff88' : 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+
+  // Arrow from source to first step
+  const firstStep = level.steps[0];
+  ctx.beginPath();
+  ctx.moveTo(level.sources[0].x + 25, level.sources[0].y);
+  ctx.lineTo(firstStep.x, firstStep.y + firstStep.h / 2);
+  ctx.stroke();
+
+  // Arrows between steps
+  for (let i = 0; i < level.steps.length - 1; i++) {
+    const curr = level.steps[i];
+    const next = level.steps[i + 1];
+    ctx.beginPath();
+    ctx.moveTo(curr.x + curr.w / 2, curr.y + curr.h);
+    ctx.lineTo(next.x + next.w / 2, next.y);
+    ctx.stroke();
+  }
+
+  // Arrow to output
+  const lastStep = level.steps[level.steps.length - 1];
+  ctx.beginPath();
+  ctx.moveTo(lastStep.x + lastStep.w, lastStep.y + lastStep.h / 2);
+  ctx.lineTo(level.output.x - level.output.r, level.output.y);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+
+  // Draw output
+  ctx.fillStyle = energyConvState.activeSteps.size >= level.requiredSteps ? 'rgba(255, 255, 0, 0.3)' : 'rgba(255, 255, 0, 0.1)';
+  ctx.beginPath();
+  ctx.arc(level.output.x, level.output.y, level.output.r, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (energyConvState.activeSteps.size >= level.requiredSteps) {
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  } else {
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillText(level.output.emoji, level.output.x, level.output.y + 8);
+}
+
+function nextEnergyConvTask() {
+  energyConvState.done[energyConvState.currentLevel] = true;
+
+  cancelAnimationFrame(energyConvRaf);
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+// ════ CHAPTER 2: HYDRAULIC GAME ════
+const HYDRAULIC_LEVELS = [
+  {
+    title: '簡單液壓',
+    desc: '按下左側活塞，右側舉起重物',
+    pistons: [
+      { x: 120, y: 200, w: 60, h: 80, area: 1, name: '活塞A', isLeft: true },
+      { x: 450, y: 200, w: 60, h: 80, area: 1, name: '活塞B', isLeft: false }
+    ],
+    weight: { x: 480, y: 120, mass: 100, targetY: 100, currentY: 120 },
+    successMsg: '✅ 液壓傳輸成功！重物被舉起了！'
+  },
+  {
+    title: '帕斯卡定律',
+    desc: '小面積活塞施加力量，大面積活塞產生大力',
+    pistons: [
+      { x: 100, y: 220, w: 40, h: 60, area: 1, name: '小活塞', isLeft: true },
+      { x: 450, y: 180, w: 80, h: 80, area: 4, name: '大活塞', isLeft: false }
+    ],
+    weight: { x: 490, y: 100, mass: 400, targetY: 80, currentY: 100 },
+    successMsg: '✅ 帕斯卡定律運作！小力量產生大力量！'
+  },
+  {
+    title: '多級液壓',
+    desc: '連接多個液壓缸，體驗動力分配',
+    pistons: [
+      { x: 80, y: 220, w: 50, h: 60, area: 1, name: '主活塞', isLeft: true },
+      { x: 300, y: 180, w: 50, h: 80, area: 2, name: '副活塞1', isLeft: false },
+      { x: 450, y: 180, w: 50, h: 80, area: 2, name: '副活塞2', isLeft: false }
+    ],
+    weight: { x: 475, y: 110, mass: 200, targetY: 90, currentY: 110 },
+    successMsg: '✅ 多級液壓完成！動力有效分配！'
+  }
+];
+
+let hydraulicState = {
+  currentLevel: 0,
+  activePistons: new Set(),
+  done: {},
+  animationProgress: {}
+};
+
+function loadHydraulicLevel(level, btn) {
+  cancelAnimationFrame(hydraulicRaf);
+  hydraulicState.currentLevel = level;
+  hydraulicState.activePistons = new Set();
+  hydraulicState.animationProgress = {};
+
+  document.querySelectorAll('#screen-game-hydraulic .lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const canvas = document.getElementById('canvas-hydraulic');
+  canvas.removeEventListener('click', handleHydraulicClick);
+  canvas.addEventListener('click', handleHydraulicClick);
+
+  hydraulicGameLoop();
+}
+
+function handleHydraulicClick(e) {
+  const rect = e.target.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (e.clientY - rect.top) * (e.target.height / rect.height);
+
+  const lvl = HYDRAULIC_LEVELS[hydraulicState.currentLevel];
+
+  for (const piston of lvl.pistons) {
+    if (x >= piston.x && x <= piston.x + piston.w && y >= piston.y && y <= piston.y + piston.h) {
+      if (!hydraulicState.activePistons.has(piston.name)) {
+        hydraulicState.activePistons.add(piston.name);
+        hydraulicState.animationProgress[piston.name] = 0;
+        updateHydraulicStatus();
+      }
+      return;
+    }
+  }
+}
+
+function updateHydraulicStatus() {
+  const el = document.getElementById('hydraulic-status');
+  const lvl = HYDRAULIC_LEVELS[hydraulicState.currentLevel];
+
+  if (lvl.weight.currentY <= lvl.weight.targetY + 10) {
+    el.style.color = '#00ff88';
+    el.textContent = lvl.successMsg;
+    hydraulicState.done[hydraulicState.currentLevel] = true;
+  } else {
+    el.style.color = 'var(--dim)';
+    const distance = Math.round(lvl.weight.currentY - lvl.weight.targetY);
+    el.textContent = `👆 繼續按下活塞！剩餘距離: ${distance}px`;
+  }
+}
+
+let hydraulicRaf;
+function hydraulicGameLoop() {
+  updateHydraulicAnimation();
+  drawHydraulicGame();
+  hydraulicRaf = requestAnimationFrame(hydraulicGameLoop);
+}
+
+function updateHydraulicAnimation() {
+  const lvl = HYDRAULIC_LEVELS[hydraulicState.currentLevel];
+
+  for (const piston of lvl.pistons) {
+    if (hydraulicState.activePistons.has(piston.name)) {
+      if (!hydraulicState.animationProgress[piston.name]) {
+        hydraulicState.animationProgress[piston.name] = 0;
+      }
+
+      hydraulicState.animationProgress[piston.name] = Math.min(
+        1,
+        hydraulicState.animationProgress[piston.name] + 0.02
+      );
+
+      // Animate weight moving up
+      const progress = hydraulicState.animationProgress[piston.name];
+      lvl.weight.currentY = lvl.weight.targetY + (120 - lvl.weight.targetY) * (1 - progress);
+    }
+  }
+}
+
+function drawHydraulicGame() {
+  const canvas = document.getElementById('canvas-hydraulic');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const lvl = HYDRAULIC_LEVELS[hydraulicState.currentLevel];
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw ground
+  ctx.fillStyle = '#1a3a2a';
+  ctx.fillRect(0, 300, W, H - 300);
+  ctx.strokeStyle = 'rgba(0,255,136,0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 300);
+  ctx.lineTo(W, 300);
+  ctx.stroke();
+
+  // Draw pistons and cylinders
+  for (const piston of lvl.pistons) {
+    const progress = hydraulicState.animationProgress[piston.name] || 0;
+    const compression = progress * 20; // Visual compression effect
+
+    // Cylinder body
+    ctx.fillStyle = '#1a2a3a';
+    ctx.fillRect(piston.x - 10, piston.y, piston.w + 20, piston.h);
+    ctx.strokeStyle = 'rgba(255,153,0,0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(piston.x - 10, piston.y, piston.w + 20, piston.h);
+
+    // Piston
+    ctx.fillStyle = piston.name.includes('主') || piston.isLeft ? '#ff9900' : '#ffaa44';
+    ctx.fillRect(piston.x, piston.y + compression, piston.w, piston.h - compression);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(piston.x, piston.y + compression, piston.w, piston.h - compression);
+
+    // Piston label
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px Microsoft JhengHei';
+    ctx.textAlign = 'center';
+    ctx.fillText(piston.name, piston.x + piston.w / 2, piston.y + piston.h / 2 + compression);
+
+    // Liquid flow effect
+    if (hydraulicState.activePistons.has(piston.name) && progress > 0) {
+      ctx.fillStyle = `rgba(0,200,255,${0.3 * progress})`;
+      ctx.fillRect(piston.x - 5, piston.y + 10, piston.w + 10, piston.h - 20);
+    }
+  }
+
+  // Draw connecting tubes
+  ctx.strokeStyle = 'rgba(0,200,255,0.3)';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(lvl.pistons[0].x + lvl.pistons[0].w / 2, lvl.pistons[0].y + lvl.pistons[0].h);
+  for (let i = 1; i < lvl.pistons.length; i++) {
+    ctx.lineTo(lvl.pistons[i].x + lvl.pistons[i].w / 2, lvl.pistons[i].y + lvl.pistons[i].h);
+  }
+  ctx.stroke();
+
+  // Draw weight/object being lifted
+  ctx.fillStyle = '#ff9900';
+  ctx.fillRect(lvl.weight.x - 25, lvl.weight.currentY, 50, 40);
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(lvl.weight.x - 25, lvl.weight.currentY, 50, 40);
+
+  // Weight label
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 12px Microsoft JhengHei';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${lvl.weight.mass}kg`, lvl.weight.x, lvl.weight.currentY + 20);
+
+  // Instructions
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = 'bold 13px Microsoft JhengHei';
+  ctx.textAlign = 'left';
+  ctx.fillText(`${lvl.title}：${lvl.desc}`, 20, 30);
+}
+
+function nextHydraulicTask() {
+  if (Object.keys(hydraulicState.done).length < 3) {
+    console.log('⚠️ 請完成所有3個關卡！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(hydraulicRaf);
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+// ════ CHAPTER 1: FORCE GAME ════
+const FORCE_TASKS = [
+  {
+    title: '推力演示',
+    desc: '拖拽木箱向右推動它',
+    targetX: 450,
+    forceType: 'push'
+  },
+  {
+    title: '拉力與摩擦力',
+    desc: '拖拽繩子拉動木箱（克服摩擦力）',
+    targetX: 450,
+    forceType: 'pull'
+  },
+  {
+    title: '力的方向',
+    desc: '從不同角度拖拽木箱，觀察運動方向',
+    targetX: 400,
+    forceType: 'angle'
+  }
+];
+
+let forceGameState = {
+  currentTask: 0,
+  boxX: 100,
+  boxY: 200,
+  dragX: -1,
+  dragY: -1,
+  isDragging: false,
+  completed: false,
+  forceVector: { x: 0, y: 0 }
+};
+
+function initForceGame() {
+  forceGameState.currentTask = (currentGame.split('-')[1] || 1) - 1;
+  const task = FORCE_TASKS[forceGameState.currentTask];
+  document.getElementById('force-title').textContent = task.title;
+  forceGameState.boxX = 100;
+  forceGameState.boxY = 200;
+  forceGameState.completed = false;
+
+  const canvas = document.getElementById('canvas-force');
+  canvas.addEventListener('mousedown', handleForceMouseDown);
+  canvas.addEventListener('mousemove', handleForceMouseMove);
+  canvas.addEventListener('mouseup', handleForceMouseUp);
+  canvas.addEventListener('touchstart', handleForceTouchStart);
+  canvas.addEventListener('touchmove', handleForceTouchMove);
+  canvas.addEventListener('touchend', handleForceTouchEnd);
+
+  forceGameLoop();
+}
+
+function handleForceMouseDown(e) {
+  const rect = e.target.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (e.clientY - rect.top) * (e.target.height / rect.height);
+
+  const boxLeft = forceGameState.boxX;
+  const boxRight = forceGameState.boxX + 80;
+  const boxTop = forceGameState.boxY;
+  const boxBottom = forceGameState.boxY + 60;
+
+  if (x >= boxLeft && x <= boxRight && y >= boxTop && y <= boxBottom) {
+    forceGameState.isDragging = true;
+    forceGameState.dragX = x;
+    forceGameState.dragY = y;
+  }
+}
+
+function handleForceMouseMove(e) {
+  if (!forceGameState.isDragging) return;
+  const rect = e.target.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (e.clientY - rect.top) * (e.target.height / rect.height);
+
+  forceGameState.forceVector.x = (x - forceGameState.dragX) * 0.5;
+  forceGameState.forceVector.y = (y - forceGameState.dragY) * 0.5;
+}
+
+function handleForceMouseUp() {
+  if (!forceGameState.isDragging) return;
+  forceGameState.isDragging = false;
+
+  const magnitude = Math.hypot(forceGameState.forceVector.x, forceGameState.forceVector.y);
+  const task = FORCE_TASKS[forceGameState.currentTask];
+
+  if (magnitude > 15) {
+    const angle = Math.atan2(forceGameState.forceVector.y, forceGameState.forceVector.x);
+    const moveDist = magnitude * 2;
+    forceGameState.boxX += Math.cos(angle) * moveDist;
+    forceGameState.boxY += Math.sin(angle) * moveDist;
+
+    if (Math.abs(forceGameState.boxX - task.targetX) < 50 && Math.abs(forceGameState.boxY - 200) < 50) {
+      forceGameState.completed = true;
+      document.getElementById('force-status').innerHTML = '✅ 任務完成！力的作用將物體移動了！';
+    } else {
+      document.getElementById('force-status').innerHTML = `📏 繼續拖拽！剩餘距離: ${Math.max(0, task.targetX - forceGameState.boxX).toFixed(0)}`;
+    }
+  }
+
+  forceGameState.forceVector.x = 0;
+  forceGameState.forceVector.y = 0;
+}
+
+function handleForceTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = e.target.getBoundingClientRect();
+  const x = (touch.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (touch.clientY - rect.top) * (e.target.height / rect.height);
+
+  const boxLeft = forceGameState.boxX;
+  const boxRight = forceGameState.boxX + 80;
+  const boxTop = forceGameState.boxY;
+  const boxBottom = forceGameState.boxY + 60;
+
+  if (x >= boxLeft && x <= boxRight && y >= boxTop && y <= boxBottom) {
+    forceGameState.isDragging = true;
+    forceGameState.dragX = x;
+    forceGameState.dragY = y;
+  }
+}
+
+function handleForceTouchMove(e) {
+  e.preventDefault();
+  if (!forceGameState.isDragging) return;
+  const touch = e.touches[0];
+  const rect = e.target.getBoundingClientRect();
+  const x = (touch.clientX - rect.left) * (e.target.width / rect.width);
+  const y = (touch.clientY - rect.top) * (e.target.height / rect.height);
+
+  forceGameState.forceVector.x = (x - forceGameState.dragX) * 0.5;
+  forceGameState.forceVector.y = (y - forceGameState.dragY) * 0.5;
+}
+
+function handleForceTouchEnd(e) {
+  e.preventDefault();
+  handleForceMouseUp();
+}
+
+let forceRaf;
+function forceGameLoop() {
+  drawForceGame();
+  forceRaf = requestAnimationFrame(forceGameLoop);
+}
+
+function drawForceGame() {
+  const canvas = document.getElementById('canvas-force');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  ctx.fillStyle = '#000814';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw ground
+  ctx.fillStyle = '#1a3a2a';
+  ctx.fillRect(0, 280, W, H - 280);
+  ctx.strokeStyle = 'rgba(0,255,136,0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, 280);
+  ctx.lineTo(W, 280);
+  ctx.stroke();
+
+  // Draw friction marks
+  ctx.strokeStyle = 'rgba(100,100,100,0.3)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 30) {
+    ctx.beginPath();
+    ctx.moveTo(x, 290);
+    ctx.lineTo(x + 15, 300);
+    ctx.stroke();
+  }
+
+  // Draw box
+  ctx.fillStyle = '#ff9900';
+  ctx.fillRect(forceGameState.boxX, forceGameState.boxY, 80, 60);
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(forceGameState.boxX, forceGameState.boxY, 80, 60);
+
+  // Draw force vector if dragging
+  if (forceGameState.isDragging && (forceGameState.forceVector.x !== 0 || forceGameState.forceVector.y !== 0)) {
+    const boxCenterX = forceGameState.boxX + 40;
+    const boxCenterY = forceGameState.boxY + 30;
+    const arrowLength = Math.hypot(forceGameState.forceVector.x, forceGameState.forceVector.y);
+    const angle = Math.atan2(forceGameState.forceVector.y, forceGameState.forceVector.x);
+
+    // Draw arrow
+    ctx.strokeStyle = '#ff2244';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(boxCenterX, boxCenterY);
+    ctx.lineTo(boxCenterX + forceGameState.forceVector.x * 5, boxCenterY + forceGameState.forceVector.y * 5);
+    ctx.stroke();
+
+    // Arrow head
+    const headlen = 15;
+    ctx.beginPath();
+    ctx.moveTo(boxCenterX + forceGameState.forceVector.x * 5, boxCenterY + forceGameState.forceVector.y * 5);
+    ctx.lineTo(boxCenterX + forceGameState.forceVector.x * 5 - headlen * Math.cos(angle - Math.PI / 6), boxCenterY + forceGameState.forceVector.y * 5 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(boxCenterX + forceGameState.forceVector.x * 5, boxCenterY + forceGameState.forceVector.y * 5);
+    ctx.lineTo(boxCenterX + forceGameState.forceVector.x * 5 - headlen * Math.cos(angle + Math.PI / 6), boxCenterY + forceGameState.forceVector.y * 5 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.stroke();
+  }
+
+  // Draw target zone
+  const task = FORCE_TASKS[forceGameState.currentTask];
+  ctx.fillStyle = 'rgba(0,255,136,0.15)';
+  ctx.fillRect(task.targetX - 50, 150, 100, 200);
+  ctx.strokeStyle = 'rgba(0,255,136,0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeRect(task.targetX - 50, 150, 100, 200);
+  ctx.setLineDash([]);
+
+  // Draw text
+  ctx.fillStyle = '#00ff88';
+  ctx.font = 'bold 14px Microsoft JhengHei';
+  ctx.textAlign = 'center';
+  ctx.fillText('目標區域', task.targetX, 140);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = 'bold 12px Microsoft JhengHei';
+  ctx.fillText('木箱', forceGameState.boxX + 40, forceGameState.boxY + 35);
+}
+
+function nextForceTask() {
+  if (!forceGameState.completed) {
+    console.log('⚠️ 請先完成遊戲任務！');
+    return;
+    return;
+  }
+
+  cancelAnimationFrame(forceRaf);
+  const canvas = document.getElementById('canvas-force');
+  if (canvas) {
+    canvas.removeEventListener('mousedown', handleForceMouseDown);
+    canvas.removeEventListener('mousemove', handleForceMouseMove);
+    canvas.removeEventListener('mouseup', handleForceMouseUp);
+    canvas.removeEventListener('touchstart', handleForceTouchStart);
+    canvas.removeEventListener('touchmove', handleForceTouchMove);
+    canvas.removeEventListener('touchend', handleForceTouchEnd);
+  }
+
+  const [ch, task] = currentGame.split('-').map(Number);
+  if (task < 3) {
+    startGame(ch, task + 1);
+  } else {
+    // Game completed, start quiz
+    showScreen('screen-game');
+    renderQuestion();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.setAttribute('data-chapter', 'home');
+
+  // Set up energy game canvas click handler
+  const energyCanvas = document.getElementById('canvas-energy');
+  if (energyCanvas) {
+    energyCanvas.onclick = (e) => {
+      const rect = e.target.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      for (const h of ENERGY_HOTSPOTS) {
+        const x1 = parseFloat(h.x) / 100;
+        const y1 = parseFloat(h.y) / 100;
+        const x2 = x1 + parseFloat(h.w) / 100;
+        const y2 = y1 + parseFloat(h.h) / 100;
+
+        if (x >= x1 && x <= x2 && y >= y1 && y <= y2) {
+          clickEnergyHotspot(h.id);
+          break;
+        }
+      }
+    };
+  }
+});
+</script>
+</body>
+</html>
