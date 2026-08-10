@@ -62,6 +62,8 @@
 
 </div>
 
+<!-- 全站共用的課程總表：決定哪些年級學期可以點，跟首頁讀同一份 -->
+<script src="../curriculum-20260810.js"></script>
 <script src="g5-lesson-engine-20260807.js"></script>
 <script src="g5-tutor-content-20260808.js"></script>
 <script src="g5-tutor-content-part2-20260808.js"></script>
@@ -130,7 +132,14 @@
 
   let curGrade = null, curTerm = null;
 
+  /**
+   * 這個年級學期能不能點。
+   * 兩個條件都要成立：共用總表說這個學期有內容，而且本地真的載得到單元（或有外部頁面）。
+   * 這樣首頁和 App 不會各說各話——總表是唯一的真相來源，本地資料只負責「實際有沒有東西」。
+   */
   const hasContent = (g, t) => {
+    const key = `${g}-${t === '上' ? 1 : 2}`;
+    if (!window.CURRICULUM?.has('math', key)) return false;
     const s = CURRICULUM[g]?.[t];
     if (!s) return false;
     if (s.external) return true;
@@ -197,7 +206,8 @@
   function renderUnits() {
     const sem = CURRICULUM[curGrade][curTerm];
     $('unit-card-title').textContent = `${curGrade} 年級${curTerm}學期 · 數學`;
-    $('unit-card-sub').textContent = sem.note || '';
+    $('unit-card-sub').textContent =
+      window.CURRICULUM?.noteOf('math', `${curGrade}-${curTerm === '上' ? 1 : 2}`) || sem.note || '';
     unitList.replaceChildren();
     (sem.units || []).forEach((u) => {
       const ready = Boolean(u.id && window.G5_UNITS?.[u.id]);

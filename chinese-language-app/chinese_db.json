@@ -1,0 +1,574 @@
+{
+  "semester": "4下",
+  "grade": "4-2",
+  "lessons": [
+    {
+      "lessonId": 1,
+      "title": "一束鮮花",
+      "newCharacters": [
+        {"character": "束", "zhuyin": "ㄕㄨˋ", "radical": "木", "strokes": 7},
+        {"character": "鮮", "zhuyin": "ㄒㄧㄢ", "radical": "魚", "strokes": 17},
+        {"character": "塗", "zhuyin": "ㄊㄨˊ", "radical": "土", "strokes": 13},
+        {"character": "煥", "zhuyin": "ㄏㄨㄢˋ", "radical": "火", "strokes": 13}
+      ],
+      "vocabulary": [
+        {"word": "鮮花", "meaning": "新鮮的花朵。"},
+        {"word": "塗鴉", "meaning": "隨意寫畫。"},
+        {"word": "煥然一新", "meaning": "形容呈現出嶄新的面貌。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "類疊",
+          "sentence": "房子變得乾乾淨淨、舒舒服服的。",
+          "explanation": "連續使用同一個字詞(乾乾、淨淨)，用來加強語氣，並增加文章的節奏感。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw1-1",
+          "question": "客廳的桌上擺放了一( )美麗的百合花。",
+          "options": ["束", "刺", "速"],
+          "correctAnswer": "束",
+          "explanation": "「束」是量詞，如「一束花」；「刺」是指尖銳的物品。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom1-1",
+          "idiom": "煥然一新",
+          "meaning": "形容氣象變換，呈現嶄新的面貌。",
+          "quizSentence": "經過大掃除後，原本髒亂的教室變得( )。",
+          "exampleSentence": "自從他換上西裝後，整個人看起來煥然一新。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent1-1",
+          "pattern": "與其…不如…",
+          "fullSentence": "與其在旁邊抱怨，不如現在就動手改變。",
+          "parts": ["與其", "在旁邊抱怨", "不如", "現在就", "動手改變"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 2,
+      "title": "心動不如行動",
+      "newCharacters": [
+        {"character": "距", "zhuyin": "ㄐㄩˋ", "radical": "足", "strokes": 12},
+        {"character": "幻", "zhuyin": "ㄏㄨㄢˋ", "radical": "幺", "strokes": 4},
+        {"character": "拒", "zhuyin": "ㄐㄩˋ", "radical": "手", "strokes": 8}
+      ],
+      "vocabulary": [
+        {"word": "距離", "meaning": "空間或時間相隔的長度。"},
+        {"word": "幻想", "meaning": "空虛而不切實際的想法。"},
+        {"word": "實踐", "meaning": "實際去做、履行。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "設問",
+          "sentence": "你是不是也曾經有過許多美好的夢想呢？",
+          "explanation": "在文章中故意提出問題，目的是為了引起讀者的注意與思考。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw2-1",
+          "question": "這兩座城市之間的( )離很遠，開車需要好幾個小時。",
+          "options": ["拒", "距", "矩"],
+          "correctAnswer": "距",
+          "explanation": "「距」指空間的相隔，如「距離」；「拒」是推辭，如「拒絕」。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom2-1",
+          "idiom": "起而行",
+          "meaning": "與其坐著空談，不如實際去行動。",
+          "quizSentence": "空有夢想是不夠的，我們必須坐而言不如( )。",
+          "exampleSentence": "他是一個起而行的人，只要想到好點子就會立刻去執行。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent2-1",
+          "pattern": "不僅…還…",
+          "fullSentence": "這項計畫不僅非常有創意，還能解決環保問題。",
+          "parts": ["這項計畫", "不僅", "非常有創意", "還能", "解決環保問題"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 3,
+      "title": "選拔動物之星",
+      "newCharacters": [
+        {"character": "拔", "zhuyin": "ㄅㄚˊ", "radical": "手", "strokes": 8},
+        {"character": "螢", "zhuyin": "ㄧㄥˊ", "radical": "虫", "strokes": 14},
+        {"character": "耀", "zhuyin": "ㄧㄠˋ", "radical": "羽", "strokes": 20}
+      ],
+      "vocabulary": [
+        {"word": "選拔", "meaning": "挑選、拔擢。"},
+        {"word": "閃耀", "meaning": "光亮耀眼。"},
+        {"word": "冠軍", "meaning": "比賽中的第一名。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "擬人",
+          "sentence": "螢火蟲提著小燈籠，在草叢裡開心的跳舞。",
+          "explanation": "把螢火蟲當作人來描寫，賦予牠們提燈籠和跳舞的動作，讓文章更生動。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw3-1",
+          "question": "他在百米短跑中( )得頭籌，順利拿下金牌。",
+          "options": ["撥", "潑", "拔"],
+          "correctAnswer": "拔",
+          "explanation": "「拔」有取得的意思，如「拔得頭籌」；「撥」是用手推開。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom3-1",
+          "idiom": "各顯神通",
+          "meaning": "比喻每個人都拿出自己的本領來完成任務。",
+          "quizSentence": "園遊會上，各班( )，設計了許多有趣的關卡。",
+          "exampleSentence": "這場廚藝大賽，各國廚師紛紛各顯神通。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent3-1",
+          "pattern": "為了…只好…",
+          "fullSentence": "妹妹為了保持健康，只好放棄最愛吃的甜點。",
+          "parts": ["妹妹", "為了", "保持健康", "只好", "放棄最愛吃的甜點"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 4,
+      "title": "米食飄香",
+      "newCharacters": [
+        {"character": "糕", "zhuyin": "ㄍㄠ", "radical": "米", "strokes": 16},
+        {"character": "粽", "zhuyin": "ㄗㄨㄥˋ", "radical": "米", "strokes": 14},
+        {"character": "統", "zhuyin": "ㄊㄨㄥˇ", "radical": "糸", "strokes": 12}
+      ],
+      "vocabulary": [
+        {"word": "糕點", "meaning": "用米、麥等粉類做成的食品。"},
+        {"word": "傳統", "meaning": "世代相傳的思想、文化、制度或習慣。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "嗅覺摹寫",
+          "sentence": "剛出爐的發糕散發著甜甜的香氣。",
+          "explanation": "透過描寫鼻子的感覺(嗅覺)，讓讀者彷彿也能聞到發糕的香味。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw4-1",
+          "question": "剛出爐的蛋( )聞起來好香，讓人垂涎三尺。",
+          "options": ["糕", "羔", "高"],
+          "correctAnswer": "糕",
+          "explanation": "「糕」是指食品，如「蛋糕」；「羔」是指小羊。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom4-1",
+          "idiom": "垂涎三尺",
+          "meaning": "形容非常貪吃或極其羨慕。",
+          "quizSentence": "看到桌上豐盛的滿漢全席，弟弟不禁( )。",
+          "exampleSentence": "櫥窗裡精緻的蛋糕讓路過的行人紛紛垂涎三尺。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent4-1",
+          "pattern": "每當…總會…",
+          "fullSentence": "每當端午節到來，奶奶總會包好吃的肉粽。",
+          "parts": ["每當", "端午節到來", "奶奶", "總會", "包好吃的肉粽"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 5,
+      "title": "我愛鹿港",
+      "newCharacters": [
+        {"character": "巷", "zhuyin": "ㄒㄧㄤˋ", "radical": "己", "strokes": 9},
+        {"character": "曲", "zhuyin": "ㄑㄩ", "radical": "曰", "strokes": 6},
+        {"character": "築", "zhuyin": "ㄓㄨˊ", "radical": "竹", "strokes": 16}
+      ],
+      "vocabulary": [
+        {"word": "巷弄", "meaning": "狹窄的街道。"},
+        {"word": "建築", "meaning": "建造房屋、橋梁等實體結構。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "譬喻",
+          "sentence": "彎彎曲曲的九曲巷，就像一座神祕的迷宮。",
+          "explanation": "使用「像」這個字，把九曲巷比喻成迷宮，幫助讀者想像巷子的複雜。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw5-1",
+          "question": "鹿港鎮上的九( )巷設計獨特，可以防風防沙。",
+          "options": ["曲", "由", "田"],
+          "correctAnswer": "曲",
+          "explanation": "「曲」指彎曲，如「九曲巷」；「由」是指原因。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom5-1",
+          "idiom": "古色古香",
+          "meaning": "形容年代久遠，具有古雅色彩的建築或器物。",
+          "quizSentence": "這間茶館裝潢得( )，讓人彷彿穿越了時空。",
+          "exampleSentence": "鹿港老街上的宅院依然保有古色古香的氣息。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent5-1",
+          "pattern": "除了…還有…",
+          "fullSentence": "鹿港除了有古老的廟宇，還有美味的傳統小吃。",
+          "parts": ["鹿港", "除了有", "古老的廟宇", "還有", "美味的傳統小吃"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 6,
+      "title": "掌中天地",
+      "newCharacters": [
+        {"character": "偶", "zhuyin": "ㄡˇ", "radical": "人", "strokes": 11},
+        {"character": "操", "zhuyin": "ㄘㄠ", "radical": "手", "strokes": 16},
+        {"character": "繹", "zhuyin": "ㄧˋ", "radical": "糸", "strokes": 19}
+      ],
+      "vocabulary": [
+        {"word": "木偶", "meaning": "用木頭雕刻而成的人形玩具或表演道具。"},
+        {"word": "操縱", "meaning": "控制、駕馭。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "借代",
+          "sentence": "掌中戲是臺灣傳統藝術的瑰寶。",
+          "explanation": "用「掌中戲」(在手掌中表演的戲) 來代替「布袋戲」這個名詞。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw6-1",
+          "question": "師傅( )縱著木偶，動作非常靈活。",
+          "options": ["操", "燥", "澡"],
+          "correctAnswer": "操",
+          "explanation": "「操」指控制，如「操縱」；「燥」是指乾燥。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom6-1",
+          "idiom": "栩栩如生",
+          "meaning": "形容外貌生動逼真，好像活的一樣。",
+          "quizSentence": "老師筆下的老鷹畫得( )。",
+          "exampleSentence": "蠟像館裡的明星蠟像製作得栩栩如生。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent6-1",
+          "pattern": "即使…也…",
+          "fullSentence": "即使布袋戲的舞台很小，也能演繹大千世界。",
+          "parts": ["即使", "布袋戲的舞台很小", "也", "能演繹", "大千世界"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 7,
+      "title": "動物老師的智慧",
+      "newCharacters": [
+        {"character": "黏", "zhuyin": "ㄋㄧㄢˊ", "radical": "黍", "strokes": 17},
+        {"character": "蝠", "zhuyin": "ㄈㄨˊ", "radical": "虫", "strokes": 15},
+        {"character": "慧", "zhuyin": "ㄏㄨㄟˋ", "radical": "心", "strokes": 15}
+      ],
+      "vocabulary": [
+        {"word": "黏貼", "meaning": "用膠狀物將東西附著在一起。"},
+        {"word": "啟發", "meaning": "開導、指引，使人有所領悟。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "譬喻",
+          "sentence": "大自然裡的動物，就像是充滿智慧的老師。",
+          "explanation": "將「動物」比喻成「老師」，說明人類可以從動物身上學到很多發明的靈感。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw7-1",
+          "question": "弟弟把可愛的貼紙( )貼在筆記本上。",
+          "options": ["黏", "點", "貼"],
+          "correctAnswer": "黏",
+          "explanation": "「黏」指具有膠性而附著，如「黏貼」；「貼」是靠近附著。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom7-1",
+          "idiom": "茅塞頓開",
+          "meaning": "比喻突然領悟、理解了原本不明白的道理。",
+          "quizSentence": "經老師這麼一指點，他( )，終於解開難題。",
+          "exampleSentence": "看了這本書，讓我對人生有種茅塞頓開的感覺。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent7-1",
+          "pattern": "不但…甚至…",
+          "fullSentence": "大自然不但帶來美景，甚至能啟發發明靈感。",
+          "parts": ["大自然", "不但", "帶來美景", "甚至能", "啟發發明靈感"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 8,
+      "title": "臺灣的昆蟲知己",
+      "newCharacters": [
+        {"character": "昆", "zhuyin": "ㄎㄨㄣ", "radical": "日", "strokes": 8},
+        {"character": "察", "zhuyin": "ㄔㄚˊ", "radical": "宀", "strokes": 14},
+        {"character": "鉅", "zhuyin": "ㄐㄩˋ", "radical": "金", "strokes": 13}
+      ],
+      "vocabulary": [
+        {"word": "觀察", "meaning": "仔細察看事物或現象。"},
+        {"word": "知己", "meaning": "互相了解、知心的朋友。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "設問",
+          "sentence": "是誰在草叢裡開演唱會呢？原來是蟋蟀。",
+          "explanation": "先提出問題，緊接著在下一句給出答案，這種自問自答的方式叫做「提問」。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw8-1",
+          "question": "法布爾是一位著名的( )蟲學家。",
+          "options": ["混", "棍", "昆"],
+          "correctAnswer": "昆",
+          "explanation": "「昆」在此指昆蟲類，如「昆蟲」；「混」是指雜亂。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom8-1",
+          "idiom": "鉅細靡遺",
+          "meaning": "形容非常詳細，沒有任何遺漏。",
+          "quizSentence": "這份報告將實驗的過程記錄得( )。",
+          "exampleSentence": "他鉅細靡遺地描述了當時的所有經過。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent8-1",
+          "pattern": "只要…就…",
+          "fullSentence": "只要用心觀察，就能發現大自然的奧祕。",
+          "parts": ["只要", "用心觀察", "就能", "發現", "大自然的奧祕"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 9,
+      "title": "向太空出發",
+      "newCharacters": [
+        {"character": "艙", "zhuyin": "ㄘㄤ", "radical": "舟", "strokes": 16},
+        {"character": "宙", "zhuyin": "ㄓㄡˋ", "radical": "宀", "strokes": 8},
+        {"character": "航", "zhuyin": "ㄏㄤˊ", "radical": "舟", "strokes": 10}
+      ],
+      "vocabulary": [
+        {"word": "太空艙", "meaning": "太空船中用來載人或載物的密閉空間。"},
+        {"word": "探索", "meaning": "探尋、尋找未知的領域。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "誇飾",
+          "sentence": "廣大的宇宙無邊無際，彷彿永遠都走不到盡頭。",
+          "explanation": "放大宇宙廣闊的程度，加深讀者對太空浩瀚的印象。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw9-1",
+          "question": "在漫長的任務中，太空人必須待在狹窄的太空( )裡。",
+          "options": ["艙", "蒼", "滄"],
+          "correctAnswer": "艙",
+          "explanation": "「艙」是指太空船或飛機中的房間，如「太空艙」；「蒼」指青色。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom9-1",
+          "idiom": "浩瀚無垠",
+          "meaning": "形容廣大遼闊，沒有邊際。",
+          "quizSentence": "在( )的宇宙中，地球顯得微不足道。",
+          "exampleSentence": "望著浩瀚無垠的大海，我的心情也跟著開朗。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent9-1",
+          "pattern": "不管…都…",
+          "fullSentence": "不管遇到什麼困難，太空人都必須冷靜克服。",
+          "parts": ["不管", "遇到什麼困難", "太空人", "都必須", "冷靜克服"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 10,
+      "title": "小青蛙想看海",
+      "newCharacters": [
+        {"character": "蛙", "zhuyin": "ㄨㄚ", "radical": "虫", "strokes": 12},
+        {"character": "躍", "zhuyin": "ㄩㄝˋ", "radical": "足", "strokes": 21},
+        {"character": "涉", "zhuyin": "ㄕㄜˋ", "radical": "水", "strokes": 11}
+      ],
+      "vocabulary": [
+        {"word": "跳躍", "meaning": "用腳蹬地向上或向前跳。"},
+        {"word": "勇敢", "meaning": "有膽量，不怕危險和困難。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "擬人",
+          "sentence": "小青蛙對著池塘說：「我一定會走到海邊的！」",
+          "explanation": "讓青蛙像人類一樣說話和表達情感，讓童話故事更有趣。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw10-1",
+          "question": "小青( )鼓起勇氣，決定離開池塘去看看大海。",
+          "options": ["娃", "哇", "蛙"],
+          "correctAnswer": "蛙",
+          "explanation": "「蛙」是指兩棲動物，如「青蛙」；「哇」是語助詞。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom10-1",
+          "idiom": "跋山涉水",
+          "meaning": "形容旅途艱辛，翻山越嶺又跨過河流。",
+          "quizSentence": "為了見到大海，小青蛙( )，經歷了許多困難。",
+          "exampleSentence": "探險隊員們跋山涉水，終於找到了傳說中的古城遺址。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent10-1",
+          "pattern": "既然…就…",
+          "fullSentence": "既然下定決心了，就勇敢出發去追尋夢想吧。",
+          "parts": ["既然", "下定決心了", "就", "勇敢出發", "去追尋夢想吧"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 11,
+      "title": "窗前的月光",
+      "newCharacters": [
+        {"character": "輝", "zhuyin": "ㄏㄨㄟ", "radical": "車", "strokes": 15},
+        {"character": "映", "zhuyin": "ㄧㄥˋ", "radical": "日", "strokes": 9},
+        {"character": "皎", "zhuyin": "ㄐㄧㄠˇ", "radical": "白", "strokes": 11}
+      ],
+      "vocabulary": [
+        {"word": "倒映", "meaning": "物體的影像反映在水面或鏡面上。"},
+        {"word": "詩情畫意", "meaning": "形容如同詩畫般優美、充滿意境。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "譬喻",
+          "sentence": "溫柔的月光有如一層銀色的白紗。",
+          "explanation": "用「有如」將月光比喻成「白紗」，形容月色的柔和與美麗。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw11-1",
+          "question": "拱橋的影子倒( )在平靜的湖面上，風景非常優美。",
+          "options": ["映", "決", "快"],
+          "correctAnswer": "映",
+          "explanation": "「映」有光線照射而顯影的意思，如「倒映」；「決」是指決定。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom11-1",
+          "idiom": "皎潔明亮",
+          "meaning": "形容月色或其他光亮非常清澈潔白。",
+          "quizSentence": "中秋節的月亮( )，一家人聚在一起賞月。",
+          "exampleSentence": "在皎潔明亮的星空下，我們靜靜聆聽大自然。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent11-1",
+          "pattern": "有如…一般…",
+          "fullSentence": "月光有如白紗一般，輕輕覆蓋在大地上。",
+          "parts": ["月光", "有如", "白紗一般", "輕輕覆蓋", "在大地上"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    },
+    {
+      "lessonId": 12,
+      "title": "如來佛的手掌心",
+      "newCharacters": [
+        {"character": "筋", "zhuyin": "ㄐㄧㄣ", "radical": "竹", "strokes": 12},
+        {"character": "佛", "zhuyin": "ㄈㄛˊ", "radical": "人", "strokes": 7},
+        {"character": "掌", "zhuyin": "ㄓㄤˇ", "radical": "手", "strokes": 12}
+      ],
+      "vocabulary": [
+        {"word": "筋斗", "meaning": "身體向前後翻轉的動作。"},
+        {"word": "恍然大悟", "meaning": "突然完全明白覺悟了過來。"}
+      ],
+      "rhetoric": [
+        {
+          "type": "誇飾",
+          "sentence": "孫悟空一個筋斗雲，就飛了十萬八千里。",
+          "explanation": "用「十萬八千里」來誇大孫悟空飛行的距離極遠、速度極快。"
+        }
+      ],
+      "confusingWords": [
+        {
+          "questionId": "cw12-1",
+          "question": "孫悟空翻一個( )斗雲，就飛了十萬八千里。",
+          "options": ["筋", "筒", "筍"],
+          "correctAnswer": "筋",
+          "explanation": "「筋」指肌肉纖維，在此指「筋斗雲」的名稱；「筒」是管狀容器。"
+        }
+      ],
+      "idioms": [
+        {
+          "questionId": "idiom12-1",
+          "idiom": "不自量力",
+          "meaning": "過高估計自己的力量，不衡量實際能力。",
+          "quizSentence": "想要以一個人的力量去阻擋洪水，簡直是( )。",
+          "exampleSentence": "雖然實力懸殊，但他仍不自量力地挑戰。"
+        }
+      ],
+      "sentences": [
+        {
+          "questionId": "sent12-1",
+          "pattern": "不管…總是…",
+          "fullSentence": "不管孫悟空飛多遠，總是逃不出如來佛的手掌心。",
+          "parts": ["不管", "孫悟空飛多遠", "總是逃不出", "如來佛的", "手掌心"],
+          "correctOrder": [0, 1, 2, 3, 4]
+        }
+      ]
+    }
+  ]
+}

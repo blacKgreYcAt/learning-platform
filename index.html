@@ -1129,6 +1129,7 @@
     .reveal-delay-3 { transition-delay: 0.3s; }
     .reveal-delay-4 { transition-delay: 0.4s; }
   </style>
+  <script src="curriculum-20260810.js"></script>
 </head>
 <body>
 
@@ -1605,35 +1606,32 @@
       }, 200);
     }
 
-    // 每個科目目前真的有內容的「年級-學期」。沒列到的會顯示成灰色的「製作中」，
-    // 讓小孩看得到完整範圍，但不會點進去撲空。
-    const SUBJECT_AVAILABLE = {
-      'math-science':    ['4-2', '5-1'],
-      'natural-science': ['4-1', '4-2'],
-      'social-studies':  ['4-1', '4-2'],
-      'chinese':         ['4-1', '4-2']
-    };
-
-    const subjectUrls = {
-      'math-science': 'https://learning-platform-two-eosin.vercel.app/math-science-app/',
-      'natural-science': 'https://natural-science-app.vercel.app/',
-      'social-studies': 'https://social-studies-app.vercel.app/',
-      'chinese': 'https://chinese-language-app-two.vercel.app/'
+    // 「哪個科目的哪個年級學期有內容」統一由 curriculum-20260810.js 定義，
+    // 首頁和各科 App 讀同一份，不會出現首頁說有、點進去卻是空的。
+    // 這裡只做卡片 id 到總表 key 的對應（卡片 id 是舊的命名，先不動 HTML）。
+    const SUBJECT_KEY = {
+      'math-science': 'math',
+      'natural-science': 'natural',
+      'social-studies': 'social',
+      'chinese': 'chinese'
     };
 
     // 產生 1~6 年級 × 上下學期，共 12 個選項
     function renderGradeButtons() {
       const box = document.getElementById('gradeButtons');
-      const avail = SUBJECT_AVAILABLE[currentSubject] || [];
+      const subj = SUBJECT_KEY[currentSubject];
+      const avail = window.CURRICULUM.availableKeys(subj);
       box.innerHTML = '';
       for (let g = 1; g <= 6; g++) {
         for (let t = 1; t <= 2; t++) {
           const key = `${g}-${t}`;
           const ready = avail.includes(key);
+          const note = window.CURRICULUM.noteOf(subj, key);
           const btn = document.createElement('button');
           btn.className = 'grade-btn' + (ready ? '' : ' is-soon');
           btn.disabled = !ready;
           btn.innerHTML = `${g} 年級<small>${t === 1 ? '上' : '下'}學期${ready ? '' : ' · 製作中'}</small>`;
+          if (ready && note) btn.title = note;
           if (ready) btn.onclick = () => navigateToSubject(key);
           box.appendChild(btn);
         }
@@ -1642,9 +1640,10 @@
 
     function navigateToSubject(grade) {
       if (!currentSubject) return;
-      const baseUrl = subjectUrls[currentSubject];
-      if (baseUrl) {
-        window.location.href = `${baseUrl}?grade=${grade}`;
+      const subj = SUBJECT_KEY[currentSubject];
+      const path = window.CURRICULUM.subjects[subj]?.path;
+      if (path) {
+        window.location.href = `${path}?grade=${grade}`;
         closeGradeModal();
       }
     }
