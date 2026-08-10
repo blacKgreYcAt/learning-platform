@@ -248,6 +248,25 @@
 
   $('back-btn').addEventListener('click', backToMap);
   window.addEventListener('lesson:exit', backToMap);
+
+  /**
+   * 從總入口（學霸星球）過來時會帶 ?grade=5-1 這種參數，
+   * 直接跳到對應的年級和學期，小孩不用再選一次。
+   * 格式是「年級-學期」，學期 1=上、2=下。
+   */
+  (function applyDeepLink() {
+    const raw = new URLSearchParams(location.search).get('grade');
+    const m = /^([1-6])-([12])$/.exec(raw || '');
+    if (!m) return;
+    const g = Number(m[1]);
+    const t = m[2] === '1' ? '上' : '下';
+    if (!hasContent(g, t)) return;               // 沒有內容就維持一般流程，不要跳到空畫面
+    const gBtn = gradeRow.querySelectorAll('.grade-btn')[g - 1];
+    if (!gBtn || gBtn.disabled) return;
+    pickGrade(g, gBtn);
+    const tBtn = $('term-row').querySelectorAll('.term-btn')[t === '上' ? 0 : 1];
+    if (tBtn && !tBtn.disabled) pickTerm(t, tBtn);
+  })();
 })();
 </script>
 </body>
