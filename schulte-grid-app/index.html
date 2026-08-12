@@ -617,21 +617,34 @@ function getDifficultyName(d) {
 }
 
 // ════ GAME LOGIC ════
+
+// Fisher-Yates 洗牌。
+// 原本用 sort(() => Math.random() - 0.5)，那個比較函式不一致，
+// 排序演算法會產生偏差——某些數字出現在特定格子的機率明顯偏高。
+// 舒爾特方格的訓練效果就建立在「位置完全隨機」上，有偏差等於練習打折。
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function generateGrid() {
   const config = difficultyConfig[gameState.currentDifficulty];
-  
+
   if (config.hasInterference) {
     // 干擾模式：使用 1-15 的數字 + A-J 的字母 = 25 個項目
     const numbers = Array.from({ length: 15 }, (_, i) => i + 1);
     const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-    const combined = [...numbers, ...letters];
-    gameState.grid = combined.sort(() => Math.random() - 0.5);
+    gameState.grid = shuffle([...numbers, ...letters]);
   } else {
     const numbers = Array.from(
       { length: gameState.totalNumbers },
       (_, i) => i + 1
     );
-    gameState.grid = numbers.sort(() => Math.random() - 0.5);
+    gameState.grid = shuffle(numbers);
   }
 }
 
