@@ -1,0 +1,235 @@
+/* ═══════════════════════════════════════════════════════════
+   靜態 App 共用 — 墨水風橋接層（2026-11-04）
+
+   適用：國語閣樓、自然科學、社會、能源實驗室、舒爾特方格
+   載入順序：各 App 內嵌 <style> → splat-core-20261104.css → 本檔。
+
+   這 5 支是同一套模板長出來的，class 命名重疊度很高
+   （.mission-card .chapter-card .quiz-choice .home-title .back-btn …），
+   所以一份就能涵蓋。自然科與社會科的 class 甚至完全相同。
+
+   共用核心只換顏色；本檔負責「質感」——粗描邊、利角、
+   不模糊的錯位陰影、歪斜、平塗。
+
+   首頁和數學 App 不載入本檔，它們各有自己的橋接層。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 先修一個既有的版面問題 ─────────────────────── */
+/* .screen 是 display:flex + justify-content:center + overflow:auto。
+   內容比容器高的時候，溢出的部分會跑到「捲動起點之上」，捲不到，
+   標題就這樣被切掉——舒爾特在 1100×1000 下實測，不套主題也會切（-34px）。
+   本主題的粗描邊讓內容再高一點，會把問題放大，所以一併修掉。
+   safe center：一旦溢出就自動退回靠上對齊，全部內容都捲得到。
+   不支援 safe 的舊瀏覽器會整條忽略，維持原本行為，不會更糟。 */
+.screen, .game-screen, .home-page, .lessons-page, .question-page, .results-page {
+  justify-content: safe center;
+}
+
+/* ── 標題：粗、不發光 ───────────────────────────── */
+.home-title, .game-title, .page-title, .chapter-title-large,
+.results-title, .completion-title, .celeb-title, .achievements-title {
+  font-weight: 900 !important;
+  letter-spacing: .01em;
+  text-shadow: none !important;
+}
+
+.home-label, .game-label, .chapter-label, .page-subtitle, .home-sub {
+  letter-spacing: .1em;
+}
+
+/* ── 小標籤：方形貼紙，微歪 ─────────────────────── */
+/* .card-spec / .game-spec 看名字像標籤，其實是整行寬的規格說明
+   （舒爾特的「3 × 3 (1-9)」），加外框會變得像輸入欄位，所以不列入。 */
+.chapter-label, .game-label, .home-label,
+.lesson-type-badge, .badge-item, .badge {
+  border-radius: 4px !important;
+  border: 2px solid currentColor !important;
+  font-weight: 700;
+  transform: rotate(-2deg);
+}
+
+/* ── 卡片：粗框、利角、錯位陰影、交錯歪斜 ───────── */
+/* 用 :not(:hover) / :hover 兩段互斥規則，各自把 transform 寫完整。
+   這些 App 的 hover 多半自己也寫了 transform，疊加是做不到的
+   （transform 是整組取代，不是累加），分開寫才不會互相抵消。 */
+.chapter-card, .mission-card, .lesson-card, .difficulty-card, .fg-card {
+  border-radius: 10px !important;
+  border: 3px solid rgba(22,208,240,.30) !important;
+  box-shadow: 5px 5px 0 rgba(255,122,26,.24) !important;
+  transition: transform .18s, box-shadow .18s, border-color .18s !important;
+}
+.chapter-card:not(:hover), .mission-card:not(:hover), .lesson-card:not(:hover),
+.difficulty-card:not(:hover), .fg-card:not(:hover) { transform: rotate(-0.6deg); }
+
+.chapters-grid > *:nth-child(even):not(:hover),
+.missions-grid > *:nth-child(even):not(:hover),
+.lessons-grid  > *:nth-child(even):not(:hover),
+.difficulty-cards > *:nth-child(even):not(:hover),
+.fg-grid > *:nth-child(even):not(:hover) { transform: rotate(0.6deg); }
+
+.chapter-card:hover, .mission-card:hover, .lesson-card:hover,
+.difficulty-card:hover, .fg-card:hover {
+  border-color: var(--ink-cyan) !important;
+  box-shadow: 8px 8px 0 rgba(255,122,26,.38) !important;
+  transform: translateY(-6px) rotate(-0.6deg) !important;
+}
+.chapters-grid > *:nth-child(even):hover,
+.missions-grid > *:nth-child(even):hover,
+.lessons-grid  > *:nth-child(even):hover,
+.difficulty-cards > *:nth-child(even):hover,
+.fg-grid > *:nth-child(even):hover { transform: translateY(-6px) rotate(0.6deg) !important; }
+
+.chapter-title, .mission-title, .lesson-title, .card-title, .fg-title {
+  font-weight: 900 !important;
+}
+
+/* ── 按鈕：實心墨塊，按下去會沉進陰影 ───────────── */
+.btn-primary, .celebration-btn, .celeb-home, .submit-btn, .next-btn,
+.card-btn, .home-again-btn {
+  background: var(--ink-orange) !important;
+  color: #1A0B02 !important;
+  border: 3px solid #FFA45C !important;
+  border-radius: 8px !important;
+  font-weight: 900 !important;
+  box-shadow: 4px 4px 0 rgba(10,18,22,.55) !important;
+  text-shadow: none !important;
+  transition: transform .12s, box-shadow .12s !important;
+}
+.btn-primary:active, .celebration-btn:active, .celeb-home:active,
+.submit-btn:active, .next-btn:active, .card-btn:active, .home-again-btn:active {
+  transform: translate(3px,3px) !important;
+  box-shadow: 1px 1px 0 rgba(10,18,22,.55) !important;
+}
+
+.btn-secondary, .back-btn, .mode-btn, .part-btn, .lvl-btn, .act-btn, .reset-btn {
+  background: rgba(22,208,240,.08) !important;
+  color: var(--ink-cyan) !important;
+  border: 3px solid rgba(22,208,240,.45) !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: transform .12s, border-color .12s !important;
+}
+.btn-secondary:active, .back-btn:active, .mode-btn:active,
+.part-btn:active, .lvl-btn:active, .act-btn:active, .reset-btn:active {
+  transform: scale(.96) !important;
+}
+.mode-btn.active, .part-btn.active, .lvl-btn.active, .act-btn.active {
+  border-color: var(--ink-orange) !important;
+  background: rgba(255,122,26,.18) !important;
+  color: var(--ink-orange) !important;
+}
+
+/* ── 選項：平塗，答對潑綠墨、答錯紅框 ───────────── */
+.quiz-choice, .option-btn {
+  border-radius: 8px !important;
+  border: 3px solid rgba(22,208,240,.26) !important;
+  background: rgba(18,32,40,.8) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  position: relative;
+  transition: transform .12s, border-color .18s, background .18s !important;
+}
+.quiz-choice:active, .option-btn:active { transform: scale(.985) !important; }
+.quiz-choice.selected, .option-btn.selected {
+  border-color: var(--ink-cyan) !important;
+  background: rgba(22,208,240,.16) !important;
+}
+.quiz-choice.correct, .option-btn.correct, .quiz-choice.right {
+  border-color: var(--ink-lime) !important;
+  background: rgba(169,214,54,.18) !important;
+  color: var(--ink-lime) !important;
+}
+.quiz-choice.wrong, .option-btn.wrong {
+  border-color: var(--ink-red) !important;
+  background: rgba(255,51,85,.16) !important;
+  box-shadow: 4px 4px 0 rgba(255,51,85,.2) !important;
+}
+
+/* 答對時的潑墨。靜止狀態一定要 opacity:0——
+   prefers-reduced-motion 會停掉動畫，若靜止是不透明，
+   畫面上會留一團永遠不消失的綠墨。 */
+.quiz-choice.correct::after,
+.quiz-choice.right::after,
+.option-btn.correct::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  height: 240%; width: auto; aspect-ratio: 1;
+  max-width: 200px; max-height: 200px;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: center / contain no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23A9D636'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3Ccircle cx='40' cy='176' r='6'/%3E%3Ccircle cx='12' cy='104' r='5'/%3E%3C/g%3E%3C/svg%3E");
+  animation: ink-splat-pop .55s ease-out 1;
+}
+
+/* ── 面板：粗框利角 ─────────────────────────────── */
+.quiz-box, .celebration-box, .completion-box, .celebration,
+.results-card, .info-box, .badge-panel, .field-guide, .canvas-wrap,
+.room-wrap, .idiom-card, .question-container, .achievements-section {
+  border-radius: 10px !important;
+  border: 3px solid rgba(22,208,240,.26) !important;
+  box-shadow: 5px 5px 0 rgba(22,208,240,.18) !important;
+}
+.quiz-explain {
+  border-radius: 0 8px 8px 0 !important;
+  border-left: 6px solid var(--ink-gold) !important;
+}
+
+/* ── 進度條：墨水流過 ───────────────────────────── */
+.progress-bar, .prog-bg, .prog-wrap {
+  border-radius: 999px !important;
+  border: 2px solid rgba(22,208,240,.3) !important;
+  background: rgba(10,18,22,.7) !important;
+  overflow: hidden;
+}
+.progress-fill, .prog-fill {
+  background: linear-gradient(90deg, var(--ink-cyan), var(--ink-orange)) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+/* ── 頁尾版號 ───────────────────────────────────── */
+/* 自然科的 .home-footer 把版號寫成 rgba(255,255,255,.4)，12px 只有 3.82:1。
+   既有設定，不是主題造成的，不過一行就能修。.62 有 6.3:1。 */
+.home-footer, .home-footer * { color: rgba(255,255,255,.62) !important; }
+
+/* ── 主角：完成畫面登場 ─────────────────────────── */
+.celebration-box, .completion-box, .celebration, .results-card {
+  position: relative;
+  padding-top: 190px !important;
+}
+.celebration-box::before, .completion-box::before,
+.celebration::before, .results-card::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 14px;
+  transform: translateX(-50%);
+  width: 150px; height: 165px;
+  background: center bottom / contain no-repeat url('assets/mascot-bingo-20261104.png');
+  pointer-events: none;
+}
+/* 這些畫面原本就有一顆大 emoji，跟角色並排會重複，收掉 */
+.celebration-emoji, .completion-emoji, .celeb-icon { display: none !important; }
+
+/* ── 首頁頁首：主角站在旁邊 ─────────────────────── */
+/* 標題是置中的，角色擺右邊會直接壓在字上（自然科實測）。
+   同時把頁首右側留白撐開，文字就會往左讓位。 */
+@media (min-width: 820px) {
+  .home-header {
+    position: relative;
+    padding-right: 150px !important;
+  }
+  .home-header::after {
+    content: '';
+    position: absolute;
+    right: 6px; bottom: -6px;
+    width: 118px; height: 154px;
+    background: right bottom / contain no-repeat url('assets/mascot-main-20261104.png');
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════════════════
+   論語大作戰（classics-splat-app）— 色票對齊（2026-11-04）
+
+   載入順序：Vite 產出的 index-*.css → splat-core-20261104.css → 本檔。
+
+   這一支本來就是潑墨風——網點底、brutal-shadow 硬陰影、skew-container 傾斜、
+   粗黑描邊，全站最接近目標的就是它。結構完全不用動，只有色票跟其他 App 不同
+   （它用洋紅／青／黃，我們用橘／青）。
+
+   它用 Tailwind v4 的 theme 變數，六個顏色集中定義在
+   @layer theme 的 :root，所以只要覆寫這六個變數，整支就跟著換。
+   未分層的樣式在串接順序上勝過 @layer 裡的，所以不需要 !important。
+   ═══════════════════════════════════════════════════════════ */
+
+:root, :host {
+  --color-splat-pink:   #FF7A1A;   /* 原 #ff007b 洋紅 → 全站對墨的橘 */
+  --color-splat-cyan:   #16D0F0;   /* 原 #0ff → 角色身上的青 */
+  --color-splat-yellow: #D7E63C;   /* 原 #e8ff00 → 上衣的黃綠，仍夠亮 */
+  --color-splat-green:  #A9D636;   /* 原 #0f0 */
+  --color-splat-purple: #4C8FD6;   /* 原 #6b00ff → 帽子藍 */
+  --color-ink-black:    #0A1216;   /* 原 #111 → 帶一點青的近黑 */
+}
+
+/* 橘底比原本的洋紅亮，上面的近黑字 opacity-70 只剩 4.41:1（20px 非粗體要 4.5）。
+   提到 .8 就有 5.42:1，視覺上幾乎看不出差別。
+   只限定「近黑字 + 七成透明」這個組合，不去動通用的 .opacity-70。 */
+.text-ink-black.opacity-70 { opacity: .8; }
+
+/* 捲軸和硬陰影的顏色是寫死的 hex，不吃變數，單獨補上 */
+.brutal-shadow-pink { box-shadow: 6px 6px #FF7A1A !important; }
+::-webkit-scrollbar-thumb {
+  background: #FF7A1A !important;
+  border-color: #0A1216 !important;
+}
+::-webkit-scrollbar-track { background: #0A1216 !important; }

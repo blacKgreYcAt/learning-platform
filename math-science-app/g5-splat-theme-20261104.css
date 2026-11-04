@@ -1,0 +1,367 @@
+/* ═══════════════════════════════════════════════════════════
+   墨水街頭風主題層（2026-11-04）
+
+   這是「疊在 g5-styles-20260807.css 之上」的外觀層，不是取代。
+   載入順序必須是 基礎樣式 → 本檔。拿掉本檔的 <link> 就完全回到原樣。
+
+   只改外觀，不改版面結構與互動邏輯：
+   - 顏色全部透過覆寫 :root 變數達成，所以 19 個互動元件自動跟著換色，
+     不需要逐一改 class。
+   - 圓角變小、描邊變粗、陰影改成不模糊的位移色塊（網版印刷的錯位感）。
+   - 潑墨造型一律用內嵌 SVG，不另外載圖，避免多幾十個 request。
+
+   ⚠ 絕對不要對以下元素加 transform（rotate / skew / scale）：
+       .chart-wrap .chart-svg .geo-wrap .geo-svg .venn-wrap .sync-wrap
+       以及它們的任何祖先（.card / .lesson-component / .wrap / body）
+     引擎的拖曳用 svg.getBoundingClientRect() 換算座標
+     （g5-lesson-engine-20260807.js 第 231、1605、1974 行）。
+     祖先一旦旋轉，拿到的是旋轉後的「外接矩形」，比實際 SVG 大且有位移，
+     手指位置會對不上，越靠邊誤差越大。
+     傾斜只套在純按鈕／卡片上（.unit .grade-btn .term-btn .quiz-option …）。
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* 取自角色實圖的色票（V3 主角）。
+     橘 #F7682E 來自噴槍上的墨漬，青 #13CCEC 來自頭髮與鞋子，
+     兩者是角色身上原本就存在的對立色，不是另外配的。 */
+  --ink-cyan:   #16D0F0;   /* 主墨 */
+  --ink-orange: #FF7A1A;   /* 對墨 */
+  --ink-navy:   #3A709D;   /* 帽子深藍 */
+  --ink-teal:   #6AB2B5;   /* 斗篷青灰 */
+  --ink-lime:   #BBCE5A;   /* 上衣黃綠 */
+  --ink-gold:   #F6AA43;   /* 帽徽金 */
+  --ink-skin:   #F9B79A;
+  --ink-black:  #0A1216;   /* 描邊用的近黑，帶一點青 */
+
+  /* 覆寫基礎樣式的變數 → 全站自動換色 */
+  --bg-deep:  #0B1418;
+  --bg-mid:   #122028;
+  --bg-card:  rgba(17, 32, 39, 0.86);
+  --line:     rgba(22, 208, 240, 0.26);
+  --text:     #E9F6FA;
+  --text-dim: #8FA8B2;
+
+  --cyan:   var(--ink-cyan);
+  --violet: #4C8FD6;        /* 原本的紫改成帽子藍系，跟角色同一個世界 */
+  --pink:   var(--ink-orange);
+  --green:  #A9D636;
+  --amber:  #FFB03A;
+  --red:    #FF3355;        /* 刻意跟 --pink 的橘拉開，數字方格裡兩者會同時出現 */
+
+  --radius: 8px;            /* 墨水風的角要利，不要圓潤 */
+  --outline: 3px;
+  --shadow-ink: 5px 5px 0 rgba(255, 122, 26, 0.30);
+  --shadow-ink-cyan: 5px 5px 0 rgba(22, 208, 240, 0.26);
+}
+
+/* ── 底：深色 + 墨漬 + 網點 ──────────────────────── */
+body {
+  background:
+    radial-gradient(760px 520px at 12% -6%,  rgba(22,208,240,.13) 0%, transparent 62%),
+    radial-gradient(680px 560px at 96% 4%,   rgba(255,122,26,.11)  0%, transparent 58%),
+    radial-gradient(900px 700px at 50% 108%, rgba(58,112,157,.16)  0%, transparent 60%),
+    linear-gradient(170deg, #0B1418 0%, #0E1C22 52%, #0A1216 100%);
+  background-attachment: fixed;
+  font-weight: 500;
+}
+
+/* 網點疊在最底層。position fixed + pointer-events:none，
+   不影響任何觸控判定。 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(22,208,240,.09) 1px, transparent 1.2px);
+  background-size: 9px 9px;
+}
+.wrap { position: relative; z-index: 1; }
+
+/* ── 標題：粗、擠、歪 ───────────────────────────── */
+.hero h1 {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  background: linear-gradient(100deg, var(--ink-cyan) 0%, var(--ink-cyan) 46%, var(--ink-orange) 54%, var(--ink-orange) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transform: rotate(-1.4deg);
+  display: inline-block;
+}
+.hero p { font-weight: 500; }
+
+/* 進入畫面右側放主角。窄螢幕（手機、iPad 分割畫面）會跟標題擠在一起，
+   所以只在 700px 以上出現，而且用 ::after 放，不占版面高度。 */
+.hero { position: relative; }
+@media (min-width: 700px) {
+  /* 角色比標題高，不加這段上緣留白的話帽子會被切掉 */
+  .hero { padding-top: 54px; }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: 4px; bottom: -6px;
+    width: 122px; height: 160px;
+    background: right bottom / contain no-repeat url('../assets/mascot-main-20261104.png');
+    pointer-events: none;
+  }
+}
+
+/* ── 卡片：粗框 + 不模糊的錯位陰影 ──────────────── */
+/* 不加 rotate：卡片裡面可能放圖表／幾何 SVG。 */
+.card {
+  border: var(--outline) solid rgba(22,208,240,.34);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-ink);
+  backdrop-filter: none;          /* 毛玻璃跟平塗風格不合，也省 GPU */
+}
+.card h2 {
+  font-weight: 900;
+  letter-spacing: .01em;
+  color: var(--ink-cyan);
+}
+
+/* 卡片標題左側的墨條 */
+.card h2::before {
+  content: '';
+  display: inline-block;
+  width: 10px; height: 1em;
+  margin-right: 12px;
+  vertical-align: -2px;
+  background: var(--ink-orange);
+  transform: skewX(-12deg);
+}
+
+/* ── 按鈕／卡片：這些不含 SVG，可以放心歪 ───────── */
+.grade-btn, .term-btn, .unit, .net-card, .sort-card, .quiz-option, .tutor-q {
+  border-width: var(--outline);
+  border-radius: var(--radius);
+  font-weight: 700;
+}
+.grade-btn, .term-btn { transform: rotate(-0.8deg); }
+.grade-btn:nth-child(even), .term-btn:nth-child(even) { transform: rotate(0.8deg); }
+.grade-btn:active, .term-btn:active { transform: rotate(0deg) scale(.95); }
+
+.unit { box-shadow: 4px 4px 0 rgba(22,208,240,.16); transform: rotate(-0.35deg); }
+.unit:nth-child(even) { transform: rotate(0.35deg); }
+.unit:active { transform: rotate(0deg) scale(.98); }
+.unit.is-ready:hover { border-color: var(--ink-cyan); box-shadow: 4px 4px 0 rgba(22,208,240,.4); }
+.unit .meta strong { font-weight: 900; }
+
+.grade-btn.is-active,
+.term-btn.is-active {
+  border-color: var(--ink-orange);
+  background: rgba(255,122,26,.2);
+  box-shadow: var(--shadow-ink);
+}
+
+/* ── 主按鈕：實心墨塊 + 粗描邊 ─────────────────── */
+.btn { border-radius: var(--radius); font-weight: 900; letter-spacing: .02em; }
+.btn--primary {
+  background: var(--ink-orange);
+  color: #1A0B02;
+  border: var(--outline) solid #FFA45C;
+  box-shadow: 4px 4px 0 rgba(10,18,22,.55);
+}
+.btn--primary:active { box-shadow: 1px 1px 0 rgba(10,18,22,.55); transform: translate(3px, 3px) scale(1); }
+.btn--ghost {
+  border: var(--outline) solid rgba(22,208,240,.4);
+  background: rgba(22,208,240,.07);
+}
+.btn--round {
+  border: var(--outline) solid var(--ink-cyan);
+  background: rgba(22,208,240,.14);
+  border-radius: 50%;
+}
+
+/* ── 進度條：墨水流過的感覺 ─────────────────────── */
+.lesson-progress {
+  height: 12px; border-radius: 999px;
+  border: 2px solid rgba(22,208,240,.3);
+  background: rgba(10,18,22,.7);
+}
+.lesson-progress-bar {
+  background: linear-gradient(90deg, var(--ink-cyan), var(--ink-orange));
+  border-radius: 999px;
+}
+.lesson-title { font-weight: 900; letter-spacing: .01em; }
+
+/* ── 提示框：左側改成歪斜墨條 ───────────────────── */
+.lesson-callout,
+.quiz-explain,
+.tutor-answer {
+  border-left-width: 6px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* ── 答對：墨水炸開 ─────────────────────────────── */
+/* 用 ::after 疊一張潑墨 SVG，放大後淡出。
+   prefers-reduced-motion 時，基礎樣式的 animation:none !important 會蓋掉，
+   動畫自動停用，不需要在這裡重複宣告——但正因如此，
+   ::after 的「靜止狀態」必須是 opacity:0，否則動畫一停（或播完）
+   就會留下一團不會消失的綠墨擋住畫面。 */
+@keyframes splat-pop {
+  0%   { opacity: 0;   transform: translate(-50%, -50%) scale(.2) rotate(-18deg); }
+  35%  { opacity: .8;  }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.5) rotate(10deg); }
+}
+
+.quiz-option.is-correct,
+.solver-option.is-correct,
+.pair-item.is-matched { position: relative; }
+
+.quiz-option.is-correct::after,
+.solver-option.is-correct::after,
+.pair-item.is-matched::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  /* 尺寸要跟著高度走。用 width:150% 的話，整列寬的選項會噴出一團
+     上千 px 的綠墨蓋住半個畫面。 */
+  height: 240%; width: auto; aspect-ratio: 1;
+  max-width: 210px; max-height: 210px;
+  opacity: 0;                      /* 靜止狀態：看不見 */
+  transform: translate(-50%, -50%);
+  pointer-events: none;            /* 絕對不能擋住底下的按鈕 */
+  background: center / contain no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23A9D636'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3Ccircle cx='40' cy='176' r='6'/%3E%3Ccircle cx='12' cy='104' r='5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 求解器與配對的 is-correct / is-matched 只有真的選對才會加上，可以直接播。 */
+.solver-option.is-correct::after,
+.pair-item.is-matched::after { animation: splat-pop .55s ease-out 1; }
+
+/* 測驗不一樣：引擎在「答錯」時也會把 is-correct 標到正確選項上，
+   好讓小孩看到正解（g5-lesson-engine-20260807.js 第 471 行）。
+   直接播動畫的話，答錯反而會收到慶祝效果，訊息完全相反。
+   說明區的 .explain-good / .explain-bad 才是真正的判別依據，
+   所以用 :has() 往上問「這次是答對嗎」。
+   舊瀏覽器不支援 :has() 時整條規則失效 → 只是沒有動畫，不會壞掉。 */
+.quiz:has(.explain-good) .quiz-option.is-correct::after {
+  animation: splat-pop .55s ease-out 1;
+}
+
+/* ── 答錯：紅墨，不要動畫（不要懲罰感太強）──────── */
+.quiz-option.is-wrong,
+.solver-option.is-wrong,
+.pair-item.is-wrong {
+  border-color: var(--red);
+  background: rgba(255,51,85,.14);
+  box-shadow: 4px 4px 0 rgba(255,51,85,.2);
+}
+
+/* ── 標籤：改成歪斜的貼紙 ───────────────────────── */
+.unit .tag,
+.legend-item {
+  border-radius: 4px;
+  font-weight: 700;
+  transform: rotate(-2deg);
+  border: 2px solid currentColor;
+}
+
+/* ── 資料表 ─────────────────────────────────────── */
+.data-table th {
+  background: var(--ink-navy);
+  color: #EAF7FF;
+  font-weight: 900;
+  border-color: var(--ink-black);
+}
+.data-table td { border-color: rgba(22,208,240,.2); }
+
+/* ── 圖表／幾何容器：只換色和描邊，不加 transform ── */
+.chart-wrap, .geo-wrap, .venn-wrap, .sync-wrap,
+.solver, .frac-wrap, .group-wrap, .area-wrap, .bar-chart, .array-board {
+  border: var(--outline) solid rgba(22,208,240,.26);
+  border-radius: var(--radius);
+  background: rgba(8,16,20,.62);
+  box-shadow: var(--shadow-ink-cyan);
+  transform: none;              /* 明確擋掉，避免日後誤加 */
+}
+.chart-line { stroke-width: 5; }
+.chart-dot  { stroke: var(--ink-black); stroke-width: 4; }
+.geo-dot    { stroke: var(--ink-black); stroke-width: 4; }
+.sync-dot   { stroke: var(--ink-black); }
+.geo-poly   { stroke-width: 4; }
+.comp-outline { stroke-width: 5; }
+.tri-stick  { stroke-width: 9; }
+
+/* 長條／方塊改成平塗，不用漸層 */
+.bar { background: var(--ink-orange); border-radius: 4px 4px 0 0; border: 2px solid var(--ink-black); border-bottom: none; }
+.array-cell { background: var(--ink-cyan); border: 2px solid var(--ink-black); border-radius: 4px; }
+.frac-seg.is-filled { background: var(--ink-orange); border-color: var(--ink-black); border-radius: 3px; }
+.frac-bar.is-converted .frac-seg.is-filled { background: var(--ink-cyan); }
+.frac-bar.is-result   .frac-seg.is-filled { background: var(--green); }
+.group-box.is-taken .group-dot { background: var(--green); }
+.area-cell.is-both { background: var(--green); }
+
+/* ── 問老師：角色出場 ───────────────────────────── */
+.tutor-open {
+  border-radius: var(--radius);
+  border-width: var(--outline);
+  font-weight: 700;
+  transform: rotate(-0.5deg);
+}
+.tutor-open:active { transform: rotate(0) scale(.99); }
+
+/* 答案區左上角放主角頭像，讓「問老師」有個具體對象 */
+.tutor-answer {
+  position: relative;
+  padding-left: 92px;
+  min-height: 96px;
+}
+.tutor-answer::before {
+  content: '';
+  position: absolute;
+  left: 14px; top: 16px;
+  width: 64px; height: 64px;
+  background: center / contain no-repeat url('../assets/mascot-main-head-20261104.png');
+  filter: drop-shadow(2px 2px 0 rgba(10,18,22,.6));
+}
+@media (max-width: 520px) {
+  /* 手機寬度下頭像改成浮在上方，不壓縮文字寬度 */
+  .tutor-answer { padding-left: 20px; padding-top: 74px; }
+  .tutor-answer::before { top: 10px; left: 16px; width: 52px; height: 52px; }
+}
+
+/* ── 課程完成：Bingo 姿勢登場 ───────────────────── */
+.lesson-done {
+  position: relative;
+  padding-top: 230px;
+}
+.lesson-done::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 0;
+  transform: translateX(-50%);
+  width: 210px; height: 210px;
+  background: center bottom / contain no-repeat url('../assets/mascot-bingo-20261104.png');
+}
+.lesson-done h2 { font-weight: 900; color: var(--ink-orange); }
+/* 完成畫面的標題是置中的，左側墨條會變成一撇多餘的斜線 */
+.lesson-done h2::before { content: none; }
+
+/* ── 測驗說明：表情要跟著結果換 ─────────────────── */
+/* 預設困惑臉（答錯）。答對時再用 :has() 換成 Bingo，
+   否則小孩答對了卻看到一張困惑的臉，訊息是反的。 */
+.quiz-explain { position: relative; padding-left: 92px; min-height: 92px; }
+.quiz-explain::before {
+  content: '';
+  position: absolute;
+  left: 14px; top: 16px;
+  width: 62px; height: 62px;
+  background: center / contain no-repeat url('../assets/mascot-confused-head-20261104.png');
+  filter: drop-shadow(2px 2px 0 rgba(10,18,22,.6));
+}
+.quiz-explain:has(.explain-good)::before {
+  background-image: url('../assets/mascot-bingo-head-20261104.png');
+}
+@media (max-width: 520px) {
+  .quiz-explain { padding-left: 20px; padding-top: 72px; }
+  .quiz-explain::before { top: 10px; left: 16px; width: 50px; height: 50px; }
+}
+
+/* ── 返回鍵 ─────────────────────────────────────── */
+.back-link { font-weight: 700; }
+.back-link:active { color: var(--ink-orange); }
+
+/* ── 家長入口維持低調，不要被主題變醒目 ─────────── */
+.parent-link a { color: rgba(143,168,178,.5); }

@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════════════════════
+   全站墨水街頭風 — 共用核心（2026-11-04）
+
+   學霸星球底下 9 個 App 原本各自開發，配色和質感都不一樣。
+   這一份把它們拉到同一個視覺系統上。
+
+   載入方式：放在各 App 原本樣式「之後」。
+     首頁（根目錄）     <link rel="stylesheet" href="splat-core-20261104.css">
+     子 App（下一層）   <link rel="stylesheet" href="../splat-core-20261104.css">
+   本檔內的 url() 一律相對於本檔（根目錄），所以兩種情境都指得到 assets/。
+   拿掉該行 <link> 即完全回到各 App 原本的樣子。
+
+   能這樣做的原因：各 App 雖然 class 名稱不同，但顏色幾乎都走 CSS 變數，
+   而且命名高度重複（--bg / --bg2 / --text / --dim / --cyan / --green …）。
+   把變數換掉，大部分畫面就跟著換了，不必逐一改 class。
+
+   數學 App 另有自己的 g5-splat-theme-20261104.css，處理它專屬的教學元件。
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* 色票取自角色實圖（V3 主角），不是另外配的 */
+  --ink-cyan:   #16D0F0;   /* 主墨：頭髮、鞋子 */
+  --ink-orange: #FF7A1A;   /* 對墨：噴槍上的墨漬 */
+  --ink-navy:   #4C8FD6;   /* 帽子藍（提亮過，深色底才看得見）*/
+  --ink-teal:   #6AB2B5;   /* 斗篷青灰 */
+  --ink-lime:   #A9D636;   /* 上衣黃綠 */
+  --ink-gold:   #FFB03A;   /* 帽徽金 */
+  --ink-red:    #FF3355;   /* 錯誤。刻意跟橘拉開，兩者常同時出現 */
+  --ink-black:  #0A1216;
+  --ink-bg:     #0B1418;
+  --ink-bg2:    #122028;
+  --ink-text:   #E9F6FA;
+  --ink-dim:    #8FA8B2;
+
+  /* ── 以下把各 App 原有的變數名稱全部對應過來 ──
+     名稱來自：首頁、能源、自然、社會、舒爾特。
+     某個 App 沒用到的變數留著也無害。 */
+
+  /* 底色與文字（自然／社會／舒爾特／能源 共用這組命名） */
+  --bg:        var(--ink-bg);
+  --bg2:       var(--ink-bg2);
+  --text:      var(--ink-text);
+  --dim:       var(--ink-dim);
+
+  /* 首頁自己的一組 */
+  --bg-dark:   var(--ink-bg);
+  --bg-card:   var(--ink-bg2);
+  --bg-card2:  #0F2420;
+  --text-main: var(--ink-text);
+  --text-dim:  var(--ink-dim);
+  --neon-cyan:   var(--ink-cyan);
+  --neon-pink:   var(--ink-orange);
+  --neon-purple: var(--ink-navy);
+  --neon-green:  var(--ink-lime);
+  --neon-gold:   var(--ink-gold);
+
+  /* 能源實驗室／舒爾特的額外色 */
+  --cyan:   var(--ink-cyan);
+  --yellow: var(--ink-gold);
+  --gold:   var(--ink-gold);
+  --orange: var(--ink-orange);
+  --green:  var(--ink-lime);
+  --accent: var(--ink-lime);
+  --red:    var(--ink-red);
+  --purple: var(--ink-navy);
+  --blue:   var(--ink-navy);
+
+  --ink-outline: 3px;
+  --ink-shadow:  5px 5px 0 rgba(255, 122, 26, .30);
+  --ink-shadow-cyan: 5px 5px 0 rgba(22, 208, 240, .26);
+}
+
+/* ── 底色與網點 ─────────────────────────────────── */
+body {
+  background:
+    radial-gradient(760px 520px at 12% -6%,  rgba(22,208,240,.13) 0%, transparent 62%),
+    radial-gradient(680px 560px at 96% 4%,   rgba(255,122,26,.11)  0%, transparent 58%),
+    radial-gradient(900px 700px at 50% 108%, rgba(76,143,214,.16)  0%, transparent 60%),
+    linear-gradient(170deg, #0B1418 0%, #0E1C22 52%, #0A1216 100%) !important;
+  background-attachment: fixed !important;
+  color: var(--ink-text);
+}
+
+/* 網點。position:fixed + pointer-events:none，不影響任何觸控判定。
+   z-index 用 0，壓在內容下面。 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(22,208,240,.09) 1px, transparent 1.2px);
+  background-size: 9px 9px;
+}
+
+/* 星空畫布跟街頭墨水風格衝突（一個是外太空，一個是都市塗鴉），
+   改用上面的網點。首頁和國語 App 各有一張。 */
+canvas#stars-canvas,
+canvas#starfield,
+canvas.stars { display: none !important; }
+
+/* ── 字重：墨水風的字要粗 ───────────────────────── */
+h1, h2, h3, h4 { font-weight: 900; letter-spacing: .01em; }
+
+/* ── 潑墨：給答對／成功狀態用 ───────────────────── */
+/* 靜止狀態一定要 opacity:0。
+   prefers-reduced-motion 時瀏覽器會停掉動畫，若靜止狀態是不透明，
+   畫面上會留一團永遠不消失的墨漬。 */
+@keyframes ink-splat-pop {
+  0%   { opacity: 0;  transform: translate(-50%, -50%) scale(.2) rotate(-18deg); }
+  35%  { opacity: .8; }
+  100% { opacity: 0;  transform: translate(-50%, -50%) scale(1.5) rotate(10deg); }
+}
+
+.ink-splat-host { position: relative; }
+.ink-splat-host::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  height: 240%; width: auto; aspect-ratio: 1;
+  max-width: 210px; max-height: 210px;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: center / contain no-repeat
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23A9D636'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3Ccircle cx='40' cy='176' r='6'/%3E%3Ccircle cx='12' cy='104' r='5'/%3E%3C/g%3E%3C/svg%3E");
+}
+.ink-splat-host.is-splatting::after { animation: ink-splat-pop .55s ease-out 1; }
+
+/* ── 可重複使用的角色圖 ─────────────────────────── */
+.ink-mascot {
+  background: center / contain no-repeat;
+  pointer-events: none;
+}
+.ink-mascot--main     { background-image: url('assets/mascot-main-20261104.png'); }
+.ink-mascot--bingo    { background-image: url('assets/mascot-bingo-20261104.png'); }
+.ink-mascot--confused { background-image: url('assets/mascot-confused-20261104.png'); }
+.ink-mascot--main-head     { background-image: url('assets/mascot-main-head-20261104.png'); }
+.ink-mascot--bingo-head    { background-image: url('assets/mascot-bingo-head-20261104.png'); }
+.ink-mascot--confused-head { background-image: url('assets/mascot-confused-head-20261104.png'); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

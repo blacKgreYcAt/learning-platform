@@ -1,0 +1,224 @@
+/* ═══════════════════════════════════════════════════════════
+   學霸星球首頁 — 墨水風橋接層（2026-11-04）
+
+   載入順序：首頁內嵌 <style> → splat-core-20261104.css → 本檔。
+
+   共用核心只換得掉「走 CSS 變數」的顏色。首頁的霓虹感大多來自
+   寫死的 rgba 發光（box-shadow: 0 0 40px rgba(255,0,170,.5) 這種），
+   變數換掉也不會變，必須逐條壓平成不模糊的錯位陰影。
+
+   這些 class 名稱是首頁專屬的，所以規則放在獨立檔案、只有首頁載入，
+   不會波及其他 App。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 一律不要光暈 ───────────────────────────────── */
+.nav-logo,
+.nav-logo span,
+.nav-links a:hover,
+.hero-title,
+.title-line1,
+.title-line2,
+.section-title,
+.stat-number { text-shadow: none !important; }
+
+.hero-badge {
+  animation: none !important;            /* 原本是一直呼吸的綠光 */
+  box-shadow: 3px 3px 0 rgba(10,18,22,.6) !important;
+  border: 2px solid var(--ink-lime) !important;
+  border-radius: 4px !important;
+  color: var(--ink-lime) !important;
+  background: rgba(169,214,54,.12) !important;
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+
+/* 背景裝飾：光球與地平線格線都是太空感，關掉 */
+.hero-orb,
+.grid-floor,
+.card-glow-bg,
+.neon-line { display: none !important; }
+
+/* ── 標題 ───────────────────────────────────────── */
+.hero-title, .section-title { font-weight: 900; letter-spacing: -0.01em; }
+.title-line1 { color: var(--ink-text); }
+.title-line2 {
+  background: linear-gradient(100deg, var(--ink-cyan) 0%, var(--ink-cyan) 48%, var(--ink-orange) 52%, var(--ink-orange) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-title { transform: rotate(-1.2deg); }
+
+.section-tag {
+  color: var(--ink-orange) !important;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+/* ── 按鈕：實心墨塊，按下去會「沉」進陰影 ───────── */
+.btn-primary {
+  background: var(--ink-orange) !important;
+  color: #1A0B02 !important;
+  border: 3px solid #FFA45C !important;
+  border-radius: 8px !important;
+  font-weight: 900 !important;
+  box-shadow: 4px 4px 0 rgba(10,18,22,.6) !important;
+  transition: transform .12s, box-shadow .12s !important;
+}
+.btn-primary:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 rgba(10,18,22,.6) !important; }
+.btn-primary:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 rgba(10,18,22,.6) !important; }
+
+.btn-secondary {
+  background: rgba(22,208,240,.08) !important;
+  color: var(--ink-cyan) !important;
+  border: 3px solid var(--ink-cyan) !important;
+  border-radius: 8px !important;
+  font-weight: 900 !important;
+  box-shadow: 4px 4px 0 rgba(22,208,240,.22) !important;
+  transition: transform .12s, box-shadow .12s !important;
+}
+.btn-secondary:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 rgba(22,208,240,.3) !important; }
+.btn-secondary:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 rgba(22,208,240,.22) !important; }
+
+/* ── App 卡片：粗框、利角、歪斜、錯位陰影 ───────── */
+/* 兩件事會跟傾斜打架，都得處理：
+   1. 卡片同時掛著 .reveal/.visible，捲動淡入時會寫 transform: translateY(...)，
+      把我的旋轉整個蓋掉（實測前三張完全沒轉）。
+   2. hover 的 transform 也是整組取代，不是疊加。
+   所以改用 :not(:hover) / :hover 兩段互斥的規則，各自把位移和旋轉寫完整。
+   代價是卡片不再「滑上來」，只剩淡入——換到穩定的傾斜，划算。 */
+.app-card {
+  border-radius: 10px !important;
+  border: 3px solid rgba(22,208,240,.34) !important;
+  box-shadow: 6px 6px 0 rgba(255,122,26,.26) !important;
+  transition: transform .2s, box-shadow .2s, border-color .2s !important;
+}
+.app-card:not(:hover)              { transform: translateY(0) rotate(-0.6deg) !important; }
+.app-card:nth-child(even):not(:hover) { transform: translateY(0) rotate(0.6deg) !important; }
+
+.app-card:hover {
+  border-color: var(--ink-cyan) !important;
+  box-shadow: 9px 9px 0 rgba(255,122,26,.4) !important;
+  transform: translateY(-8px) rotate(-0.6deg) !important;
+}
+.app-card:nth-child(even):hover { transform: translateY(-8px) rotate(0.6deg) !important; }
+
+.card-title { font-weight: 900 !important; }
+.card-badge {
+  border-radius: 4px !important;
+  border-width: 2px !important;
+  box-shadow: none !important;
+  font-weight: 700;
+  transform: rotate(-3deg);
+}
+.tag, .card-tags .tag {
+  border-radius: 4px !important;
+  border: 2px solid currentColor !important;
+  font-weight: 700;
+}
+.card-launch {
+  border-radius: 6px !important;
+  border: 2px solid currentColor !important;
+  box-shadow: none !important;
+  font-weight: 900;
+}
+.card-launch:hover { box-shadow: 3px 3px 0 rgba(10,18,22,.5) !important; }
+
+/* ── 數據卡／功能卡 ─────────────────────────────── */
+.stat-card, .feature-card {
+  border-radius: 10px !important;
+  border: 3px solid rgba(22,208,240,.26) !important;
+  box-shadow: 5px 5px 0 rgba(22,208,240,.18) !important;
+}
+.stat-card:hover, .feature-card:hover {
+  border-color: var(--ink-cyan) !important;
+  box-shadow: 7px 7px 0 rgba(22,208,240,.3) !important;
+  transform: translateY(-4px) !important;
+}
+.stat-number { font-weight: 900; color: var(--ink-orange) !important; }
+
+/* ── 年級選擇彈窗 ───────────────────────────────── */
+.grade-modal-content {
+  border-radius: 10px !important;
+  border: 3px solid var(--ink-cyan) !important;
+  box-shadow: 8px 8px 0 rgba(255,122,26,.3) !important;
+}
+.grade-modal-title { font-weight: 900; }
+.grade-modal .grade-btn,
+.grade-buttons .grade-btn {
+  border-radius: 8px !important;
+  border-width: 3px !important;
+  font-weight: 900;
+}
+
+/* ── 行動呼籲區塊 ───────────────────────────────── */
+.cta-box {
+  border-radius: 12px !important;
+  border: 3px solid rgba(255,122,26,.4) !important;
+  box-shadow: 8px 8px 0 rgba(22,208,240,.2) !important;
+}
+.cta-title { font-weight: 900; }
+
+/* ── 圖示：emoji 換成手繪墨水圖 ─────────────────── */
+/* emoji 由系統字型算繪，吃不到 CSS 的 color，是全站唯一還留著
+   蘋果風格的東西。做法是把字級歸零把字元藏掉，再用 ::before 放圖。
+   卡片都有語意 class（.card-classics 等），不必靠 :nth-child，
+   日後增刪卡片也不會對錯。 */
+.card-icon {
+  font-size: 0 !important;
+  line-height: 0;
+  filter: none !important;        /* 原本是 drop-shadow 彩色光暈 */
+}
+.card-icon::before {
+  content: '';
+  display: inline-block;
+  width: 84px; height: 84px;
+  background: center / contain no-repeat;
+}
+.card-classics        .card-icon::before { background-image: url('assets/icon-classics-20261104.png'); }
+.card-math            .card-icon::before { background-image: url('assets/icon-mathlogic-20261104.png'); }
+.card-schulte         .card-icon::before { background-image: url('assets/icon-schulte-20261104.png'); }
+.card-math-science    .card-icon::before { background-image: url('assets/icon-mathscience-20261104.png'); }
+.card-natural-science .card-icon::before { background-image: url('assets/icon-natural-20261104.png'); }
+.card-social          .card-icon::before { background-image: url('assets/icon-social-20261104.png'); }
+.card-chinese         .card-icon::before { background-image: url('assets/icon-chinese-20261104.png'); }
+.card-energy          .card-icon::before { background-image: url('assets/icon-energy-20261104.png'); }
+.card-english         .card-icon::before { background-image: url('assets/icon-english-20261104.png'); }
+
+/* 特色卡的四顆小圖示。這四張沒有各自的 class，只能靠順序；
+   它們是寫死在 HTML 裡的四個區塊，不是資料產生的，順序不會變。 */
+.feature-icon {
+  font-size: 0 !important;
+  line-height: 0;
+}
+.feature-icon::before {
+  content: '';
+  display: inline-block;
+  width: 40px; height: 40px;
+  background: center / contain no-repeat;
+}
+.features-grid > *:nth-child(1) .feature-icon::before { background-image: url('assets/icon-game-20261104.png'); }
+.features-grid > *:nth-child(2) .feature-icon::before { background-image: url('assets/icon-device-20261104.png'); }
+.features-grid > *:nth-child(3) .feature-icon::before { background-image: url('assets/icon-brain-20261104.png'); }
+.features-grid > *:nth-child(4) .feature-icon::before { background-image: url('assets/icon-rocket-20261104.png'); }
+
+/* ── 捲動提示 ───────────────────────────────────── */
+/* .scroll-hint 本身掛 opacity:.6 的彈跳動畫，裡面用 --ink-dim，
+   實際合成後只剩 3.43:1（12px 要 4.5）。這是既有設定，不是主題造成的，
+   但它是首頁唯一的「往下看」提示，順手修掉。
+   改用主文字色就有 6.58:1，動畫和透明度都不用動。 */
+.scroll-hint, .scroll-hint * { color: var(--ink-text) !important; }
+
+/* ── 主角登場 ───────────────────────────────────── */
+/* 只在夠寬的畫面出現；窄螢幕會跟標題與按鈕擠在一起。 */
+@media (min-width: 900px) {
+  .hero { position: relative; }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: 3%; bottom: 8%;
+    width: 190px; height: 250px;
+    background: right bottom / contain no-repeat url('assets/mascot-main-20261104.png');
+    pointer-events: none;
+    z-index: 2;
+  }
+}

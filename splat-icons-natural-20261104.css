@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════════════════════
+   自然科綜合版 — 章節圖示（2026-11-04）
+
+   載入順序：內嵌 <style> → splat-core → splat-apps → 本檔。
+
+   為什麼要獨立一支、不併進 splat-apps：
+   自然科和社會科的章節卡用同一組 class 和同一組 data-chapter 值
+   （都是 .chapter-card[data-chapter="1"]），但要換成不同的圖
+   —— 自然科的篇章一是「力與運動」，社會科的篇章一是「大地觀測」。
+   共用檔會互相蓋到，所以兩支各自獨立，只有自己那支 App 載入。
+   ═══════════════════════════════════════════════════════════ */
+
+.chapter-icon {
+  font-size: 0 !important;        /* emoji 吃不到 color，只能把字級歸零藏掉 */
+  line-height: 0;
+}
+.chapter-icon::before {
+  content: '';
+  display: inline-block;
+  width: 52px; height: 52px;
+  background: center / contain no-repeat;
+}
+
+/* 一律照原本的 emoji 一對一換，不順手改語意——
+   圖示代表哪個篇章是你定的，我只換算繪方式。 */
+.chapter-card[data-chapter="1"] .chapter-icon::before { background-image: url('assets/icon-energy-20261104.png'); } /* ⚡ 力與運動 */
+.chapter-card[data-chapter="2"] .chapter-icon::before { background-image: url('assets/icon-force-20261104.png');  } /* 💪 動力傳送 */
+.chapter-card[data-chapter="3"] .chapter-icon::before { background-image: url('assets/icon-water-20261104.png');  } /* 💧 液體與壓力 */
+.chapter-card[data-chapter="4"] .chapter-icon::before { background-image: url('assets/icon-earth-20261104.png');  } /* 🌍 大地科學 */
+.chapter-card[data-chapter="5"] .chapter-icon::before { background-image: url('assets/icon-sun-20261104.png');    } /* ☀️ 能源基礎 */
+.chapter-card[data-chapter="6"] .chapter-icon::before { background-image: url('assets/icon-gear-20261104.png');   } /* ⚙️ 電與節能 */
+
+
+/* ── 任務卡（進入篇章後的那一層）─────────────────── */
+/* 這 18 張卡沒有 class，但每張的 onclick 參數是唯一的，
+   用屬性選擇器精準比對，比 :nth-child 穩。 */
+.mission-icon {
+  font-size: 0 !important;
+  line-height: 0;
+}
+.mission-icon::before {
+  content: '';
+  display: inline-block;
+  width: 44px; height: 44px;
+  background: center / contain no-repeat;
+}
+
+[onclick="startGame(1,1)"] .mission-icon::before { background-image: url('assets/icon-energy-20261104.png');     } /* ⚡ 力的特性 */
+[onclick="startGame(1,2)"] .mission-icon::before { background-image: url('assets/icon-ruler-20261104.png');      } /* 📏 力的測量 */
+[onclick="startGame(1,3)"] .mission-icon::before { background-image: url('assets/icon-rocket-20261104.png');     } /* 🚀 生活中的力 */
+[onclick="startGame(2,1)"] .mission-icon::before { background-image: url('assets/icon-force-20261104.png');      } /* 💪 動力傳送基礎 */
+[onclick="startGame(2,2)"] .mission-icon::before { background-image: url('assets/icon-microscope-20261104.png'); } /* 🔬 液體傳力科學 */
+[onclick="startGame(2,3)"] .mission-icon::before { background-image: url('assets/icon-crane-20261104.png');      } /* 🏗 生活應用設計 */
+[onclick="startGame(3,1)"] .mission-icon::before { background-image: url('assets/icon-water-20261104.png');      } /* 💧 連通管現象 */
+[onclick="startGame(3,2)"] .mission-icon::before { background-image: url('assets/icon-wave-20261104.png');       } /* 🌊 虹吸現象 */
+[onclick="startGame(3,3)"] .mission-icon::before { background-image: url('assets/icon-splash-20261104.png');     } /* 💦 引水裝置 */
+[onclick="startGame(4,1)"] .mission-icon::before { background-image: url('assets/icon-rock-20261104.png');       } /* 🪨 認識大地 */
+[onclick="startGame(4,2)"] .mission-icon::before { background-image: url('assets/icon-pickaxe-20261104.png');    } /* ⛏ 地殼的變化 */
+[onclick="startGame(4,3)"] .mission-icon::before { background-image: url('assets/icon-earth-20261104.png');      } /* 🌍 地震與保護 */
+[onclick="startGame(5,1)"] .mission-icon::before { background-image: url('assets/icon-sun-20261104.png');        } /* ☀️ 認識能源 */
+[onclick="startGame(5,2)"] .mission-icon::before { background-image: url('assets/icon-gear-20261104.png');       } /* ⚙️ 能源轉換 */
+[onclick="startGame(5,3)"] .mission-icon::before { background-image: url('assets/icon-bulb-20261104.png');       } /* 💡 電與電路 */
+[onclick="startGame(6,1)"] .mission-icon::before { background-image: url('assets/icon-energy-20261104.png');     } /* ⚡ 串聯與並聯 */
+[onclick="startGame(6,2)"] .mission-icon::before { background-image: url('assets/icon-house-20261104.png');      } /* 🏠 家庭電路 */
+[onclick="startGame(6,3)"] .mission-icon::before { background-image: url('assets/icon-recycle-20261104.png');    } /* ♻️ 節約能源 */

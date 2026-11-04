@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════════════════════
+   能源電力廠 — 任務圖示（2026-11-04）
+
+   載入順序：內嵌 <style> → splat-core → splat-apps → 本檔。
+
+   三張任務卡各有 .m1 / .m2 / .m3，是穩定的鉤子，不必靠 :nth-child。
+   ═══════════════════════════════════════════════════════════ */
+
+.mission-icon {
+  font-size: 0 !important;        /* emoji 吃不到 color，只能把字級歸零藏掉 */
+  line-height: 0;
+}
+.mission-icon::before {
+  content: '';
+  display: inline-block;
+  width: 52px; height: 52px;
+  background: center / contain no-repeat;
+}
+
+.mission-card.m1 .mission-icon::before { background-image: url('assets/icon-energy-20261104.png');     } /* ⚡ 黑暗村莊電路解謎 */
+.mission-card.m2 .mission-icon::before { background-image: url('assets/icon-microscope-20261104.png'); } /* 🔬 抓出絕緣體 */
+.mission-card.m3 .mission-icon::before { background-image: url('assets/icon-natural-20261104.png');    } /* 🌿 節能小尖兵 */

@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════════
+   數感邏輯（math-logic-app）— 墨水風橋接層（2026-11-04）
+
+   載入順序：Vite 產出的 index-*.css → splat-core-20261104.css → 本檔。
+
+   這支是全站最極簡的一個：純黑底、單一橘色重點（#FF9F0A）、
+   綠/紅只用在對錯提示。色相其實已經很接近全站的橘，
+   差別在「純黑 + 無描邊」太素，跟其他 App 的粗框質感對不起來。
+
+   它用 Tailwind v4 的 theme 變數，但橘色是寫成 arbitrary class
+   （.bg-[#FF9F0A] / .text-[#FF9F0A] / .border-[#FF9F0A]），不吃變數，
+   所以那三個要各別覆寫。
+   ═══════════════════════════════════════════════════════════ */
+
+:root, :host {
+  --color-black: #0A1216;        /* 純黑改成帶青的近黑，跟全站一致 */
+  --color-green-400: #BCE04A;
+  --color-green-500: #A9D636;
+  --color-red-400:   #FF6B82;
+  --color-red-500:   #FF3355;
+}
+
+/* 重點色：原本的 #FF9F0A 偏黃，往全站的對墨橘靠 */
+.bg-\[\#FF9F0A\]     { background-color: #FF7A1A !important; }
+.text-\[\#FF9F0A\]   { color: #FF9F3A !important; }   /* 文字用亮一階，深底才讀得清楚 */
+.border-\[\#FF9F0A\] { border-color: #FF7A1A !important; }
+
+/* 選單按鈕：原本只有 1px 細框，補成粗描邊＋錯位陰影。
+   實際的 class 是 .rounded-2xl + .border + .border-white/10（不是 border-[#FF9F0A]）。 */
+.border, .border-t, .border-b { border-color: rgba(22,208,240,.26); }
+
+button.rounded-2xl {
+  border-width: 2px !important;
+  border-radius: 10px !important;
+  box-shadow: 4px 4px 0 rgba(255,122,26,.22) !important;
+}
+button.rounded-2xl:active {
+  box-shadow: 1px 1px 0 rgba(255,122,26,.22) !important;
+}
+
+/* 這支刻意用細體（font-light / font-extralight）做極簡感，
+   標題不加粗，避免破壞它原本的排版個性。 */

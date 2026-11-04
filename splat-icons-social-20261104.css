@@ -1,0 +1,74 @@
+/* ═══════════════════════════════════════════════════════════
+   社會科探險 — 章節圖示（2026-11-04）
+
+   載入順序：內嵌 <style> → splat-core → splat-apps → 本檔。
+
+   跟自然科分開兩支的原因：兩支 App 的章節卡用同一組 class 和同一組
+   data-chapter 值（都是 .chapter-card[data-chapter="1"]），但要換不同的圖。
+   放進共用檔會互相蓋掉，所以各自獨立，只有自己那支載入。
+   ═══════════════════════════════════════════════════════════ */
+
+.chapter-icon {
+  font-size: 0 !important;        /* emoji 吃不到 color，只能把字級歸零藏掉 */
+  line-height: 0;
+}
+.chapter-icon::before {
+  content: '';
+  display: inline-block;
+  width: 52px; height: 52px;
+  background: center / contain no-repeat;
+}
+
+.chapter-card[data-chapter="1"] .chapter-icon::before { background-image: url('assets/icon-earth-20261104.png');  } /* 🌍 大地觀測 */
+.chapter-card[data-chapter="2"] .chapter-icon::before { background-image: url('assets/icon-crop-20261104.png');   } /* 🌾 食農生活 */
+.chapter-card[data-chapter="3"] .chapter-icon::before { background-image: url('assets/icon-social-20261104.png'); } /* 🏛️ 家鄉文化 */
+
+
+/* ── 任務卡（進入篇章後的那一層）─────────────────── */
+/* 任務卡同時有 data-chapter 和 data-task，兩個一起指定就不會
+   跟上面的篇章卡（只有 data-chapter）混到。 */
+.mission-icon {
+  font-size: 0 !important;
+  line-height: 0;
+}
+.mission-icon::before {
+  content: '';
+  display: inline-block;
+  width: 44px; height: 44px;
+  background: center / contain no-repeat;
+}
+
+.mission-card[data-chapter="1"][data-task="1"] .mission-icon::before { background-image: url('assets/icon-water-20261104.png');   } /* 💧 水資源時光機 */
+.mission-card[data-chapter="1"][data-task="2"] .mission-icon::before { background-image: url('assets/icon-tree-20261104.png');    } /* 🌲 山林演變故事 */
+.mission-card[data-chapter="1"][data-task="3"] .mission-icon::before { background-image: url('assets/icon-fish-20261104.png');    } /* 🐟 漁業轉型挑戰 */
+.mission-card[data-chapter="2"][data-task="1"] .mission-icon::before { background-image: url('assets/icon-tractor-20261104.png'); } /* 🚜 農耕時光機 */
+.mission-card[data-chapter="2"][data-task="2"] .mission-icon::before { background-image: url('assets/icon-veg-20261104.png');     } /* 🥬 食安衛士 */
+.mission-card[data-chapter="3"][data-task="1"] .mission-icon::before { background-image: url('assets/icon-social-20261104.png');  } /* 🏛 人文古蹟探險 */
+.mission-card[data-chapter="3"][data-task="2"] .mission-icon::before { background-image: url('assets/icon-mask-20261104.png');    } /* 🎭 民俗文化祭典 */
+.mission-card[data-chapter="3"][data-task="3"] .mission-icon::before { background-image: url('assets/icon-star-20261104.png');    } /* 🌟 社區故事工坊 */
+
+
+/* ── 答題畫面的輪播圖示 ─────────────────────────── */
+/* 這顆是 JS 依題號輪流換的，emoji 直接寫在 textContent 裡，
+   CSS 沒辦法用「內容」當選擇器。所以 index.html 那段改成
+   同時寫一個 data-icon，這裡再照 data-icon 對應圖檔。
+   emoji 仍留在 textContent 當備援：本檔沒載入時字級不會被歸零，
+   看到的還是原本的 emoji，不會變成空白。 */
+.quiz-icon {
+  font-size: 0 !important;
+  line-height: 0;
+}
+.quiz-icon::before {
+  content: '';
+  display: inline-block;
+  width: 56px; height: 56px;
+  background: center / contain no-repeat;
+}
+.quiz-icon[data-icon="water"]::before   { background-image: url('assets/icon-water-20261104.png');   }
+.quiz-icon[data-icon="tree"]::before    { background-image: url('assets/icon-tree-20261104.png');    }
+.quiz-icon[data-icon="fish"]::before    { background-image: url('assets/icon-fish-20261104.png');    }
+.quiz-icon[data-icon="tractor"]::before { background-image: url('assets/icon-tractor-20261104.png'); }
+.quiz-icon[data-icon="veg"]::before     { background-image: url('assets/icon-veg-20261104.png');     }
+.quiz-icon[data-icon="social"]::before  { background-image: url('assets/icon-social-20261104.png');  }
+.quiz-icon[data-icon="mask"]::before    { background-image: url('assets/icon-mask-20261104.png');    }
+.quiz-icon[data-icon="star"]::before    { background-image: url('assets/icon-star-20261104.png');    }

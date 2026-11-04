@@ -1,0 +1,41 @@
+/* ═══════════════════════════════════════════════════════════
+   舒爾特方格 — 難度圖示（2026-11-04）
+
+   載入順序：內嵌 <style> → splat-core → splat-apps → 本檔。
+
+   四張難度卡沒有各自的 class，但卡片裡的 id 是綁難度的
+   （#best-easy / #best-medium / #best-hard / #best-distraction），
+   用 :has() 反向抓父卡片，比 :nth-child 穩——日後調整卡片順序也不會對錯。
+   :has() 需要 Safari 15.4+；不支援的瀏覽器會整條忽略，
+   維持原本的 emoji，不會變成空白。
+
+   前三個難度原本是 🟢🟡🔴 三顆純色圓點。那種東西不值得生圖，
+   直接用潑墨形狀的 SVG 上色，跟全站答對時的墨點同一個形狀。
+   ═══════════════════════════════════════════════════════════ */
+
+.difficulty-card .card-icon {
+  font-size: 0 !important;        /* emoji 吃不到 color，只能把字級歸零藏掉 */
+  line-height: 0;
+}
+.difficulty-card .card-icon::before {
+  content: '';
+  display: inline-block;
+  width: 46px; height: 46px;
+  background: center / contain no-repeat;
+}
+
+/* 入門／標準／進階：同一個墨點形狀，換顏色 */
+.difficulty-card:has(#best-easy) .card-icon::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23A9D636'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3C/g%3E%3C/svg%3E");
+}
+.difficulty-card:has(#best-medium) .card-icon::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23F6AA43'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3C/g%3E%3C/svg%3E");
+}
+.difficulty-card:has(#best-hard) .card-icon::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23FF3355'%3E%3Cpath d='M100 14c17 0 25 13 37 21s31 2 40 15-6 27-2 41 15 21 10 35-24 11-33 21-12 25-26 27-24-10-37-10-24 14-38 9-15-20-24-30-23-9-24-24 12-21 13-35-8-24 1-34 25-2 37-12S83 14 100 14z'/%3E%3Ccircle cx='28' cy='34' r='9'/%3E%3Ccircle cx='178' cy='56' r='7'/%3E%3Ccircle cx='166' cy='172' r='10'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 干擾級原本是 ⚡，換成生成的閃電圖 */
+.difficulty-card:has(#best-distraction) .card-icon::before {
+  background-image: url('assets/icon-energy-20261104.png');
+}

@@ -162,6 +162,10 @@
       .home-title { font-size:2rem; }
     }
   </style>
+  <!-- 全站墨水街頭風外觀層。必須排在本頁原有樣式之後；拿掉這一行即回到原樣。 -->
+  <link rel="stylesheet" href="../splat-core-20261104.css">
+  <link rel="stylesheet" href="../splat-apps-20261104.css">
+  <link rel="stylesheet" href="../splat-icons-social-20261104.css">
 </head>
 <body>
 
@@ -978,7 +982,16 @@ function renderQuestion() {
   el.innerHTML = '';
   const iconDiv = document.createElement('div');
   iconDiv.className = 'quiz-icon';
-  iconDiv.textContent = ['💧', '🌲', '🐟', '🚜', '🥬', '🏛️', '🎭', '🌟'][currentQuestion % 8];
+  // 圖示改成墨水風的圖檔。emoji 仍然寫進 textContent 當備援——
+  // 樣式表沒載入時至少看得到東西，不會變成空白方塊；
+  // 載入時 splat-icons-social-20261104.css 會把字級歸零，改用 data-icon 對應圖。
+  const QUIZ_ICONS = [
+    ['💧', 'water'], ['🌲', 'tree'],   ['🐟', 'fish'], ['🚜', 'tractor'],
+    ['🥬', 'veg'],   ['🏛️', 'social'], ['🎭', 'mask'], ['🌟', 'star'],
+  ];
+  const [quizEmoji, quizIcon] = QUIZ_ICONS[currentQuestion % 8];
+  iconDiv.textContent = quizEmoji;
+  iconDiv.dataset.icon = quizIcon;
   el.appendChild(iconDiv);
 
   const qDiv = document.createElement('div');

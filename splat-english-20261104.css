@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════════════════════
+   魔法英文島（english-app）— 墨水風橋接層（2026-11-04）
+
+   載入順序：Vite 產出的 index-*.css → splat-core-20261104.css → 本檔。
+
+   這支是 Tailwind build，顏色全部寫死在 utility class 裡，沒有語意化變數，
+   所以共用核心的變數覆寫對它無效。而且它原本是「淺色主題」
+   （底色 #e0f7fa、白卡片、深灰字），是全站唯一的淺色，衝突最大。
+
+   做法：Tailwind 只會產出實際用到的 class，數量有限且可窮舉。
+   我把這支 CSS 裡出現過的每一個顏色 class 都逐一對應過來，
+   不是靠通用規則碰運氣，所以不會有「漏掉某一頁變成深底深字」的情況。
+   完整清單是從 english-app/assets/index-3b19ebc1.css 直接抓出來的。
+
+   ⚠ 實心按鈕（bg-blue-500 等）上面是白字。
+     如果把它們換成亮青 #16D0F0，白字會幾乎看不見，
+     所以實心底色一律選「深到足以襯白字」的版本，
+     亮色只用在文字、邊框這些本來就不配白字的地方。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 頁面底：讓共用核心的墨水底透出來 ───────────── */
+.bg-\[\#e0f7fa\],
+.bg-\[\#f0f9ff\] { background-color: transparent !important; }
+
+/* ── 面板底 ─────────────────────────────────────── */
+.bg-white     { background-color: #132530 !important; }
+.bg-gray-50   { background-color: #0F1D24 !important; }
+.bg-gray-200  { background-color: #1C2F39 !important; }
+.bg-gray-300  { background-color: #27424E !important; }
+.bg-slate-800 { background-color: #122028 !important; }
+.bg-slate-900 { background-color: #0B1418 !important; }
+
+/* ── 淡色提示底：改成同色系的低透明度墨 ─────────── */
+.bg-blue-50    { background-color: rgba(22,208,240,.10) !important; }
+.bg-yellow-50  { background-color: rgba(255,176,58,.09) !important; }
+.bg-yellow-100 { background-color: rgba(255,176,58,.15) !important; }
+.bg-yellow-200 { background-color: rgba(255,176,58,.22) !important; }
+.bg-green-50   { background-color: rgba(169,214,54,.10) !important; }
+.bg-green-100  { background-color: rgba(169,214,54,.16) !important; }
+.bg-red-100    { background-color: rgba(255,51,85,.15) !important; }
+
+/* ── 實心按鈕：配白字，所以挑深色版 ─────────────── */
+.bg-blue-500, .bg-blue-600   { background-color: #2A6EA8 !important; }
+.bg-green-400, .bg-green-500, .bg-green-600 { background-color: #5E8F1E !important; }
+.bg-red-500                  { background-color: #C9243F !important; }
+
+/* ── 文字 ───────────────────────────────────────── */
+.text-gray-800, .text-gray-700 { color: #E9F6FA !important; }
+.text-gray-600, .text-gray-500 { color: #8FA8B2 !important; }
+.text-blue-600, .text-blue-800 { color: #16D0F0 !important; }
+.text-green-500, .text-green-600, .text-green-700 { color: #A9D636 !important; }
+.text-red-500, .text-red-700   { color: #FF6B82 !important; }
+.text-yellow-500, .text-yellow-600, .text-yellow-800 { color: #FFB03A !important; }
+.text-orange-500, .text-amber-500 { color: #FF7A1A !important; }
+.text-purple-600 { color: #7FB4E8 !important; }
+
+/* ── 邊框 ───────────────────────────────────────── */
+.border-gray-300  { border-color: rgba(22,208,240,.30) !important; }
+.border-slate-700 { border-color: rgba(22,208,240,.25) !important; }
+.border-green-400, .border-green-500 { border-color: #A9D636 !important; }
+.border-red-500    { border-color: #FF3355 !important; }
+.border-yellow-400 { border-color: #FFB03A !important; }
+
+/* ── 質感：利角 + 不模糊的錯位陰影 ──────────────── */
+/* rounded-full 不動，那是圓形按鈕（麥克風）和圓點。 */
+.rounded, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl,
+.rounded-r-lg { border-radius: 8px !important; }
+
+.shadow-md { box-shadow: 4px 4px 0 rgba(22,208,240,.20) !important; }
+.shadow-lg { box-shadow: 5px 5px 0 rgba(255,122,26,.24) !important; }
+.shadow-xl { box-shadow: 6px 6px 0 rgba(255,122,26,.28) !important; }
+
+/* 白底卡片原本靠陰影浮起來，換成深底之後要靠描邊才有輪廓 */
+.bg-white.shadow-lg, .bg-white.shadow-xl, .bg-white.shadow-md {
+  border: 3px solid rgba(22,208,240,.28) !important;
+}
+
+h1, h2, h3 { font-weight: 900 !important; }
