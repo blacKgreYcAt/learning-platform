@@ -70,6 +70,30 @@
   var hintEl = null;
   var hintTimer = null;
 
+  /* 記住最後按到的按鈕，提示條才能貼在它上面，而不是蓋住它。
+     用捕獲階段，確保比 onclick 先跑到。 */
+  var lastBtn = null;
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('button');
+    if (b) lastBtn = b;
+  }, true);
+
+  /* 預設貼在畫面底部，但那裡常常正好是「下一任務」自己。
+     有抓到按鈕就改成浮在它正上方；太靠上就夾回安全範圍。 */
+  function place() {
+    var gap = 14;
+    var bottom = 28;
+    if (lastBtn && document.body.contains(lastBtn)) {
+      var r = lastBtn.getBoundingClientRect();
+      if (r.height) {
+        bottom = window.innerHeight - r.top + gap;
+        var max = window.innerHeight - hintEl.offsetHeight - 12;
+        if (bottom > max) bottom = Math.max(12, max);
+      }
+    }
+    hintEl.style.bottom = bottom + 'px';
+  }
+
   function showHint(msg) {
     ensureStyle();
     if (!hintEl) {
@@ -81,6 +105,8 @@
       document.body.appendChild(hintEl);
     }
     hintEl.textContent = msg;
+    // 先量高度再定位，不然 offsetHeight 還是上一則訊息的
+    place();
     // 強制重排，連按兩次才會重新播放淡入
     void hintEl.offsetWidth;
     hintEl.classList.add('is-on');
