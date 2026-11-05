@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════
+   能源電力廠．任務三「節能小尖兵」— 圖示蓋住文字的修正（2026-11-05）
+
+   只追加覆寫，不動 energy-lab-app/index.html 的原有樣式與程式。
+   拿掉那一行 <link> 即完全還原。
+
+   ── 原本壞在哪 ──
+   房間是一張 canvas，每個電器的狀態文字都畫在 canvas 上：
+     冷氣  20°C ❄️❄️❄️  →  26°C ✅
+     電視  📺 沒人看…    →  已關閉 ✅
+     冰箱  門沒關！       →  已關好 ✅
+
+   可點的熱點是疊在 canvas 上面的 .room-hotspot <div>，裡面放一顆
+   1.8rem（28.8px）的 emoji，而且 align-items/justify-content 都是
+   center —— 正好壓在那些文字的正中央。
+
+   結果：修好之後「已關閉 ✅」只剩「已關」，冰箱的「已關好 ✅」
+   幾乎整句被蓋掉，還跟覆蓋層自己的 ✅ 疊成兩個勾。
+
+   ── 怎麼修 ──
+   把 emoji 移到熱點框的右上角並縮小，canvas 的文字都畫在框的中段
+   偏下，這樣就不會互相重疊。虛線框（橘＝還沒修、綠＝修好了）照舊，
+   點擊範圍也完全不變。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 窄螢幕上熱點會整個飄離電器 ─────────────────
+   同一個覆蓋層的另一個問題，手機上才看得出來。
+
+   .room-canvas 是 width:100%、高度隨比例縮，但 .room-wrap 被寫死
+   min-height:320px。螢幕一窄，畫布只剩 180px 高，外框卻還是 320px。
+   熱點是用「佔外框的百分比」定位的，於是整組往下飄：電視的框跑到
+   地板上，冰箱的框跑到冰箱下面，點了半天點不到。
+
+   桌機看不出來是因為畫布正好 600×320，外框高度剛好等於畫布。
+
+   min-height 歸零後，外框永遠貼齊畫布，百分比就一比一對上了。 */
+.room-wrap {
+  min-height: 0 !important;
+}
+
+.room-hotspot {
+  /* 原本是 center/center，圖示因此壓在文字上 */
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  padding: 3px 4px;
+}
+
+.room-hotspot > span {
+  /* 字級是 JS 寫在 inline style 的 1.8rem，只能用 !important 蓋 */
+  font-size: 15px !important;
+  line-height: 1;
+  /* 疊在插圖上，給一層深底才看得清楚 */
+  background: rgba(5, 16, 22, .78);
+  border-radius: 999px;
+  padding: 2px 3px;
+}
