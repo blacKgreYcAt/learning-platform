@@ -181,7 +181,18 @@
 }
 
 /* ── 進度條：墨水流過 ───────────────────────────── */
-.progress-bar, .prog-bg, .prog-wrap {
+/* 只挑「真正是那條軌道」的元素。
+   原本這裡還列了 .prog-wrap，那是錯的 —— 社會科和自然科的
+   .prog-wrap 是「文字列 + 軌道」的外層容器：
+
+     <div class="prog-wrap">
+       <div class="prog-row"><span>6</span> / 10</div>   ← 文字
+       <div class="prog-bg"><div class="prog-fill">      ← 真正的軌道
+     </div>
+
+   給它圓角 + overflow:hidden，等於把文字列塞進一顆膠囊裡裁切，
+   左邊的「6」和右邊的「/ 10」就被切掉一半。2026-11-05 移除。 */
+.progress-bar, .prog-bg {
   border-radius: 999px !important;
   border: 2px solid rgba(22,208,240,.3) !important;
   background: rgba(10,18,22,.7) !important;
