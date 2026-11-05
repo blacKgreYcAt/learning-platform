@@ -1,0 +1,12 @@
+/* 首頁「課程闖關站」卡片的圖示（2026-11-05）
+ *
+ * splat-hub-20261104.css 把 .card-icon 的字級歸零（emoji 吃不到 color，
+ * 只能這樣藏），再用 ::before 換成圖檔。新卡片沒有對應規則就會是空白，
+ * 所以這裡補上。
+ *
+ * 目前先借用既有的 icon-star —— 它只用在社會科的任務裡，首頁沒用到。
+ * Benjamin 之後生一張專屬的（羅盤／地圖之類）再把檔名換掉就好。
+ */
+.card-quest .card-icon::before {
+  background-image: url('assets/icon-star-20261104.png');
+}

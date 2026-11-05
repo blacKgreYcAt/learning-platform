@@ -1133,6 +1133,8 @@
   <!-- 全站墨水街頭風外觀層。必須排在本頁原有樣式之後；拿掉這一行即回到原樣。 -->
   <link rel="stylesheet" href="splat-core-20261104.css">
   <link rel="stylesheet" href="splat-hub-20261104.css">
+  <!-- 課程闖關站卡片的圖示。拿掉這行那張卡的圖會變空白。 -->
+  <link rel="stylesheet" href="splat-hub-quest-20261105.css">
 </head>
 <body>
 
@@ -1342,6 +1344,33 @@
               </div>
               <div class="card-launch">
                 選擇年級
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 課程闖關站：照課本版本分年級學期的題庫（2026-11-05 新增） -->
+          <div class="app-card card-quest reveal reveal-delay-5"
+               onclick="location.href='quest/index.html'" role="button" tabindex="0">
+            <div class="card-glow-bg"></div>
+            <div class="card-art">
+              <div class="card-art-bg"></div>
+              <div class="card-icon">🧭</div>
+              <div class="card-badge">依課本版本</div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">課程闖關站</div>
+              <p class="card-desc">
+                照課本的分法來練：先選年級、課本版本、學期和考試範圍，再進單元和課次闖關。答錯的題目會自動收進錯題本，隨時可以回頭複習。目前有五上自然（康軒版）、四下自然和四下社會。
+              </p>
+              <div class="card-tags">
+                <span class="tag">康軒/南一/翰林</span>
+                <span class="tag">期中期末範圍</span>
+                <span class="tag">錯題本</span>
+                <span class="tag">320題</span>
+              </div>
+              <div class="card-launch">
+                開始設定
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </div>
             </div>

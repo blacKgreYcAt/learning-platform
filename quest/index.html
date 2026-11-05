@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧭 課程闖關站</title>
+<!--
+  課程闖關站（2026-11-05）
+
+  為什麼要有這一支：
+  原本四下自然、四下社會各自是一支單檔 App，題庫寫死在 HTML 裡，
+  每多一個學期就得整支複製一份。這裡改成「殼 + 資料檔」：
+    quest/index.html      ← 這支，只有流程和畫面
+    quest/data/*.js       ← 一個學期一個題庫檔，檔名帶版本與日期
+
+  流程照一般課本的分法：年級 → 版本 → 學期 → 考試範圍 → 單元 → 課。
+  要加新學期只要丟一個新的 data 檔並在下面 <script> 加一行，殼不用改。
+
+  原本那兩支 App（含它們的互動小遊戲）完全沒有動，還在原位。
+-->
+<link rel="stylesheet" href="../splat-core-20261104.css">
+<link rel="stylesheet" href="../splat-apps-20261104.css">
+<style>
+  :root {
+    --bg:#0B1418; --bg2:#122028; --text:#E9F6FA; --dim:#8FA8B2;
+    --accent:#16D0F0; --accent-rgb:22,208,240;
+    --good:#A9D636; --bad:#FF3355; --gold:#FFB03A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Microsoft JhengHei','PingFang TC',system-ui,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh; padding:1.2rem;
+  }
+  .wrap { max-width:880px; margin:0 auto; }
+
+  .topbar { display:flex; align-items:center; gap:.6rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+  .btn {
+    font:inherit; font-weight:700; cursor:pointer; text-decoration:none; display:inline-block;
+    background:transparent; color:var(--accent);
+    border:2px solid var(--accent); border-radius:10px; padding:.5rem .9rem;
+    transition:background .18s,color .18s;
+  }
+  .btn:hover { background:var(--accent); color:#06161c; }
+  .btn.ghost { color:var(--dim); border-color:rgba(255,255,255,.18); }
+  .btn.ghost:hover { background:rgba(255,255,255,.08); color:var(--text); }
+  .btn.sm { padding:.3rem .7rem; font-size:.85rem; border-width:2px; }
+  .btn[hidden] { display:none; }
+  .spacer { flex:1; }
+
+  .crumb { color:var(--dim); font-size:.88rem; }
+  .crumb b { color:var(--text); }
+
+  h1 { font-size:1.85rem; letter-spacing:.04em; margin-bottom:.35rem; }
+  h1 span { color:var(--accent); }
+  h2 { font-size:1.05rem; letter-spacing:.05em; margin:1.7rem 0 .8rem; }
+  .lede { color:var(--dim); font-size:.95rem; margin-bottom:1.5rem; line-height:1.7; }
+
+  .grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+
+  .card {
+    background:var(--bg2); border:2px solid rgba(255,255,255,.1); border-radius:14px;
+    padding:1.15rem; cursor:pointer; text-align:left; font:inherit; color:inherit; width:100%;
+    transition:border-color .18s,transform .18s;
+  }
+  .card:hover { border-color:var(--accent); transform:translateY(-3px); }
+  .card-ico { font-size:2rem; line-height:1; margin-bottom:.55rem; }
+  .card-name { font-size:1.1rem; font-weight:800; margin-bottom:.3rem; }
+  .card-sub { color:var(--dim); font-size:.84rem; line-height:1.6; }
+  .card-meta { margin-top:.65rem; font-size:.8rem; color:var(--accent); font-weight:700; }
+  .card.done { border-color:var(--good); }
+  .card.done .card-meta { color:var(--good); }
+
+  /* ── 設定精靈 ── */
+  .setup { background:var(--bg2); border:2px solid rgba(255,255,255,.1); border-radius:16px; padding:1.5rem; }
+  .step { margin-bottom:1.4rem; }
+  .step-t { font-weight:800; margin-bottom:.6rem; }
+  .step-t small { font-weight:400; color:var(--dim); margin-left:.5rem; font-size:.82rem; }
+  .chips { display:flex; gap:.6rem; flex-wrap:wrap; }
+  .chip {
+    font:inherit; cursor:pointer; padding:.5rem .95rem; border-radius:999px;
+    background:rgba(255,255,255,.04); color:var(--text);
+    border:2px solid rgba(255,255,255,.14); transition:all .15s;
+  }
+  .chip:hover { border-color:var(--accent); }
+  .chip.on { background:var(--accent); border-color:var(--accent); color:#06161c; font-weight:800; }
+  .chip:disabled { opacity:.35; cursor:not-allowed; }
+  .chip:disabled:hover { border-color:rgba(255,255,255,.14); }
+
+  /* ── 進度條 ──
+     文字列和軌道是兄弟節點。外層絕對不要給 overflow:hidden 或圓角，
+     否則文字會被裁掉（四下那兩支就是這樣壞的）。 */
+  .prog { margin:0 0 1.3rem; }
+  .prog-row { display:flex; justify-content:space-between; font-size:.8rem; color:var(--dim); margin-bottom:.35rem; }
+  .prog-row b { color:var(--accent); }
+  .prog-bg { height:8px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; }
+  .prog-fill { height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--gold)); transition:width .35s; }
+
+  /* ── 答題 ── */
+  .quiz { background:var(--bg2); border:2px solid rgba(255,255,255,.1); border-radius:16px; padding:1.5rem; }
+  .q-text { font-size:1.12rem; font-weight:700; line-height:1.7; margin-bottom:1.1rem; }
+  .opts { display:flex; flex-direction:column; gap:.65rem; }
+  .opt {
+    font:inherit; text-align:left; cursor:pointer; color:var(--text);
+    background:rgba(255,255,255,.03); border:2px solid rgba(255,255,255,.14);
+    border-radius:10px; padding:.85rem 1rem; transition:border-color .15s,background .15s;
+  }
+  .opt:hover:not(:disabled) { border-color:var(--accent); background:rgba(var(--accent-rgb),.1); }
+  .opt:disabled { cursor:default; }
+  .opt.right { border-color:var(--good); background:rgba(169,214,54,.16); }
+  .opt.wrong { border-color:var(--bad); background:rgba(255,51,85,.14); }
+
+  .explain {
+    margin-top:1rem; padding:.9rem 1.05rem; line-height:1.75; font-size:.94rem;
+    border-left:6px solid var(--gold); border-radius:0 8px 8px 0; background:rgba(255,176,58,.1);
+  }
+  .explain b { color:var(--gold); }
+  .next-row { margin-top:1.1rem; display:flex; justify-content:flex-end; gap:.6rem; }
+
+  .score { font-size:2.9rem; font-weight:900; color:var(--accent); line-height:1; }
+  .score small { font-size:1.05rem; color:var(--dim); font-weight:700; }
+  .review { margin-top:1.3rem; display:flex; flex-direction:column; gap:.85rem; }
+  .ri {
+    background:rgba(255,51,85,.08); border-left:5px solid var(--bad);
+    border-radius:0 8px 8px 0; padding:.8rem 1rem; font-size:.92rem; line-height:1.75;
+  }
+  .ri-q { font-weight:700; margin-bottom:.25rem; }
+  .ri-a { color:var(--good); }
+  .ri-where { color:var(--dim); font-size:.8rem; margin-top:.3rem; }
+
+  .empty { color:var(--dim); line-height:1.9; }
+  .foot { margin-top:2.4rem; color:var(--dim); font-size:.78rem; line-height:1.8; }
+
+  @media (max-width:480px) {
+    body { padding:.9rem; }
+    h1 { font-size:1.45rem; }
+    .quiz, .setup { padding:1.05rem; }
+  }
+  @media (prefers-reduced-motion:reduce) { .card,.prog-fill,.opt,.chip { transition:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <button class="btn ghost sm" id="btn-back" hidden>← 返回</button>
+    <a class="btn ghost sm" href="../index.html">🏠 首頁</a>
+    <span class="crumb" id="crumb"></span>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" id="btn-wrong">📕 錯題本</button>
+    <button class="btn ghost sm" id="btn-setup">⚙️ 設定</button>
+  </div>
+
+  <div id="view"></div>
+  <p class="foot" id="foot"></p>
+</div>
+
+<!-- 題庫：一個學期一個檔。加新學期就在這裡加一行。 -->
+<script src="data/science-5a-kang-20261105.js"></script>
+<script src="data/science-4b-any-20261105.js"></script>
+<script src="data/social-4b-any-20261105.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var BANKS = window.QUEST_BANKS || {};
+  var view = document.getElementById('view');
+  var crumb = document.getElementById('crumb');
+  var foot = document.getElementById('foot');
+  var backBtn = document.getElementById('btn-back');
+
+  var GRADES = [3, 4, 5, 6];
+  var VERSIONS = [['kang', '康軒版'], ['nani', '南一版'], ['han', '翰林版']];
+  var TERMS = [['上', '上學期'], ['下', '下學期']];
+  var RANGES = [['mid', '期中考範圍'], ['final', '期末考範圍'], ['all', '全冊']];
+
+  /* ── 存檔 ──
+     進度、錯題、設定都只存在這台瀏覽器。無痕視窗或清掉網站資料就會是空的，
+     所以每一次讀寫都包 try：拿不到就當成沒有，不能讓它整頁壞掉。 */
+  var KEY = 'quest-20261105';
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} }
+  var DB = load();
+  DB.setup = DB.setup || { grade: 5, version: 'kang', term: '上', range: 'all' };
+  DB.best = DB.best || {};     // 課 -> {score,total}
+  DB.wrong = DB.wrong || [];   // 錯題本
+
+  /* Fisher-Yates。不要用 sort(()=>Math.random()-.5)，那個有偏差。 */
+  function shuffle(a) {
+    var r = a.slice();
+    for (var i = r.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = r[i]; r[i] = r[j]; r[j] = t;
+    }
+    return r;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ── 依設定挑題庫 ──
+     同一個年級學期可能有好幾個版本的檔。先找完全符合版本的；
+     找不到就退回 version:'any'（不分版本的舊題庫），總比空白好。 */
+  function banksFor(s) {
+    var all = Object.keys(BANKS).map(function (k) { return BANKS[k]; });
+    var hit = all.filter(function (b) { return b.grade === s.grade && b.term === s.term; });
+    var bySubject = {};
+    hit.forEach(function (b) {
+      var cur = bySubject[b.subjectKey];
+      if (!cur || (cur.version === 'any' && b.version === s.version)) bySubject[b.subjectKey] = b;
+    });
+    return Object.keys(bySubject).map(function (k) { return bySubject[k]; });
+  }
+  function bankId(b) { return b.subjectKey + '-' + b.grade + (b.term === '上' ? 'a' : 'b') + '-' + b.version; }
+  function unitsInRange(b, range) {
+    if (range === 'all') return b.units;
+    var u = b.units.filter(function (x) { return x.exam === range; });
+    return u.length ? u : b.units;   // 該範圍沒標註就全給，不要給空白
+  }
+  function lKey(b, uNo, i) { return bankId(b) + '/' + uNo + '/' + i; }
+
+  function statsOf(b, range) {
+    var us = unitsInRange(b, range), total = 0, done = 0, qs = 0;
+    us.forEach(function (u) {
+      u.lessons.forEach(function (l, i) {
+        total++; qs += l.quiz.length;
+        if (DB.best[lKey(b, u.no, i)]) done++;
+      });
+    });
+    return { total: total, done: done, questions: qs, units: us.length };
+  }
+
+  function setFoot(t) { foot.textContent = t; }
+  function top() { window.scrollTo(0, 0); }
+
+  /* ═══ 設定精靈 ═══ */
+  function renderSetup() {
+    backBtn.hidden = true;
+    crumb.textContent = '';
+    var s = DB.setup;
+    function chips(name, list, cur) {
+      return list.map(function (o) {
+        var v = Array.isArray(o) ? o[0] : o, t = Array.isArray(o) ? o[1] : (o + '年級');
+        return '<button class="chip' + (v == cur ? ' on' : '') + '" data-set="' + name + '" data-v="' + v + '">' + t + '</button>';
+      }).join('');
+    }
+    view.innerHTML =
+      '<h1>🧭 課程<span>闖關站</span></h1>' +
+      '<p class="lede">先設定一次：年級、課本版本、學期、要準備的考試。設定會記住，下次進來直接用。</p>' +
+      '<div class="setup">' +
+        '<div class="step"><div class="step-t">1. 幾年級？</div><div class="chips">' + chips('grade', GRADES, s.grade) + '</div></div>' +
+        '<div class="step"><div class="step-t">2. 哪個版本的課本？<small>課本封面或聯絡簿上會寫</small></div><div class="chips">' + chips('version', VERSIONS, s.version) + '</div></div>' +
+        '<div class="step"><div class="step-t">3. 上學期還是下學期？</div><div class="chips">' + chips('term', TERMS, s.term) + '</div></div>' +
+        '<div class="step"><div class="step-t">4. 要準備哪一次考試？<small>進去之後隨時可以改</small></div><div class="chips">' + chips('range', RANGES, s.range) + '</div></div>' +
+        '<button class="btn" id="btn-go">出發去闖關 ▶</button>' +
+      '</div>';
+
+    view.querySelectorAll('[data-set]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var v = el.dataset.v;
+        DB.setup[el.dataset.set] = (el.dataset.set === 'grade') ? +v : v;
+        save(); renderSetup();
+      });
+    });
+    document.getElementById('btn-go').addEventListener('click', renderSubjects);
+    setFoot('單元名稱照課本目錄，題目是自己出的。進度只存在這台瀏覽器裡。');
+  }
+
+  /* ═══ 選科目 ═══ */
+  function renderSubjects() {
+    var s = DB.setup;
+    backBtn.hidden = false;
+    backBtn.onclick = renderSetup;
+    crumb.innerHTML = '<b>' + s.grade + '年級' + s.term + '學期</b>　' +
+      (VERSIONS.filter(function (v) { return v[0] === s.version; })[0] || ['', ''])[1];
+
+    var list = banksFor(s);
+    var html = '<h1>選一科<span>開始</span></h1>' +
+      '<p class="lede">' + s.grade + ' 年級' + s.term + '學期・範圍：' +
+      (RANGES.filter(function (r) { return r[0] === s.range; })[0] || ['', '全冊'])[1] + '</p>';
+
+    if (!list.length) {
+      html += '<div class="quiz"><div class="q-text">這個年級學期還沒有題庫</div>' +
+        '<p class="empty">目前已經做好的是：<br>' +
+        Object.keys(BANKS).map(function (k) {
+          var b = BANKS[k];
+          return '・' + b.grade + '年級' + b.term + '學期　' + b.subject +
+                 '（' + b.versionName + '，' + b.units.length + ' 單元）';
+        }).join('<br>') +
+        '<br><br>回上一步換一個年級或學期試試。</p></div>';
+    } else {
+      html += '<div class="grid">';
+      list.forEach(function (b) {
+        var st = statsOf(b, s.range);
+        html += '<button class="card' + (st.done === st.total && st.total ? ' done' : '') + '" data-b="' + bankId(b) + '">' +
+          '<div class="card-ico">' + b.icon + '</div>' +
+          '<div class="card-name">' + esc(b.subject) + '</div>' +
+          '<div class="card-sub">' + esc(unitsInRange(b, s.range).map(function (u) { return u.name; }).join('・')) + '</div>' +
+          '<div class="card-meta">' + st.units + ' 單元 ' + st.total + ' 課 ' + st.questions + ' 題　完成 ' + st.done + '/' + st.total + '</div>' +
+          '</button>';
+      });
+      html += '</div>';
+      if (list.some(function (b) { return b.version === 'any'; })) {
+        html += '<p class="foot">標示「不分版本」的題庫是從舊的 App 搬過來的，還沒有對齊任何一家課本的單元。</p>';
+      }
+    }
+    view.innerHTML = html;
+    view.querySelectorAll('[data-b]').forEach(function (el) {
+      el.addEventListener('click', function () { renderUnits(el.dataset.b); });
+    });
+    setFoot('');
+    top();
+  }
+
+  function findBank(id) {
+    var all = Object.keys(BANKS).map(function (k) { return BANKS[k]; });
+    return all.filter(function (b) { return bankId(b) === id; })[0];
+  }
+
+  /* ═══ 單元與課 ═══ */
+  function renderUnits(id) {
+    var b = findBank(id), s = DB.setup;
+    backBtn.hidden = false;
+    backBtn.onclick = renderSubjects;
+    crumb.innerHTML = '<b>' + esc(b.subject) + '</b>　' + b.grade + '年級' + b.term + '學期・' + esc(b.versionName);
+
+    var st = statsOf(b, s.range);
+    var html = '<h1>' + b.icon + ' ' + esc(b.title || b.subject) + '</h1>' +
+      '<div class="chips" style="margin:.2rem 0 1.2rem">' +
+      RANGES.map(function (r) {
+        return '<button class="chip sm' + (r[0] === s.range ? ' on' : '') + '" data-range="' + r[0] + '">' + r[1] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="prog"><div class="prog-row"><span>已完成 <b>' + st.done + '</b> / ' + st.total + ' 課</span><span>' + st.questions + ' 題</span></div>' +
+      '<div class="prog-bg"><div class="prog-fill" style="width:' + (st.total ? st.done / st.total * 100 : 0) + '%"></div></div></div>';
+
+    unitsInRange(b, s.range).forEach(function (u) {
+      html += '<h2>' + (u.icon || '') + ' 單元 ' + u.no + '　' + esc(u.name) + '</h2><div class="grid">';
+      u.lessons.forEach(function (l, i) {
+        var best = DB.best[lKey(b, u.no, i)];
+        html += '<button class="card' + (best ? ' done' : '') + '" data-u="' + u.no + '" data-l="' + i + '">' +
+          (l.icon ? '<div class="card-ico">' + l.icon + '</div>' : '') +
+          '<div class="card-name">' + esc(l.name) + '</div>' +
+          '<div class="card-sub">' + esc(l.desc || '') + '</div>' +
+          '<div class="card-meta">' + (best ? '最佳 ' + best.score + '/' + best.total : l.quiz.length + ' 題・還沒挑戰') + '</div>' +
+          '</button>';
+      });
+      html += '</div>';
+    });
+    view.innerHTML = html;
+    view.querySelectorAll('[data-range]').forEach(function (el) {
+      el.addEventListener('click', function () { DB.setup.range = el.dataset.range; save(); renderUnits(id); });
+    });
+    view.querySelectorAll('[data-u]').forEach(function (el) {
+      el.addEventListener('click', function () { startQuiz(id, +el.dataset.u, +el.dataset.l); });
+    });
+    setFoot('');
+    top();
+  }
+
+  /* ═══ 闖關 ═══ */
+  var run = null;
+
+  function startQuiz(id, uNo, lIdx) {
+    var b = findBank(id);
+    var u = b.units.filter(function (x) { return x.no === uNo; })[0];
+    var l = u.lessons[lIdx];
+
+    run = {
+      id: id, b: b, u: u, l: l, uNo: uNo, lIdx: lIdx,
+      items: shuffle(l.quiz).map(function (q) {
+        // 選項也洗牌，順便把「哪一個是正解」帶著走
+        return { q: q, pairs: shuffle(q.choices.map(function (c, i) { return { text: c, ok: i === q.correct }; })) };
+      }),
+      i: 0, score: 0, wrong: []
+    };
+    backBtn.hidden = false;
+    backBtn.onclick = function () { renderUnits(id); };
+    crumb.innerHTML = '<b>' + esc(b.subject) + '</b>　' + esc(u.name) + '　' + esc(l.name);
+    renderQ();
+  }
+
+  function renderQ() {
+    var it = run.items[run.i], n = run.items.length;
+    view.innerHTML =
+      '<div class="prog"><div class="prog-row"><span>第 <b>' + (run.i + 1) + '</b> 題 / ' + n + '</span><span>答對 ' + run.score + '</span></div>' +
+      '<div class="prog-bg"><div class="prog-fill" style="width:' + (run.i / n * 100) + '%"></div></div></div>' +
+      '<div class="quiz"><div class="q-text">' + esc(it.q.q) + '</div><div class="opts">' +
+      it.pairs.map(function (p, i) { return '<button class="opt" data-i="' + i + '">' + esc(p.text) + '</button>'; }).join('') +
+      '</div><div id="after"></div></div>';
+    view.querySelectorAll('.opt').forEach(function (el) {
+      el.addEventListener('click', function () { answer(+el.dataset.i); }, { once: true });
+    });
+    top();
+  }
+
+  function answer(picked) {
+    var it = run.items[run.i], ci = -1;
+    it.pairs.forEach(function (p, i) { if (p.ok) ci = i; });
+
+    view.querySelectorAll('.opt').forEach(function (el, i) {
+      el.disabled = true;
+      if (i === ci) el.classList.add('right');
+      else if (i === picked) el.classList.add('wrong');
+    });
+
+    var ok = picked === ci;
+    if (ok) run.score++;
+    else {
+      var rec = {
+        q: it.q.q, answer: it.pairs[ci].text, explain: it.q.explain,
+        where: run.b.subject + '・' + run.u.name + '・' + run.l.name,
+        at: Date.now()
+      };
+      run.wrong.push(rec);
+      // 錯題本：同一題只留一筆最新的，不然重練幾次就塞滿重複
+      DB.wrong = DB.wrong.filter(function (w) { return w.q !== rec.q; });
+      DB.wrong.unshift(rec);
+      if (DB.wrong.length > 200) DB.wrong.length = 200;
+      save();
+    }
+
+    document.getElementById('after').innerHTML =
+      '<div class="explain"><b>' + (ok ? '答對了！' : '正解：' + esc(it.pairs[ci].text)) + '</b><br>' + esc(it.q.explain) + '</div>' +
+      '<div class="next-row"><button class="btn" id="btn-next">' +
+      (run.i + 1 < run.items.length ? '下一題 →' : '看結果 →') + '</button></div>';
+
+    document.getElementById('btn-next').addEventListener('click', function () {
+      run.i++;
+      if (run.i < run.items.length) renderQ(); else finish();
+    });
+  }
+
+  function finish() {
+    var k = lKey(run.b, run.uNo, run.lIdx), best = DB.best[k];
+    // 只在更好的時候覆蓋，免得重練手滑把好成績蓋掉
+    if (!best || run.score > best.score) {
+      DB.best[k] = { score: run.score, total: run.items.length };
+      save();
+    }
+    var pct = Math.round(run.score / run.items.length * 100);
+    var word = pct === 100 ? '全對！這一課你會了。'
+      : pct >= 80 ? '很好，錯的看一下就補起來了。'
+      : pct >= 60 ? '及格，下面錯的再讀一次。'
+      : '先把下面錯的看懂，再挑戰一次。';
+
+    var html = '<div class="quiz" style="text-align:center">' +
+      '<div class="score">' + run.score + '<small> / ' + run.items.length + '</small></div>' +
+      '<p style="margin-top:.7rem;color:var(--dim)">' + esc(word) + '</p>' +
+      '<div class="next-row" style="justify-content:center">' +
+      '<button class="btn ghost" id="b-again">再挑戰一次</button>' +
+      '<button class="btn" id="b-units">回單元列表</button></div></div>';
+
+    if (run.wrong.length) {
+      html += '<h2>錯題複習（' + run.wrong.length + '）</h2><div class="review">' +
+        run.wrong.map(function (w) {
+          return '<div class="ri"><div class="ri-q">' + esc(w.q) + '</div>' +
+            '<div class="ri-a">正解：' + esc(w.answer) + '</div><div>' + esc(w.explain) + '</div></div>';
+        }).join('') + '</div>';
+    }
+    view.innerHTML = html;
+    document.getElementById('b-again').addEventListener('click', function () { startQuiz(run.id, run.uNo, run.lIdx); });
+    document.getElementById('b-units').addEventListener('click', function () { renderUnits(run.id); });
+    top();
+  }
+
+  /* ═══ 錯題本 ═══ */
+  function renderWrong() {
+    backBtn.hidden = false;
+    backBtn.onclick = renderSubjects;
+    crumb.textContent = '';
+    var html = '<h1>📕 錯<span>題本</span></h1>';
+    if (!DB.wrong.length) {
+      html += '<p class="lede">還沒有錯題。去闖幾關之後，答錯的題目會自動收進這裡。</p>';
+    } else {
+      html += '<p class="lede">收錄最近答錯的 ' + DB.wrong.length + ' 題，同一題只留最新一次。</p>' +
+        '<div class="review">' + DB.wrong.map(function (w) {
+          return '<div class="ri"><div class="ri-q">' + esc(w.q) + '</div>' +
+            '<div class="ri-a">正解：' + esc(w.answer) + '</div><div>' + esc(w.explain) + '</div>' +
+            '<div class="ri-where">' + esc(w.where) + '</div></div>';
+        }).join('') + '</div>' +
+        '<div class="next-row" style="justify-content:flex-start"><button class="btn ghost" id="b-clear">清空錯題本</button></div>';
+    }
+    view.innerHTML = html;
+    var c = document.getElementById('b-clear');
+    if (c) c.addEventListener('click', function () {
+      if (confirm('確定要清空錯題本嗎？清掉就救不回來了。')) { DB.wrong = []; save(); renderWrong(); }
+    });
+    setFoot('');
+    top();
+  }
+
+  document.getElementById('btn-wrong').addEventListener('click', renderWrong);
+  document.getElementById('btn-setup').addEventListener('click', renderSetup);
+
+  /* ── 起手 ── */
+  if (!Object.keys(BANKS).length) {
+    view.innerHTML = '<div class="quiz"><div class="q-text">題庫沒載入</div>' +
+      '<p class="empty">data/ 底下的檔沒讀到。如果是用 file:// 直接開檔，請改用本機伺服器，或從首頁進來。</p></div>';
+  } else {
+    renderSubjects();
+  }
+})();
+</script>
+</body>
+</html>
