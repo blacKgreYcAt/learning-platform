@@ -1,0 +1,16 @@
+/* 老師解答改用專屬角色（2026-11-06）
+ *
+ * 原本 g5-splat-theme-20261104.css 的 .tutor-answer::before 用的是
+ * mascot-main-head —— 那是主角的頭。等於「主角自己在教自己」，
+ * 而且首頁 hero、各 App 頁首用的也是同一個角色，整站只有一張臉。
+ *
+ * 現在換成 mascot-teacher-head：戴圓框眼鏡的大人，一眼分得出不是小孩。
+ * 答對／答錯的表情回饋（.quiz-explain 的 bingo／confused 臉）不動，
+ * 那兩個本來就對 —— 那是「孩子自己的反應」，不是老師。
+ *
+ * 載入順序要在 g5-splat-theme-20261104.css 之後。
+ */
+
+.tutor-answer::before {
+  background-image: url('../assets/mascot-teacher-head-20261106.png');
+}
