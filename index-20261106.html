@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學霸星球 | 超能學習基地</title>
+
+<!--
+  新版首頁（2026-11-06）—— 階段 1：版面重整
+
+  跟舊的 index.html 的差別：
+    1. 年級從「卡片點下去才問」提到最上面，變成整個網站的入口。
+    2. 內容分兩個書架：跟著課本走（按科目分列）、隨時練（不分年級）。
+    3. 舊的「選擇你的年級」小視窗整個拿掉 —— 它跟闖關站的精靈重複問同一件事。
+
+  舊首頁 index.html 原封不動留著，不滿意隨時切回去。
+  什麼東西存在、擺哪一格，全部寫在 shelf-20261106.js，這裡只負責畫。
+-->
+
+<link rel="stylesheet" href="splat-core-20261104.css">
+<link rel="stylesheet" href="splat-hub-shelf-20261106.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-mark"></span>學霸<em>星球</em></div>
+    <span class="topbar-spacer"></span>
+    <button class="chip sm" id="btn-reset" type="button">換年級</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="head">
+    <h1>今天要練<em>哪一科</em>？</h1>
+    <p>先選年級，下面就只會出現這個年級念得到的東西。選過一次會記住，下次直接進。</p>
+  </section>
+
+  <!-- 年級 / 學期 / 版本 -->
+  <section class="picker" aria-label="選擇年級與學期">
+    <div class="picker-row">
+      <span class="picker-label">年級</span>
+      <div id="pick-grade" class="picker-row" style="gap:8px"></div>
+    </div>
+    <div class="picker-row">
+      <span class="picker-label">學期</span>
+      <div id="pick-term" class="picker-row" style="gap:8px"></div>
+    </div>
+    <div class="picker-row">
+      <span class="picker-label">課本</span>
+      <div id="pick-version" class="picker-row" style="gap:8px"></div>
+    </div>
+  </section>
+
+  <!-- 書架一：跟著課本走 -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2>跟著課本走</h2>
+      <small id="shelf-sub"></small>
+    </div>
+    <div id="by-subject"></div>
+  </section>
+
+  <!-- 書架二：隨時練 -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2>隨時練</h2>
+      <small>不分年級，想到就玩</small>
+    </div>
+    <div class="row" id="anytime"></div>
+  </section>
+
+  <footer class="foot">
+    學霸星球 · 自己做給自己小孩用的。
+    舊版首頁還在 <a href="index.html">index.html</a>，這一版不滿意可以切回去。
+  </footer>
+
+</main>
+
+<script src="shelf-20261106.js"></script>
+<script>
+'use strict';
+(function () {
+
+  var KEY = 'shelf-setup-20261106';
+  var S = window.SHELF;
+
+  /* ── 設定的讀寫。無痕模式會丟例外，不能讓它炸掉整頁 ── */
+  var setup = { grade: 5, term: 1, version: 'kang' };
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var o = JSON.parse(raw);
+      if (S.grades.indexOf(o.grade) >= 0) setup.grade = o.grade;
+      if (o.term === 1 || o.term === 2) setup.term = o.term;
+      if (S.versions.some(function (v) { return v[0] === o.version; })) setup.version = o.version;
+    }
+  } catch (e) { /* 讀不到就用預設，不影響使用 */ }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(setup)); } catch (e) {}
+  }
+
+  function keyOf() { return setup.grade + '-' + setup.term; }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  /* ── 選擇列 ───────────────────────────────────── */
+  function renderPicker() {
+    var g = document.getElementById('pick-grade');
+    g.innerHTML = '';
+    S.grades.forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (n === setup.grade ? ' on' : '');
+      // 上下學期都沒東西的年級，先讓它低調，但不擋著不給點
+      if (!S.countAt(n + '-1') && !S.countAt(n + '-2')) b.className += ' is-empty';
+      b.textContent = n + ' 年級';
+      b.onclick = function () { setup.grade = n; save(); renderAll(); };
+      g.appendChild(b);
+    });
+
+    var t = document.getElementById('pick-term');
+    t.innerHTML = '';
+    S.terms.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip sm' + (p[0] === setup.term ? ' on' : '');
+      if (!S.countAt(setup.grade + '-' + p[0])) b.className += ' is-empty';
+      b.textContent = p[1];
+      b.onclick = function () { setup.term = p[0]; save(); renderAll(); };
+      t.appendChild(b);
+    });
+
+    var v = document.getElementById('pick-version');
+    v.innerHTML = '';
+    S.versions.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip sm' + (p[0] === setup.version ? ' on' : '');
+      b.textContent = p[1];
+      b.onclick = function () { setup.version = p[0]; save(); renderAll(); };
+      v.appendChild(b);
+    });
+  }
+
+  /* ── 一張卡片 ─────────────────────────────────── */
+  function cardHTML(item, href, slotNote) {
+    return '<a class="item" href="' + esc(href) + '">' +
+      '<span class="item-ico" style="background-image:url(\'' + esc(item.icon) + '\')"></span>' +
+      '<span class="item-txt">' +
+        '<span class="item-title">' + esc(item.title) +
+          (item.tag ? '<span class="item-tag">' + esc(item.tag) + '</span>' : '') +
+        '</span>' +
+        '<span class="item-desc">' + esc(item.desc) + '</span>' +
+        (slotNote ? '<span class="item-note">' + esc(slotNote) + '</span>' : '') +
+      '</span>' +
+    '</a>';
+  }
+
+  /* ── 書架一 ───────────────────────────────────── */
+  function renderSubjects() {
+    var k = keyOf();
+    var termName = setup.term === 1 ? '上學期' : '下學期';
+    var versionName = (S.versions.filter(function (v) { return v[0] === setup.version; })[0] || [])[1] || '';
+    document.getElementById('shelf-sub').textContent =
+      setup.grade + ' 年級' + termName + '　' + versionName;
+
+    var box = document.getElementById('by-subject');
+    var html = '';
+
+    // 這個年級學期還沒有任何「照課本」的內容時，先講清楚。
+    // 但底下的科目列照常畫 —— 不分年級的項目（能源電力廠）還是點得到，
+    // 直接 return 會把它藏起來。
+    if (!S.countAt(k)) {
+      html += '<div class="blank" style="margin-bottom:18px">' +
+        '<b>' + setup.grade + ' 年級' + termName + '還沒有照課本的內容。</b><br>' +
+        '目前做好的是四下（自然、社會、數學、國語）和五上（自然、社會、數學）。<br>' +
+        '換一個年級，或往下看「隨時練」那一區。</div>';
+    }
+
+    S.subjects.forEach(function (sub) {
+      var live = S.liveItems(sub, k);
+      html += '<div class="subject' + (live.length ? '' : ' is-blank') + '">' +
+        '<div class="subject-bar">' +
+          '<span class="dot" style="background:' + sub.color + '"></span>' +
+          sub.icon + ' ' + esc(sub.name) +
+          '<span class="count">' + (live.length ? live.length + ' 項' : '製作中') + '</span>' +
+        '</div><div class="row">';
+
+      if (!live.length) {
+        html += '<div class="blank">這一格還沒做。</div>';
+      } else {
+        live.forEach(function (it) {
+          html += cardHTML(it, S.hrefOf(it, k), S.slotOf(it, k));
+        });
+      }
+      html += '</div></div>';
+    });
+    box.innerHTML = html;
+  }
+
+  /* ── 書架二 ───────────────────────────────────── */
+  function renderAnytime() {
+    document.getElementById('anytime').innerHTML =
+      S.anytime.map(function (it) { return cardHTML(it, it.href, ''); }).join('');
+  }
+
+  function renderAll() {
+    renderPicker();
+    renderSubjects();
+  }
+
+  document.getElementById('btn-reset').onclick = function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.picker').animate(
+      [{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' },
+       { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }],
+      { duration: 240 }
+    );
+  };
+
+  renderAll();
+  renderAnytime();
+})();
+</script>
+</body>
+</html>
