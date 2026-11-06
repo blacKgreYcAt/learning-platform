@@ -160,6 +160,9 @@
 <script src="data/science-4b-any-20261105.js"></script>
 <script src="data/social-4b-any-20261105.js"></script>
 
+<!-- 月考測驗卷：外掛，拿掉這一行就回到沒有測驗卷的樣子 -->
+<script src="exam-20261106.js"></script>
+
 <script>
 (function () {
   'use strict';
@@ -519,6 +522,37 @@
 
   document.getElementById('btn-wrong').addEventListener('click', renderWrong);
   document.getElementById('btn-setup').addEventListener('click', renderSetup);
+
+  /* ── 給外掛模組用的介面（2026-11-06）──
+     月考測驗卷（exam-20261106.js）要用到題庫、存檔和這裡的幾個小工具。
+     與其把它整段塞進這個檔案，不如開一道窄門讓它自己是一個檔。
+     只導出「讀資料」和「畫面交還」會用到的東西，不導出內部的 render* 流程。 */
+  window.QUEST = {
+    BANKS: BANKS,
+    DB: DB,
+    save: save,
+    shuffle: shuffle,
+    esc: esc,
+    view: view,
+    crumb: crumb,
+    backBtn: backBtn,
+    setFoot: setFoot,
+    top: top,
+    banksFor: banksFor,
+    bankId: bankId,
+    unitsInRange: unitsInRange,
+    RANGES: RANGES,
+    /** 回到科目列表 —— 測驗卷結束後要能交還畫面 */
+    home: function () { renderSubjects(); },
+    /** 寫進錯題本，格式跟闖關模式一致（同一題只留最新一筆） */
+    addWrong: function (rec) {
+      DB.wrong = DB.wrong.filter(function (w) { return w.q !== rec.q; });
+      DB.wrong.unshift(rec);
+      if (DB.wrong.length > 200) DB.wrong.length = 200;
+      save();
+    }
+  };
+  if (typeof window.QUEST_EXAM_INIT === 'function') window.QUEST_EXAM_INIT();
 
   /* ── 起手 ── */
   if (!Object.keys(BANKS).length) {

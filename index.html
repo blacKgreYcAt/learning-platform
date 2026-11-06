@@ -1,1817 +1,231 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>學霸星球 | 超能學習基地</title>
-  <style>
-    /* ===== RESET & BASE ===== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --neon-cyan:   #00f5ff;
-      --neon-pink:   #ff00aa;
-      --neon-purple: #b400ff;
-      --neon-green:  #00ff88;
-      --neon-gold:   #ffd700;
-      --bg-dark:     #060612;
-      --bg-card:     #0d0d2b;
-      --bg-card2:    #0a1a0a;
-      --text-main:   #e8e8ff;
-      --text-dim:    #8888aa;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-main);
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-
-    /* ===== STAR FIELD BACKGROUND ===== */
-    #stars-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ===== SCANLINE OVERLAY ===== */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.08) 2px,
-        rgba(0,0,0,0.08) 4px
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* ===== GRID FLOOR ===== */
-    .grid-floor {
-      position: fixed;
-      bottom: 0; left: 0;
-      width: 100%; height: 45vh;
-      background:
-        linear-gradient(rgba(0,245,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,245,255,0.08) 1px, transparent 1px);
-      background-size: 60px 60px;
-      transform: perspective(600px) rotateX(60deg);
-      transform-origin: bottom center;
-      pointer-events: none;
-      z-index: 0;
-      mask-image: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 70%);
-    }
-
-    /* ===== NAV ===== */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2.5rem;
-      background: rgba(6,6,18,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(0,245,255,0.15);
-    }
-
-    .nav-logo {
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--neon-cyan);
-      text-shadow: 0 0 16px var(--neon-cyan), 0 0 40px rgba(0,245,255,0.4);
-    }
-
-    .nav-logo span { color: var(--neon-pink); text-shadow: 0 0 16px var(--neon-pink); }
-
-    .nav-links { display: flex; gap: 2rem; }
-    .nav-links a {
-      color: var(--text-dim);
-      text-decoration: none;
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      transition: color 0.2s, text-shadow 0.2s;
-    }
-    .nav-links a:hover {
-      color: var(--neon-cyan);
-      text-shadow: 0 0 10px var(--neon-cyan);
-    }
-
-    /* ===== HERO ===== */
-    .hero {
-      position: relative;
-      z-index: 2;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 6rem 2rem 4rem;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--neon-green);
-      border: 1px solid var(--neon-green);
-      border-radius: 50px;
-      padding: 0.35rem 1.2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 0 12px rgba(0,255,136,0.3);
-      animation: pulse-green 2.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse-green {
-      0%, 100% { box-shadow: 0 0 12px rgba(0,255,136,0.3); }
-      50%       { box-shadow: 0 0 24px rgba(0,255,136,0.7), inset 0 0 8px rgba(0,255,136,0.1); }
-    }
-
-    .hero-title {
-      font-size: clamp(3rem, 9vw, 7rem);
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      margin-bottom: 1.5rem;
-    }
-
-    .title-line1 {
-      display: block;
-      color: #fff;
-      text-shadow: 0 0 30px rgba(255,255,255,0.5);
-    }
-
-    .title-line2 {
-      display: block;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 20px rgba(0,245,255,0.6));
-      animation: gradient-shift 4s ease-in-out infinite;
-      background-size: 200% 200%;
-    }
-
-    @keyframes gradient-shift {
-      0%, 100% { background-position: 0% 50%; }
-      50%       { background-position: 100% 50%; }
-    }
-
-    .hero-sub {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      color: var(--text-dim);
-      max-width: 600px;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
-    }
-
-    .hero-sub strong { color: var(--neon-cyan); font-weight: 600; }
-
-    .hero-cta-group {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 4rem;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.9rem 2.2rem;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-      color: #fff;
-      font-weight: 700;
-      font-size: 1rem;
-      text-decoration: none;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 0 24px rgba(0,245,255,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-      transition: transform 0.2s, box-shadow 0.2s;
-      letter-spacing: 0.04em;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px) scale(1.03);
-      box-shadow: 0 0 40px rgba(0,245,255,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
-    }
-
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.9rem 2.2rem;
-      background: transparent;
-      color: var(--neon-pink);
-      font-weight: 700;
-      font-size: 1rem;
-      text-decoration: none;
-      border-radius: 8px;
-      border: 1.5px solid var(--neon-pink);
-      cursor: pointer;
-      box-shadow: 0 0 16px rgba(255,0,170,0.2);
-      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-      letter-spacing: 0.04em;
-    }
-
-    .btn-secondary:hover {
-      transform: translateY(-3px) scale(1.03);
-      background: rgba(255,0,170,0.08);
-      box-shadow: 0 0 30px rgba(255,0,170,0.5);
-    }
-
-    /* Floating 3D orbs */
-    .hero-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      pointer-events: none;
-      animation: orb-float 8s ease-in-out infinite;
-    }
-
-    .orb1 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(180,0,255,0.2), transparent 70%);
-      top: 10%; left: -10%;
-      animation-delay: 0s;
-    }
-
-    .orb2 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(0,245,255,0.15), transparent 70%);
-      top: 20%; right: -5%;
-      animation-delay: -3s;
-    }
-
-    .orb3 {
-      width: 250px; height: 250px;
-      background: radial-gradient(circle, rgba(255,0,170,0.15), transparent 70%);
-      bottom: 20%; left: 20%;
-      animation-delay: -6s;
-    }
-
-    @keyframes orb-float {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      33%       { transform: translateY(-30px) scale(1.05); }
-      66%       { transform: translateY(15px) scale(0.97); }
-    }
-
-    /* scroll indicator */
-    .scroll-hint {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      animation: scroll-bounce 2s ease-in-out infinite;
-    }
-
-    .scroll-hint svg { opacity: 0.6; }
-
-    @keyframes scroll-bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
-      50%       { transform: translateX(-50%) translateY(8px); opacity: 1; }
-    }
-
-    /* ===== SECTION COMMON ===== */
-    section {
-      position: relative;
-      z-index: 2;
-      padding: 6rem 2rem;
-    }
-
-    .section-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--neon-purple);
-      margin-bottom: 0.8rem;
-    }
-
-    .section-title {
-      font-size: clamp(1.8rem, 4vw, 3rem);
-      font-weight: 900;
-      margin-bottom: 1rem;
-      line-height: 1.1;
-    }
-
-    .section-desc {
-      color: var(--text-dim);
-      max-width: 560px;
-      line-height: 1.7;
-      font-size: 1rem;
-    }
-
-    .text-center { text-align: center; }
-    .mx-auto { margin-left: auto; margin-right: auto; }
-
-    /* ===== APP SHOWCASE ===== */
-    #apps { max-width: 1200px; margin: 0 auto; }
-
-    .apps-header { text-align: center; margin-bottom: 4rem; }
-
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2.5rem;
-    }
-
-    /* APP CARD */
-    .app-card {
-      position: relative;
-      background: var(--bg-card);
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-      cursor: pointer;
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s;
-      text-decoration: none;
-      display: block;
-      transform-style: preserve-3d;
-    }
-
-    .app-card:hover {
-      transform: translateY(-12px) scale(1.02);
-    }
-
-    .app-card.card-classics {
-      --card-color: var(--neon-gold);
-      --card-glow:  rgba(255,215,0,0.35);
-      --card-bg:    rgba(255,200,0,0.04);
-    }
-
-    .app-card.card-math {
-      --card-color: var(--neon-cyan);
-      --card-glow:  rgba(0,245,255,0.35);
-      --card-bg:    rgba(0,245,255,0.04);
-    }
-
-    .app-card:hover {
-      box-shadow:
-        0 0 0 1px var(--card-color),
-        0 20px 60px var(--card-glow),
-        0 0 80px var(--card-glow);
-    }
-
-    /* corner accents */
-    .app-card::before, .app-card::after {
-      content: '';
-      position: absolute;
-      width: 20px; height: 20px;
-      border-color: var(--card-color);
-      border-style: solid;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 3;
-    }
-    .app-card::before { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
-    .app-card::after  { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
-    .app-card:hover::before, .app-card:hover::after { opacity: 1; }
-
-    .card-glow-bg {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--card-bg);
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 0;
-    }
-    .app-card:hover .card-glow-bg { opacity: 1; }
-
-    .card-art {
-      position: relative;
-      height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .card-art-bg {
-      position: absolute;
-      inset: 0;
-      opacity: 0.12;
-      transition: opacity 0.3s;
-    }
-
-    .app-card:hover .card-art-bg { opacity: 0.22; }
-
-    .card-classics .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-gold), transparent 70%);
-    }
-
-    .card-math .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-cyan), transparent 70%);
-    }
-
-    .app-card.card-science {
-      --card-color: var(--neon-green);
-      --card-glow:  rgba(0,255,136,0.35);
-      --card-bg:    rgba(0,255,136,0.04);
-    }
-
-    .card-science .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-green), transparent 70%);
-    }
-
-    .app-card.card-math-science {
-      --card-color: #ff00ff;
-      --card-glow:  rgba(255,0,255,0.35);
-      --card-bg:    rgba(255,0,255,0.04);
-    }
-
-    .card-math-science .card-art-bg {
-      background: radial-gradient(ellipse at center, #ff00ff, transparent 70%);
-    }
-
-    .app-card.card-energy {
-      --card-color: var(--neon-gold);
-      --card-glow:  rgba(255,215,0,0.35);
-      --card-bg:    rgba(255,215,0,0.04);
-    }
-
-    .card-energy .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-gold), transparent 70%);
-    }
-
-    .app-card.card-social {
-      --card-color: var(--neon-purple);
-      --card-glow:  rgba(180,0,255,0.35);
-      --card-bg:    rgba(180,0,255,0.04);
-    }
-
-    .card-social .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-purple), transparent 70%);
-    }
-
-    .app-card.card-schulte {
-      --card-color: var(--neon-green);
-      --card-glow:  rgba(0,255,136,0.35);
-      --card-bg:    rgba(0,255,136,0.04);
-    }
-
-    .card-schulte .card-art-bg {
-      background: radial-gradient(ellipse at center, var(--neon-green), transparent 70%);
-    }
-
-    .app-card.card-natural-science {
-      --card-color: var(--neon-green);
-      --card-glow:  rgba(0,255,136,0.35);
-      --card-bg:    rgba(0,255,136,0.04);
-      background: linear-gradient(135deg,
-        rgba(0, 212, 255, 0.1) 0%,
-        rgba(255, 153, 0, 0.1) 25%,
-        rgba(0, 255, 136, 0.1) 50%,
-        rgba(255, 51, 102, 0.1) 100%);
-      border: 1px solid rgba(0, 255, 136, 0.4);
-      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2),
-                  inset 0 0 20px rgba(0, 255, 136, 0.05);
-    }
-
-    .app-card.card-natural-science:hover {
-      background: linear-gradient(135deg,
-        rgba(0, 212, 255, 0.15) 0%,
-        rgba(255, 153, 0, 0.15) 25%,
-        rgba(0, 255, 136, 0.15) 50%,
-        rgba(255, 51, 102, 0.15) 100%);
-      box-shadow: 0 0 30px rgba(0, 255, 136, 0.4),
-                  inset 0 0 20px rgba(0, 255, 136, 0.1);
-    }
-
-    .card-natural-science .card-art-bg {
-      background: linear-gradient(135deg,
-        rgba(0, 212, 255, 0.3) 0%,
-        rgba(255, 153, 0, 0.3) 25%,
-        rgba(0, 255, 136, 0.3) 50%,
-        rgba(255, 51, 102, 0.3) 100%);
-    }
-
-    .app-card.card-english {
-      --card-color: var(--neon-gold);
-      --card-glow:  rgba(255,215,0,0.35);
-      --card-bg:    rgba(255,215,0,0.04);
-      background: linear-gradient(135deg,
-        rgba(255, 215, 0, 0.1) 0%,
-        rgba(0, 245, 255, 0.1) 25%,
-        rgba(180, 0, 255, 0.1) 50%,
-        rgba(255, 0, 170, 0.1) 100%);
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2),
-                  inset 0 0 20px rgba(255, 215, 0, 0.05);
-    }
-
-    .app-card.card-english:hover {
-      background: linear-gradient(135deg,
-        rgba(255, 215, 0, 0.15) 0%,
-        rgba(0, 245, 255, 0.15) 25%,
-        rgba(180, 0, 255, 0.15) 50%,
-        rgba(255, 0, 170, 0.15) 100%);
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4),
-                  inset 0 0 20px rgba(255, 215, 0, 0.1);
-    }
-
-    .card-english .card-art-bg {
-      background: linear-gradient(135deg,
-        rgba(255, 215, 0, 0.3) 0%,
-        rgba(0, 245, 255, 0.3) 25%,
-        rgba(180, 0, 255, 0.3) 50%,
-        rgba(255, 0, 170, 0.3) 100%);
-    }
-
-    .card-icon {
-      font-size: 5rem;
-      position: relative;
-      z-index: 1;
-      filter: drop-shadow(0 0 20px var(--card-color));
-      transition: transform 0.3s, filter 0.3s;
-      animation: icon-float 4s ease-in-out infinite;
-    }
-
-    .app-card:hover .card-icon {
-      transform: scale(1.15) translateY(-6px);
-      filter: drop-shadow(0 0 40px var(--card-color));
-    }
-
-    @keyframes icon-float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-8px); }
-    }
-
-    .card-badge {
-      position: absolute;
-      top: 1rem; right: 1rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--card-color);
-      border: 1px solid var(--card-color);
-      border-radius: 50px;
-      padding: 0.2rem 0.7rem;
-      background: rgba(0,0,0,0.4);
-      z-index: 2;
-      box-shadow: 0 0 8px var(--card-glow);
-    }
-
-    .card-body {
-      position: relative;
-      z-index: 1;
-      padding: 1.5rem 1.8rem 2rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .card-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.01em;
-    }
-
-    .card-desc {
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      line-height: 1.6;
-      margin-bottom: 1.2rem;
-    }
-
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tag {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: var(--text-dim);
-      background: rgba(255,255,255,0.03);
-      letter-spacing: 0.05em;
-    }
-
-    .card-launch {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.7rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      border: 1.5px solid var(--card-color);
-      color: var(--card-color);
-      background: rgba(0,0,0,0.3);
-      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-      text-decoration: none;
-    }
-
-    .app-card:hover .card-launch {
-      background: rgba(255,255,255,0.06);
-      box-shadow: 0 0 20px var(--card-glow);
-      transform: translateX(4px);
-    }
-
-    /* ===== APPS SECTION LAYOUT ===== */
-    .apps-wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .apps-section {
-      margin-bottom: 4rem;
-    }
-
-    .section-subtitle {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 2rem;
-      text-align: center;
-      letter-spacing: 0.05em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.8rem;
-    }
-
-    .games-grid,
-    .subjects-grid,
-    .others-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2.5rem;
-      margin-bottom: 0;
-    }
-
-    .games-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .subjects-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    .others-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    /* 科目學習卡片樣式（可點擊） */
-    .app-card.card-math-science,
-    .app-card.card-natural-science,
-    .app-card.card-social,
-    .app-card.card-chinese {
-      cursor: pointer;
-    }
-
-    /* 國語科佔位符卡片樣式 */
-    .app-card.card-chinese {
-      --card-color: #ff6b9d;
-      --card-glow: rgba(255, 107, 157, 0.35);
-      --card-bg: rgba(255, 107, 157, 0.04);
-    }
-
-    .card-chinese .card-art-bg {
-      background: radial-gradient(ellipse at center, #ff6b9d, transparent 70%);
-    }
-
-    /* ===== GRADE MODAL ===== */
-    .grade-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .grade-modal.show {
-      animation: fadeIn 0.2s ease-out forwards !important;
-      opacity: 1 !important;
-      pointer-events: auto;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-
-    .grade-modal-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      cursor: pointer;
-      z-index: -1;
-    }
-
-    .grade-modal-content {
-      position: relative;
-      background: var(--bg-card);
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 0 60px rgba(0, 245, 255, 0.2),
-                  0 0 30px rgba(180, 0, 255, 0.15);
-      padding: 3rem 2.5rem;
-      max-width: 480px;
-      width: 90%;
-      opacity: 0;
-      transform: translateY(20px);
-      z-index: 1001;
-    }
-
-    .grade-modal.show .grade-modal-content {
-      animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .grade-modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-
-    .grade-modal-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.01em;
-      margin: 0;
-    }
-
-    .grade-modal-close {
-      background: none;
-      border: none;
-      font-size: 1.8rem;
-      color: var(--text-dim);
-      cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s, transform 0.2s;
-    }
-
-    .grade-modal-close:hover {
-      color: var(--neon-cyan);
-      transform: scale(1.1);
-    }
-
-    .grade-modal-body {
-      text-align: center;
-    }
-
-    .grade-modal-subtitle {
-      color: var(--text-dim);
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-
-    .grade-buttons {
-      display: grid;
-      /* 12 個選項（6 年級 × 上下學期）。原本 5 欄是為了 5 顆代號按鈕，
-         現在改 4 欄比較好讀，同一年級的上下學期會在同一列相鄰。 */
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.9rem;
-    }
-
-    .grade-btn {
-      padding: 1rem 0.75rem;
-      background: rgba(0, 245, 255, 0.1);
-      border: 1.5px solid rgba(0, 245, 255, 0.5);
-      border-radius: 12px;
-      color: var(--neon-cyan);
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-      min-height: 68px;
-      line-height: 1.3;
-    }
-
-    .grade-btn small {
-      display: block;
-      font-size: 0.72rem;
-      font-weight: 400;
-      letter-spacing: 0;
-      opacity: 0.75;
-      margin-top: 3px;
-    }
-
-    /* 還沒做的學期：看得到但點不下去，讓小孩知道完整範圍在哪裡 */
-    .grade-btn.is-soon {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.14);
-      color: rgba(255, 255, 255, 0.34);
-      cursor: not-allowed;
-    }
-    .grade-btn.is-soon:hover {
-      transform: none;
-      box-shadow: none;
-    }
-
-    .grade-btn:hover {
-      background: var(--neon-cyan);
-      color: var(--bg-dark);
-      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
-      transform: scale(1.05);
-    }
-
-    .grade-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* ===== 響應式設計 ===== */
-    @media (max-width: 1024px) {
-      .games-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      }
-
-      .subjects-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .others-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .grade-buttons {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .games-grid,
-      .subjects-grid,
-      .others-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-
-      .section-subtitle {
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .grade-modal-content {
-        padding: 2rem 1.5rem;
-      }
-
-      .grade-buttons {
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.75rem;
-      }
-
-      .grade-btn {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.85rem;
-      }
-    }
-
-    /* ===== STATS ===== */
-    .stats-section {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .stat-card {
-      text-align: center;
-      padding: 2rem 1.5rem;
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.06);
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s, border-color 0.3s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(0,245,255,0.3);
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .stat-card:hover::before { opacity: 1; }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-      color: var(--text-dim);
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-    }
-
-    /* ===== FEATURES ===== */
-    .features-section {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .features-header { text-align: center; margin-bottom: 4rem; }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .feature-card {
-      padding: 2rem;
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(180,0,255,0.3);
-      box-shadow: 0 12px 40px rgba(180,0,255,0.1);
-    }
-
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-
-    .feature-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-desc {
-      color: var(--text-dim);
-      font-size: 0.88rem;
-      line-height: 1.65;
-    }
-
-    /* ===== CTA BANNER ===== */
-    .cta-section {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .cta-box {
-      background: var(--bg-card);
-      border-radius: 24px;
-      padding: 4rem 3rem;
-      border: 1px solid rgba(0,245,255,0.12);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 80px rgba(0,245,255,0.06), 0 0 160px rgba(180,0,255,0.04);
-    }
-
-    .cta-box::before {
-      content: '';
-      position: absolute;
-      top: -60px; left: 50%;
-      transform: translateX(-50%);
-      width: 300px; height: 120px;
-      background: radial-gradient(ellipse, rgba(0,245,255,0.15), transparent 70%);
-      pointer-events: none;
-    }
-
-    .cta-title {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 900;
-      margin-bottom: 1rem;
-      line-height: 1.15;
-    }
-
-    .cta-desc {
-      color: var(--text-dim);
-      margin-bottom: 2.5rem;
-      font-size: 1rem;
-      line-height: 1.7;
-    }
-
-    /* ===== FOOTER ===== */
-    footer {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      padding: 3rem 2rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      color: var(--text-dim);
-      font-size: 0.85rem;
-    }
-
-    footer .footer-logo {
-      font-size: 1.2rem;
-      font-weight: 900;
-      color: var(--neon-cyan);
-      text-shadow: 0 0 12px var(--neon-cyan);
-      display: block;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.1em;
-    }
-
-    footer span { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
-
-    /* ===== DIVIDER LINE ===== */
-    .neon-line {
-      width: 100%;
-      max-width: 160px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
-      margin: 1.5rem auto;
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 640px) {
-      nav { padding: 1rem 1.2rem; }
-      .nav-links { display: none; }
-      .apps-grid { grid-template-columns: 1fr; }
-      .cta-box { padding: 2.5rem 1.5rem; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    /* ===== ANIMATE ON SCROLL ===== */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-  </style>
-  <script src="curriculum-20260810.js"></script>
-  <!-- 全站墨水街頭風外觀層。必須排在本頁原有樣式之後；拿掉這一行即回到原樣。 -->
-  <link rel="stylesheet" href="splat-core-20261104.css">
-  <link rel="stylesheet" href="splat-hub-20261104.css">
-  <!-- 課程闖關站卡片的圖示。拿掉這行那張卡的圖會變空白。 -->
-  <link rel="stylesheet" href="splat-hub-quest-20261105.css">
-  <link rel="stylesheet" href="splat-hub-compass-20261106.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學霸星球 | 超能學習基地</title>
+
+<!--
+  新版首頁（2026-11-06）—— 階段 1：版面重整
+
+  跟舊的 index.html 的差別：
+    1. 年級從「卡片點下去才問」提到最上面，變成整個網站的入口。
+    2. 內容分兩個書架：跟著課本走（按科目分列）、隨時練（不分年級）。
+    3. 舊的「選擇你的年級」小視窗整個拿掉 —— 它跟闖關站的精靈重複問同一件事。
+
+  2026-11-06 起這一版成為正式首頁，改版前那一份改名存成
+  index-old-20261104.html（完全沒動內容），要比對或退回都還在。
+  什麼東西存在、擺哪一格，全部寫在 shelf-20261106.js，這裡只負責畫。
+-->
+
+<link rel="stylesheet" href="splat-core-20261104.css">
+<link rel="stylesheet" href="splat-hub-shelf-20261106.css">
 </head>
 <body>
 
-  <!-- Star field canvas -->
-  <canvas id="stars-canvas"></canvas>
-
-  <!-- Perspective grid floor -->
-  <div class="grid-floor"></div>
-
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">學霸<span>星球</span></div>
-    <div class="nav-links">
-      <a href="#apps">學習 APP</a>
-      <a href="#features">特色功能</a>
-      <a href="#cta">開始探索</a>
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-orb orb1"></div>
-    <div class="hero-orb orb2"></div>
-    <div class="hero-orb orb3"></div>
-
-    <div class="hero-badge">⚡ 學習任務已啟動</div>
-
-    <h1 class="hero-title">
-      <span class="title-line1">超能學習</span>
-      <span class="title-line2">冒險基地</span>
-    </h1>
-
-    <p class="hero-sub">
-      橫跨<strong>國學</strong>、<strong>數學</strong>、<strong>自然科學</strong>的全方位學習平台，<br>
-      在這裡開啟你的超能學習之旅，成為真正的學霸！
-    </p>
-
-    <div class="hero-cta-group">
-      <a href="#apps" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        開始冒險
-      </a>
-      <a href="#features" class="btn-secondary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        了解更多
-      </a>
-    </div>
-
-    <div class="scroll-hint">
-      <span>探索更多</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"/>
-      </svg>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <section>
-    <div class="stats-section reveal">
-      <div class="stats-grid">
-        <div class="stat-card reveal reveal-delay-1">
-          <span class="stat-number">8</span>
-          <div class="stat-label">學習 APP</div>
-        </div>
-        <div class="stat-card reveal reveal-delay-2">
-          <span class="stat-number">5+</span>
-          <div class="stat-label">學習模式</div>
-        </div>
-        <div class="stat-card reveal reveal-delay-3">
-          <span class="stat-number">∞</span>
-          <div class="stat-label">挑戰關卡</div>
-        </div>
-        <div class="stat-card reveal reveal-delay-4">
-          <span class="stat-number">0</span>
-          <div class="stat-label">需要下載</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- APP SHOWCASE -->
-  <section id="apps">
-    <div class="apps-wrapper">
-      <div class="apps-header reveal">
-        <div class="section-tag">// 任務選單</div>
-        <h2 class="section-title">選擇你的<br><span style="color:var(--neon-cyan)">學習冒險</span></h2>
-        <div class="neon-line"></div>
-        <p class="section-desc mx-auto">每個 APP 都是一場獨特的知識冒險，點擊卡片立即出發！</p>
-      </div>
-
-      <!-- 🎮 快速遊戲區 -->
-      <div class="apps-section">
-        <h3 class="section-subtitle">🎮 快速遊戲</h3>
-        <div class="apps-grid games-grid">
-
-          <!-- APP 1: 經典大作戰 -->
-          <a class="app-card card-classics reveal reveal-delay-1"
-             href="classics-splat-app/"
-             target="_blank" rel="noopener">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">📜</div>
-              <div class="card-badge">國學經典</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">經典大作戰</div>
-              <p class="card-desc">
-                穿越千年，與孔子、文人才子一同對話。收錄《論語》與《世說新語》，支援注音輔助，循序漸進掌握國學精髓。
-              </p>
-              <div class="card-tags">
-                <span class="tag">論語</span>
-                <span class="tag">世說新語</span>
-                <span class="tag">注音輔助</span>
-                <span class="tag">經典學習</span>
-              </div>
-              <div class="card-launch">
-                進入冒險
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </a>
-
-          <!-- APP 2: 數感邏輯 -->
-          <a class="app-card card-math reveal reveal-delay-2"
-             href="math-logic-app/"
-             target="_blank" rel="noopener">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🧮</div>
-              <div class="card-badge">數學邏輯</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">數感邏輯</div>
-              <p class="card-desc">
-                燒腦挑戰從這裡開始！24點心算、四則運算、九九乘法到 19×19 進階乘法，全方位訓練數學直覺與邏輯思維。
-              </p>
-              <div class="card-tags">
-                <span class="tag">24點</span>
-                <span class="tag">四則運算</span>
-                <span class="tag">九九乘法</span>
-                <span class="tag">19x19</span>
-              </div>
-              <div class="card-launch">
-                進入冒險
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </a>
-
-          <!-- APP 5: 舒爾特方格 -->
-          <a class="app-card card-schulte reveal reveal-delay-3"
-             href="schulte-grid-app/"
-             target="_blank" rel="noopener">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🎯</div>
-              <div class="card-badge">視覺訓練</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">舒爾特方格</div>
-              <p class="card-desc">
-                按順序點擊隱藏的數字！從 3×3 入門到 7×7 進階，激發周邊視覺，訓練專注力與反應速度。4 個難度，12 項挑戰！
-              </p>
-              <div class="card-tags">
-                <span class="tag">視覺訓練</span>
-                <span class="tag">專注力</span>
-                <span class="tag">反應速度</span>
-                <span class="tag">成就系統</span>
-              </div>
-              <div class="card-launch">
-                進入冒險
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </a>
-
-        </div>
-      </div>
-
-      <!-- 📚 科目學習區 -->
-      <div class="apps-section">
-        <h3 class="section-subtitle">📚 科目學習</h3>
-        <div class="apps-grid subjects-grid">
-
-          <!-- APP 7: 星際數學探險 (需要年級選擇) -->
-          <div class="app-card card-math-science reveal reveal-delay-4"
-               onclick="showGradeModal('math-science')" role="button" tabindex="0">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🔢</div>
-              <div class="card-badge">數學科</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">星際數學探險</div>
-              <p class="card-desc">
-                用卡牌遊戲和遊戲化闖關探索數學的奧秘！涵蓋四年級下、五年級上下、六年級上下的數學課程，包含四則運算、幾何、統計等核心概念。選擇你的年級，隨機出題讓每次練習都是新的冒險！
-              </p>
-              <div class="card-tags">
-                <span class="tag">卡牌自學</span>
-                <span class="tag">隨機出題</span>
-                <span class="tag">20單元</span>
-                <span class="tag">進度追蹤</span>
-              </div>
-              <div class="card-launch">
-                選擇年級
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- 課程闖關站：照課本版本分年級學期的題庫（2026-11-05 新增） -->
-          <div class="app-card card-quest reveal reveal-delay-5"
-               onclick="location.href='quest/index.html'" role="button" tabindex="0">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🧭</div>
-              <div class="card-badge">依課本版本</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">課程闖關站</div>
-              <p class="card-desc">
-                照課本的分法來練：先選年級、課本版本、學期和考試範圍，再進單元和課次闖關。答錯的題目會自動收進錯題本，隨時可以回頭複習。目前有五上自然、五上社會（都是康軒版），以及四下自然和四下社會。
-              </p>
-              <div class="card-tags">
-                <span class="tag">康軒/南一/翰林</span>
-                <span class="tag">期中期末範圍</span>
-                <span class="tag">錯題本</span>
-                <span class="tag">440題</span>
-              </div>
-              <div class="card-launch">
-                開始設定
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- 自然科綜合版 (需要年級選擇) -->
-          <div class="app-card card-natural-science reveal reveal-delay-5"
-               onclick="showGradeModal('natural-science')" role="button" tabindex="0">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🌿</div>
-              <div class="card-badge">自然科學</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">自然科綜合版</div>
-              <p class="card-desc">
-                探索力、動力、液體、地球、能源和電的奧秘！支援四年級下、五年級上下、六年級上下多個年級。多個篇章涵蓋物理、地球科學和能源知識，層層深入自然科學的世界。選擇你的年級開始探索！
-              </p>
-              <div class="card-tags">
-                <span class="tag">多選測驗</span>
-                <span class="tag">6篇章</span>
-                <span class="tag">18任務</span>
-                <span class="tag">進度追蹤</span>
-              </div>
-              <div class="card-launch">
-                選擇年級
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- APP 3: 社會科探險 (需要年級選擇) -->
-          <div class="app-card card-social reveal reveal-delay-6"
-               onclick="showGradeModal('social-studies')" role="button" tabindex="0">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🏛️</div>
-              <div class="card-badge">社會科學</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">社會科探險</div>
-              <p class="card-desc">
-                探索臺灣的自然、飲食與文化！支援四年級下、五年級上下、六年級上下。從水資源、山林、漁業，到農業、食安、人文古蹟，多個篇章讓你成為小小社會學家。選擇適合你的年級開始冒險！
-              </p>
-              <div class="card-tags">
-                <span class="tag">大地觀測</span>
-                <span class="tag">食農生活</span>
-                <span class="tag">家鄉文化</span>
-                <span class="tag">臺灣探索</span>
-              </div>
-              <div class="card-launch">
-                選擇年級
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- 國語科 -->
-          <div class="app-card card-chinese reveal reveal-delay-7">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">📚</div>
-              <div class="card-badge">新上線</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">國語科</div>
-              <p class="card-desc">
-                語文閣樓互動學習平台，透過卡牌模式和智慧闖關挑戰，掌握易混淆字詞、成語理解和句式排序。
-              </p>
-              <div class="card-tags">
-                <span class="tag">字詞辨析</span>
-                <span class="tag">成語理解</span>
-                <span class="tag">句式排序</span>
-                <span class="tag">互動學習</span>
-              </div>
-              <div class="card-launch" onclick="showGradeModal('chinese')">
-                開始學習
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- 🔧 其他應用區 -->
-      <div class="apps-section">
-        <h3 class="section-subtitle">🔧 其他應用</h3>
-        <div class="apps-grid others-grid">
-
-          <!-- APP 4: 能源電力廠 -->
-          <a class="app-card card-energy reveal reveal-delay-8"
-             href="energy-lab-app/"
-             target="_blank" rel="noopener">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">⚡</div>
-              <div class="card-badge">自然科學</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">能源電力廠</div>
-              <p class="card-desc">
-                連接電路讓村莊重見光明！測試導體與絕緣體，再化身節能小尖兵找出浪費電的壞習慣。四年級電學必玩！
-              </p>
-              <div class="card-tags">
-                <span class="tag">通路短路</span>
-                <span class="tag">串聯並聯</span>
-                <span class="tag">導體絕緣體</span>
-                <span class="tag">節能省電</span>
-              </div>
-              <div class="card-launch">
-                進入冒險
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </a>
-
-          <!-- APP 8: 英文千詞營 -->
-          <a class="app-card card-english reveal reveal-delay-9"
-             href="english-app/"
-             target="_blank" rel="noopener">
-            <div class="card-glow-bg"></div>
-            <div class="card-art">
-              <div class="card-art-bg"></div>
-              <div class="card-icon">🎤</div>
-              <div class="card-badge">英文學習</div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">英文千詞營</div>
-              <p class="card-desc">
-                掌握 1000 個高頻英文單詞！從基礎母音、短語到進階詞彙，搭配語音識別練習與互動遊戲，10 個難度等級層層深入，成為英文小達人。
-              </p>
-              <div class="card-tags">
-                <span class="tag">Fry 1000 詞</span>
-                <span class="tag">語音練習</span>
-                <span class="tag">10難度等級</span>
-                <span class="tag">自然發音</span>
-              </div>
-              <div class="card-launch">
-                進入冒險
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </a>
-
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 年級選擇模態框 -->
-  <div id="gradeModal" class="grade-modal" style="display: none;">
-    <div class="grade-modal-overlay" onclick="closeGradeModal()"></div>
-    <div class="grade-modal-content">
-      <div class="grade-modal-header">
-        <h2 class="grade-modal-title">選擇你的年級</h2>
-        <button class="grade-modal-close" onclick="closeGradeModal()">✕</button>
-      </div>
-      <div class="grade-modal-body">
-        <p class="grade-modal-subtitle">選擇年級和學期　·　灰色的表示還在製作中</p>
-        <div class="grade-buttons" id="gradeButtons"></div>
-      </div>
-    </div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-mark"></span>學霸<em>星球</em></div>
+    <span class="topbar-spacer"></span>
+    <button class="chip sm" id="btn-reset" type="button">換年級</button>
   </div>
+</header>
 
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="features-section">
-      <div class="features-header reveal">
-        <div class="section-tag">// 特色系統</div>
-        <h2 class="section-title">為什麼選擇<br><span style="color:var(--neon-purple)">學霸星球？</span></h2>
-        <div class="neon-line"></div>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card reveal reveal-delay-1">
-          <span class="feature-icon">🎮</span>
-          <div class="feature-title">遊戲化學習</div>
-          <p class="feature-desc">把枯燥的學習變成有趣的關卡挑戰，讓孩子在玩樂中自然吸收知識。</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-2">
-          <span class="feature-icon">📱</span>
-          <div class="feature-title">隨時隨地</div>
-          <p class="feature-desc">純網頁應用，不需下載，手機、平板、電腦皆可使用，學習零門檻。</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-3">
-          <span class="feature-icon">🧠</span>
-          <div class="feature-title">跨領域培養</div>
-          <p class="feature-desc">國語文學與數理邏輯並重，全方位培養左右腦協調發展。</p>
-        </div>
-        <div class="feature-card reveal reveal-delay-4">
-          <span class="feature-icon">🚀</span>
-          <div class="feature-title">持續更新</div>
-          <p class="feature-desc">不斷開發新的學習 APP，讓學習內容越來越豐富，陪伴孩子成長每一步。</p>
-        </div>
-      </div>
+<main class="wrap">
+
+  <section class="head">
+    <h1>今天要練<em>哪一科</em>？</h1>
+    <p>先選年級，下面就只會出現這個年級念得到的東西。選過一次會記住，下次直接進。</p>
+  </section>
+
+  <!-- 年級 / 學期 / 版本 -->
+  <section class="picker" aria-label="選擇年級與學期">
+    <div class="picker-row">
+      <span class="picker-label">年級</span>
+      <div id="pick-grade" class="picker-row" style="gap:8px"></div>
+    </div>
+    <div class="picker-row">
+      <span class="picker-label">學期</span>
+      <div id="pick-term" class="picker-row" style="gap:8px"></div>
+    </div>
+    <div class="picker-row">
+      <span class="picker-label">課本</span>
+      <div id="pick-version" class="picker-row" style="gap:8px"></div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section id="cta">
-    <div class="cta-section">
-      <div class="cta-box reveal">
-        <div class="section-tag">// 準備好了嗎？</div>
-        <h2 class="cta-title">現在就開始你的<br><span style="color:var(--neon-cyan)">學霸冒險！</span></h2>
-        <p class="cta-desc">
-          選擇你想挑戰的關卡，<br>知識的世界正在等著你探索。
-        </p>
-        <div class="hero-cta-group">
-          <a href="#apps" class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            選擇學習 APP
-          </a>
-        </div>
-      </div>
+  <!-- 書架一：跟著課本走 -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2>跟著課本走</h2>
+      <small id="shelf-sub"></small>
     </div>
+    <div id="by-subject"></div>
   </section>
 
-  <!-- FOOTER -->
-  <footer>
-    <span class="footer-logo">學霸<span>星球</span></span>
-    <p>為孩子打造的超能學習冒險基地 ✨</p>
-    <p style="margin-top:0.5rem;font-size:0.78rem;">
-      <a href="classics-splat-app/" target="_blank"
-         style="color:var(--neon-gold);text-decoration:none;margin:0 0.5rem;">經典大作戰</a>
-      ·
-      <a href="math-logic-app/" target="_blank"
-         style="color:var(--neon-cyan);text-decoration:none;margin:0 0.5rem;">數感邏輯</a>
-      ·
-      <a href="natural-science-app/" target="_blank"
-         style="color:var(--neon-green);text-decoration:none;margin:0 0.5rem;">大地觀測站</a>
-      ·
-      <a href="energy-lab-app/" target="_blank"
-         style="color:var(--neon-gold);text-decoration:none;margin:0 0.5rem;">能源電力廠</a>
-    </p>
+  <!-- 書架二：隨時練 -->
+  <section class="shelf">
+    <div class="shelf-head">
+      <h2>隨時練</h2>
+      <small>不分年級，想到就玩</small>
+    </div>
+    <div class="row" id="anytime"></div>
+  </section>
+
+  <footer class="foot">
+    學霸星球 · 自己做給自己小孩用的。
+    改版前的舊首頁留在 <a href="index-old-20261104.html">index-old-20261104.html</a>。
   </footer>
 
-  <script>
-    // ===== GRADE MODAL FUNCTIONS =====
-    let currentSubject = null;
+</main>
 
-    function showGradeModal(subject) {
-      currentSubject = subject;
-      renderGradeButtons();
-      const modal = document.getElementById('gradeModal');
-      modal.style.display = 'flex';
-      // 强制浏览器重排，然后添加 show 类触发动画
-      void modal.offsetHeight;
-      modal.classList.add('show');
-      document.body.style.overflow = 'hidden';
-    }
+<script src="study-setup-20261106.js"></script>
+<script src="shelf-20261106.js"></script>
+<script>
+'use strict';
+(function () {
 
-    function closeGradeModal() {
-      const modal = document.getElementById('gradeModal');
-      modal.classList.remove('show');
-      // 让动画有时间执行（reversal）
-      setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        currentSubject = null;
-      }, 200);
-    }
+  var S = window.SHELF;
 
-    // 「哪個科目的哪個年級學期有內容」統一由 curriculum-20260810.js 定義，
-    // 首頁和各科 App 讀同一份，不會出現首頁說有、點進去卻是空的。
-    // 這裡只做卡片 id 到總表 key 的對應（卡片 id 是舊的命名，先不動 HTML）。
-    const SUBJECT_KEY = {
-      'math-science': 'math',
-      'natural-science': 'natural',
-      'social-studies': 'social',
-      'chinese': 'chinese'
-    };
+  /* ── 設定 ──
+     2026-11-06 起改用 study-setup-20261106.js 的共用設定，
+     原本這裡自己讀寫 'shelf-setup-20261106'，跟闖關站的那一份各記各的，
+     在首頁選了五上、進闖關站卻可能還停在四下。現在兩邊讀同一把鑰匙。
+     讀寫的 try/catch 都在那支模組裡，這裡不用再包一次。 */
+  var setup = window.StudySetup.resolve();
 
-    // 產生 1~6 年級 × 上下學期，共 12 個選項
-    function renderGradeButtons() {
-      const box = document.getElementById('gradeButtons');
-      const subj = SUBJECT_KEY[currentSubject];
-      const avail = window.CURRICULUM.availableKeys(subj);
-      box.innerHTML = '';
-      for (let g = 1; g <= 6; g++) {
-        for (let t = 1; t <= 2; t++) {
-          const key = `${g}-${t}`;
-          const ready = avail.includes(key);
-          const note = window.CURRICULUM.noteOf(subj, key);
-          const btn = document.createElement('button');
-          btn.className = 'grade-btn' + (ready ? '' : ' is-soon');
-          btn.disabled = !ready;
-          btn.innerHTML = `${g} 年級<small>${t === 1 ? '上' : '下'}學期${ready ? '' : ' · 製作中'}</small>`;
-          if (ready && note) btn.title = note;
-          if (ready) btn.onclick = () => navigateToSubject(key);
-          box.appendChild(btn);
-        }
-      }
-    }
+  function save() { window.StudySetup.write(setup); }
 
-    function navigateToSubject(grade) {
-      if (!currentSubject) return;
-      const subj = SUBJECT_KEY[currentSubject];
-      const path = window.CURRICULUM.subjects[subj]?.path;
-      if (path) {
-        window.location.href = `${path}?grade=${grade}`;
-        closeGradeModal();
-      }
-    }
+  function keyOf() { return setup.grade + '-' + setup.term; }
 
-    // Close modal when clicking overlay
-    document.addEventListener('click', (e) => {
-      const modal = document.getElementById('gradeModal');
-      if (e.target.classList.contains('grade-modal-overlay')) {
-        closeGradeModal();
-      }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  /* ── 選擇列 ───────────────────────────────────── */
+  function renderPicker() {
+    var g = document.getElementById('pick-grade');
+    g.innerHTML = '';
+    S.grades.forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip' + (n === setup.grade ? ' on' : '');
+      // 上下學期都沒東西的年級，先讓它低調，但不擋著不給點
+      if (!S.countAt(n + '-1') && !S.countAt(n + '-2')) b.className += ' is-empty';
+      b.textContent = n + ' 年級';
+      b.onclick = function () { setup.grade = n; save(); renderAll(); };
+      g.appendChild(b);
     });
 
-    // Close modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeGradeModal();
-      }
+    var t = document.getElementById('pick-term');
+    t.innerHTML = '';
+    S.terms.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip sm' + (p[0] === setup.term ? ' on' : '');
+      if (!S.countAt(setup.grade + '-' + p[0])) b.className += ' is-empty';
+      b.textContent = p[1];
+      b.onclick = function () { setup.term = p[0]; save(); renderAll(); };
+      t.appendChild(b);
     });
 
-    // ===== STAR FIELD =====
-    const canvas = document.getElementById('stars-canvas');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
+    var v = document.getElementById('pick-version');
+    v.innerHTML = '';
+    S.versions.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip sm' + (p[0] === setup.version ? ' on' : '');
+      b.textContent = p[1];
+      b.onclick = function () { setup.version = p[0]; save(); renderAll(); };
+      v.appendChild(b);
+    });
+  }
 
-    function resizeCanvas() {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+  /* ── 一張卡片 ─────────────────────────────────── */
+  function cardHTML(item, href, slotNote) {
+    return '<a class="item" href="' + esc(href) + '">' +
+      '<span class="item-ico" style="background-image:url(\'' + esc(item.icon) + '\')"></span>' +
+      '<span class="item-txt">' +
+        '<span class="item-title">' + esc(item.title) +
+          (item.tag ? '<span class="item-tag">' + esc(item.tag) + '</span>' : '') +
+        '</span>' +
+        '<span class="item-desc">' + esc(item.desc) + '</span>' +
+        (slotNote ? '<span class="item-note">' + esc(slotNote) + '</span>' : '') +
+      '</span>' +
+    '</a>';
+  }
+
+  /* ── 書架一 ───────────────────────────────────── */
+  function renderSubjects() {
+    var k = keyOf();
+    var termName = setup.term === 1 ? '上學期' : '下學期';
+    var versionName = (S.versions.filter(function (v) { return v[0] === setup.version; })[0] || [])[1] || '';
+    document.getElementById('shelf-sub').textContent =
+      setup.grade + ' 年級' + termName + '　' + versionName;
+
+    var box = document.getElementById('by-subject');
+    var html = '';
+
+    // 這個年級學期還沒有任何「照課本」的內容時，先講清楚。
+    // 但底下的科目列照常畫 —— 不分年級的項目（能源電力廠）還是點得到，
+    // 直接 return 會把它藏起來。
+    if (!S.countAt(k)) {
+      html += '<div class="blank" style="margin-bottom:18px">' +
+        '<b>' + setup.grade + ' 年級' + termName + '還沒有照課本的內容。</b><br>' +
+        '目前做好的是四下（自然、社會、數學、國語）和五上（自然、社會、數學）。<br>' +
+        '換一個年級，或往下看「隨時練」那一區。</div>';
     }
 
-    function createStars() {
-      stars = [];
-      const count = Math.floor((canvas.width * canvas.height) / 5000);
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x:      Math.random() * canvas.width,
-          y:      Math.random() * canvas.height,
-          r:      Math.random() * 1.5 + 0.3,
-          alpha:  Math.random(),
-          speed:  Math.random() * 0.003 + 0.001,
-          phase:  Math.random() * Math.PI * 2,
-          color:  ['#ffffff','#00f5ff','#b400ff','#ff00aa'][Math.floor(Math.random()*4)]
+    S.subjects.forEach(function (sub) {
+      var live = S.liveItems(sub, k);
+      html += '<div class="subject' + (live.length ? '' : ' is-blank') + '">' +
+        '<div class="subject-bar">' +
+          '<span class="dot" style="background:' + sub.color + '"></span>' +
+          sub.icon + ' ' + esc(sub.name) +
+          '<span class="count">' + (live.length ? live.length + ' 項' : '製作中') + '</span>' +
+        '</div><div class="row">';
+
+      if (!live.length) {
+        html += '<div class="blank">這一格還沒做。</div>';
+      } else {
+        live.forEach(function (it) {
+          // 連結再把設定帶過去一份。localStorage 被鎖住（無痕模式）時，
+          // 共用設定讀不到，網址參數還是能讓子頁開在正確的年級。
+          var href = S.hrefOf(it, k);
+          if (it.carriesSetup) href += window.StudySetup.query(setup);
+          html += cardHTML(it, href, S.slotOf(it, k));
         });
       }
-    }
-
-    function drawStars(t) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      stars.forEach(s => {
-        const a = (Math.sin(t * s.speed + s.phase) + 1) / 2 * 0.8 + 0.15;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = s.color;
-        ctx.globalAlpha = a;
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-    }
-
-    // Global RAF variable for cleanup
-    window.starAnimationRaf = null;
-
-    function animate(t) {
-      drawStars(t * 0.001);
-      window.starAnimationRaf = requestAnimationFrame(animate);
-    }
-
-    resizeCanvas();
-    createStars();
-    animate(0);
-
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      createStars();
+      html += '</div></div>';
     });
+    box.innerHTML = html;
+  }
 
-    // Cleanup RAF on page unload to prevent memory leak
-    window.addEventListener('beforeunload', () => {
-      if (window.starAnimationRaf) {
-        cancelAnimationFrame(window.starAnimationRaf);
-        window.starAnimationRaf = null;
-      }
-    });
+  /* ── 書架二 ───────────────────────────────────── */
+  function renderAnytime() {
+    document.getElementById('anytime').innerHTML =
+      S.anytime.map(function (it) { return cardHTML(it, it.href, ''); }).join('');
+  }
 
-    // ===== 3D CARD TILT =====
-    document.querySelectorAll('.app-card').forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const rect  = card.getBoundingClientRect();
-        const cx    = rect.left + rect.width / 2;
-        const cy    = rect.top  + rect.height / 2;
-        const dx    = (e.clientX - cx) / (rect.width  / 2);
-        const dy    = (e.clientY - cy) / (rect.height / 2);
-        card.style.transform =
-          `translateY(-12px) scale(1.02) rotateY(${dx * 6}deg) rotateX(${-dy * 4}deg)`;
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
-        card.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s';
-      });
-      card.addEventListener('mouseenter', () => {
-        card.style.transition = 'box-shadow 0.2s';
-      });
+  function renderAll() {
+    renderPicker();
+    renderSubjects();
+  }
 
-      // 科目學習卡片支援鍵盤操作
-      if (card.getAttribute('onclick')) {
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            card.click();
-          }
-        });
-      }
-    });
+  document.getElementById('btn-reset').onclick = function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.picker').animate(
+      [{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' },
+       { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }],
+      { duration: 240 }
+    );
+  };
 
-    // ===== SCROLL REVEAL =====
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // ===== SMOOTH NAV LINKS =====
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
-  </script>
+  renderAll();
+  renderAnytime();
+})();
+</script>
 </body>
 </html>
