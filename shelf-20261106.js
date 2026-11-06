@@ -94,6 +94,16 @@ window.SHELF = {
       key: 'math', name: '數學', icon: '🚀', color: 'var(--ink-cyan)',
       items: [
         {
+          title: '課程闖關站',
+          desc: '照課本單元分的題庫，答錯自動進錯題本',
+          href: 'quest/index.html',
+          icon: 'assets/icon-compass-20261106.png',
+          // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
+          carriesSetup: true,
+          grades: { '5-1': '140 題・康軒版' },
+          tag: '題庫',
+        },
+        {
           title: '星際數學探險',
           desc: '引導式教學，一步一步帶著算',
           href: 'math-science-app/?grade={grade}',
@@ -106,6 +116,16 @@ window.SHELF = {
     {
       key: 'chinese', name: '國語', icon: '📚', color: 'var(--ink-orange)',
       items: [
+        {
+          title: '課程闖關站',
+          desc: '照課本單元分的題庫，答錯自動進錯題本',
+          href: 'quest/index.html',
+          icon: 'assets/icon-compass-20261106.png',
+          // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
+          carriesSetup: true,
+          grades: { '5-1': '100 題・不分版本' },
+          tag: '題庫',
+        },
         {
           title: '語文閣樓',
           desc: '課文理解、詞語和修辭',
