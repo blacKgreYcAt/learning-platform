@@ -43,6 +43,8 @@ window.SHELF = {
           desc: '照課本單元分的題庫，答錯自動進錯題本',
           href: 'quest/index.html',
           icon: 'assets/icon-compass-20261106.png',
+          // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
+          carriesSetup: true,
           grades: { '4-2': '144 題・不分版本', '5-1': '110 題・康軒版' },
           tag: '題庫',
         },
@@ -73,6 +75,8 @@ window.SHELF = {
           desc: '照課本單元分的題庫，答錯自動進錯題本',
           href: 'quest/index.html',
           icon: 'assets/icon-compass-20261106.png',
+          // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
+          carriesSetup: true,
           grades: { '4-2': '66 題・不分版本', '5-1': '120 題・康軒版' },
           tag: '題庫',
         },

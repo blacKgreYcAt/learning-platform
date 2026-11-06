@@ -154,6 +154,7 @@
 </div>
 
 <!-- 題庫：一個學期一個檔。加新學期就在這裡加一行。 -->
+<script src="../study-setup-20261106.js"></script>
 <script src="data/science-5a-kang-20261105.js"></script>
 <script src="data/social-5a-kang-20261105.js"></script>
 <script src="data/science-4b-any-20261105.js"></script>
@@ -184,7 +185,29 @@
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} }
   var DB = load();
-  DB.setup = DB.setup || { grade: 5, version: 'kang', term: '上', range: 'all' };
+
+  /* ── 年級／版本／學期：改讀全站共用的那一份（2026-11-06）──
+     原本這三個欄位只存在 DB.setup 裡，首頁有自己的一份，兩邊各記各的，
+     所以在首頁選了五上、進來這裡可能還停在四下。
+     現在這三個以 study-setup 為準（網址參數 > 共用設定 > 預設），
+     range（要準備哪次考試）仍然是闖關站自己的事，留在 DB。 */
+  DB.setup = DB.setup || { range: 'all' };
+  (function () {
+    var shared = window.StudySetup.resolve();
+    DB.setup.grade = shared.grade;
+    DB.setup.version = shared.version;
+    DB.setup.term = window.StudySetup.termCh(shared.term);
+    if (['mid', 'final', 'all'].indexOf(DB.setup.range) < 0) DB.setup.range = 'all';
+  })();
+
+  /** 設定精靈改了年級／版本／學期之後，寫回共用設定，首頁才會跟著變 */
+  function syncShared() {
+    window.StudySetup.write({
+      grade: DB.setup.grade,
+      term: window.StudySetup.termNum(DB.setup.term),
+      version: DB.setup.version,
+    });
+  }
   DB.best = DB.best || {};     // 課 -> {score,total}
   DB.wrong = DB.wrong || [];   // 錯題本
 
@@ -264,7 +287,7 @@
       el.addEventListener('click', function () {
         var v = el.dataset.v;
         DB.setup[el.dataset.set] = (el.dataset.set === 'grade') ? +v : v;
-        save(); renderSetup();
+        save(); syncShared(); renderSetup();
       });
     });
     document.getElementById('btn-go').addEventListener('click', renderSubjects);

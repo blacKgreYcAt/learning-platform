@@ -78,29 +78,22 @@
 
 </main>
 
+<script src="study-setup-20261106.js"></script>
 <script src="shelf-20261106.js"></script>
 <script>
 'use strict';
 (function () {
 
-  var KEY = 'shelf-setup-20261106';
   var S = window.SHELF;
 
-  /* ── 設定的讀寫。無痕模式會丟例外，不能讓它炸掉整頁 ── */
-  var setup = { grade: 5, term: 1, version: 'kang' };
-  try {
-    var raw = localStorage.getItem(KEY);
-    if (raw) {
-      var o = JSON.parse(raw);
-      if (S.grades.indexOf(o.grade) >= 0) setup.grade = o.grade;
-      if (o.term === 1 || o.term === 2) setup.term = o.term;
-      if (S.versions.some(function (v) { return v[0] === o.version; })) setup.version = o.version;
-    }
-  } catch (e) { /* 讀不到就用預設，不影響使用 */ }
+  /* ── 設定 ──
+     2026-11-06 起改用 study-setup-20261106.js 的共用設定，
+     原本這裡自己讀寫 'shelf-setup-20261106'，跟闖關站的那一份各記各的，
+     在首頁選了五上、進闖關站卻可能還停在四下。現在兩邊讀同一把鑰匙。
+     讀寫的 try/catch 都在那支模組裡，這裡不用再包一次。 */
+  var setup = window.StudySetup.resolve();
 
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(setup)); } catch (e) {}
-  }
+  function save() { window.StudySetup.write(setup); }
 
   function keyOf() { return setup.grade + '-' + setup.term; }
 
@@ -197,7 +190,11 @@
         html += '<div class="blank">這一格還沒做。</div>';
       } else {
         live.forEach(function (it) {
-          html += cardHTML(it, S.hrefOf(it, k), S.slotOf(it, k));
+          // 連結再把設定帶過去一份。localStorage 被鎖住（無痕模式）時，
+          // 共用設定讀不到，網址參數還是能讓子頁開在正確的年級。
+          var href = S.hrefOf(it, k);
+          if (it.carriesSetup) href += window.StudySetup.query(setup);
+          html += cardHTML(it, href, S.slotOf(it, k));
         });
       }
       html += '</div></div>';
