@@ -123,7 +123,7 @@ window.SHELF = {
           icon: 'assets/icon-compass-20261106.png',
           // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
           carriesSetup: true,
-          grades: { '5-1': '100 題・不分版本' },
+          grades: { '5-1': '100 題・各版本通用' },
           tag: '題庫',
         },
         {
