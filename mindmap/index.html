@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="color-scheme" content="dark">
+<title>🗺️ 心智圖牆</title>
+<!--
+  心智圖牆（2026-11-09）
+
+  為什麼要有這一支：
+  自然科心智圖/ 和 社會科心智圖/ 這兩個資料夾一直都在 repo 裡，也跟著上線了，
+  但是全站沒有任何一個地方連得到 —— 要看只能自己猜網址。
+  這一支就是它們的門：照年級學期過濾、照單元排好、點下去可以放大看。
+
+  一樣是「殼 + 資料檔」：
+    mindmap/index.html          ← 這支，只有畫面和閱讀器
+    mindmap/data-20261109.js    ← 圖庫索引，之後多一套圖就加一個檔
+
+  圖檔本身一個位元組都沒有動，也沒有複製，就讀原本那兩個資料夾。
+-->
+<link rel="stylesheet" href="../splat-core-20261104.css">
+<link rel="stylesheet" href="mindmap-20261109.css">
+<link rel="stylesheet" href="../splat-typescale-20261109.css">
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <button class="btn ghost sm" id="btn-back" hidden>← 返回</button>
+    <a class="btn ghost sm" href="../index.html">🏠 首頁</a>
+    <span class="crumb" id="crumb"></span>
+  </div>
+
+  <h1>🗺️ 心智圖牆</h1>
+  <p class="lede">一課一張圖，整課的重點都畫在上面。考前翻一遍比重看一次課本快。</p>
+  <p class="mm-setup" id="setup-line"></p>
+
+  <!-- 第一層：選科目 -->
+  <section id="set-card">
+    <div class="set-grid" id="set-list"></div>
+  </section>
+
+  <!-- 第二層：單元 + 圖卡 -->
+  <section id="sheet-card" hidden>
+    <div id="sheet-list"></div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<!-- 閱讀器：原圖只有 1408×768，不能放大就等於讀不到，所以縮放拖曳是必要的 -->
+<div class="mm-viewer" id="viewer" hidden>
+  <div class="mm-bar">
+    <button class="btn ghost sm" id="mm-close" type="button">✕<span class="wide-only"> 關閉</span></button>
+    <span class="mm-title" id="mm-title"></span>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" id="mm-out" type="button" aria-label="縮小">−</button>
+    <button class="btn ghost sm" id="mm-fit" type="button"><span class="wide-only">符合畫面</span><span class="narrow-only">全圖</span></button>
+    <button class="btn ghost sm" id="mm-in" type="button" aria-label="放大">＋</button>
+  </div>
+
+  <div class="mm-stage" id="mm-stage">
+    <img id="mm-img" alt="">
+    <div class="mm-hint" id="mm-hint"></div>
+  </div>
+
+  <div class="mm-foot">
+    <button class="btn ghost sm" id="mm-prev" type="button">‹<span class="wide-only"> 上一張</span></button>
+    <span class="mm-pos" id="mm-pos"></span>
+    <button class="btn ghost sm" id="mm-next" type="button"><span class="wide-only">下一張 </span>›</button>
+  </div>
+</div>
+
+<script src="../study-setup-20261106.js"></script>
+<!-- 圖庫索引：之後多一套圖就在這裡加一行 -->
+<script src="data-20261109.js"></script>
+
+<script>
+'use strict';
+(function () {
+  var SETS = window.MINDMAP_SETS || [];
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* 年級／學期跟首頁和闖關站共用同一份設定，三邊不會各說各話 */
+  var setup = window.StudySetup.resolve();
+  var term = window.StudySetup.termCh(setup.term);
+  $('setup-line').textContent = setup.grade + ' 年級' + term + '學期　（要換年級請回首頁）';
+
+  /** 這一套圖是不是現在這個年級學期的？版本標 any 的各版本通用。 */
+  function fits(s) {
+    return s.grade === setup.grade && s.term === term &&
+      (s.version === 'any' || s.version === setup.version);
+  }
+  var live = SETS.filter(fits);
+
+  /* ── 看過了沒：跟引擎一樣存在 localStorage，無痕視窗會丟例外所以包 try ── */
+  function seenKey(set, sheet) { return 'mm-seen-' + set.key + '-' + sheet.file; }
+  function isSeen(set, sheet) {
+    try { return localStorage.getItem(seenKey(set, sheet)) === '1'; } catch (e) { return false; }
+  }
+  function markSeen(set, sheet) {
+    try { localStorage.setItem(seenKey(set, sheet), '1'); } catch (e) {}
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  /* ── 第一層：科目 ──────────────────────────── */
+  function renderSets() {
+    $('sheet-card').hidden = true;
+    $('set-card').hidden = false;
+    $('btn-back').hidden = true;
+    $('crumb').textContent = '';
+    current = null;
+
+    var list = $('set-list');
+    list.replaceChildren();
+
+    if (!live.length) {
+      $('set-card').append(el('p', 'blank',
+        setup.grade + ' 年級' + term + '學期還沒有心智圖。' +
+        '目前有的是四年級下學期的自然和社會，回首頁把年級切過去就看得到。'));
+      $('foot').textContent = '';
+      return;
+    }
+
+    live.forEach(function (s) {
+      var total = count(s);
+      var seen = s.units.reduce(function (n, u) {
+        return n + u.sheets.filter(function (x) { return isSeen(s, x); }).length;
+      }, 0);
+
+      var b = el('button', 'set-card');
+      b.type = 'button';
+      b.append(el('span', 'big', s.icon));
+      var meta = el('span');
+      meta.append(el('strong', null, s.subject + '　' + s.grade + ' 年級' + s.term + '學期'));
+      meta.append(el('span', 'sub', total + ' 張・' + s.versionName + '　已看 ' + seen + ' / ' + total));
+      b.append(meta);
+      b.addEventListener('click', function () { renderSheets(s); });
+      list.append(b);
+    });
+
+    $('foot').textContent = '圖片放在 自然科心智圖/ 和 社會科心智圖/ 兩個資料夾裡，這一頁只是把它們排好。';
+  }
+
+  function count(s) {
+    return s.units.reduce(function (n, u) { return n + u.sheets.length; }, 0);
+  }
+
+  /* ── 第二層：單元 + 圖卡 ────────────────────── */
+  var current = null;    // 現在看的是哪一套
+  var flat = [];         // 攤平之後的圖序，閱讀器的上一張下一張靠它
+
+  function renderSheets(s) {
+    current = s;
+    flat = [];
+    s.units.forEach(function (u) {
+      u.sheets.forEach(function (x) { flat.push(x); });
+    });
+
+    $('set-card').hidden = true;
+    $('sheet-card').hidden = false;
+    $('btn-back').hidden = false;
+    $('crumb').innerHTML = '';
+    $('crumb').append(document.createTextNode('心智圖牆 ／ '));
+    $('crumb').append(el('b', null, s.subject));
+
+    var host = $('sheet-list');
+    host.replaceChildren();
+
+    if (s.note) host.append(el('p', 'lede', s.note));
+
+    s.units.forEach(function (u) {
+      host.append(el('h2', 'unit-head', '單元 ' + u.no + '　' + u.name));
+      var grid = el('div', 'sheet-grid');
+      u.sheets.forEach(function (x) { grid.append(cardOf(s, x)); });
+      host.append(grid);
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cardOf(s, sheet) {
+    var b = el('button', 'sheet-card' + (isSeen(s, sheet) ? ' is-seen' : ''));
+    b.type = 'button';
+
+    var img = document.createElement('img');
+    img.className = 'sheet-thumb';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.alt = sheet.title + ' 的心智圖';
+    img.src = s.dir + '/' + sheet.file;
+    b.append(img);
+
+    var body = el('div', 'sheet-body');
+    body.append(el('span', 'sheet-no', sheet.no + (isSeen(s, sheet) ? ' ✓' : '')));
+    body.append(el('span', 'sheet-title', sheet.title));
+    body.append(el('span', 'sheet-desc', sheet.desc));
+    if (sheet.flag) body.append(el('span', 'sheet-flag', '⚠️ 圖上這裡有問題：' + sheet.flag));
+    b.append(body);
+
+    b.addEventListener('click', function () { open(flat.indexOf(sheet)); });
+    return b;
+  }
+
+  $('btn-back').addEventListener('click', function () {
+    if (!$('viewer').hidden) return;
+    renderSets();
+  });
+
+  /* ══ 閱讀器 ════════════════════════════════════
+     圖是 1408×768 的點陣圖，手機寬度只有 375，字一定看不到。
+     所以這裡自己做縮放和拖曳：
+       transform-origin 固定 0 0，狀態只有三個數字 k / x / y，
+       放大的時候讓游標（或兩指中點）底下的那一點留在原地。 */
+  var viewer = $('viewer'), stage = $('mm-stage'), img = $('mm-img'), hint = $('mm-hint');
+  var idx = -1;
+  var k = 1, x = 0, y = 0, kFit = 1;
+  /* 原圖只有 1408px 寬，放到 3 倍已經很糊了，再大沒有意義只會迷路 */
+  var MAXK = 3;
+  var toldHowToZoom = false;
+
+  function apply() {
+    img.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + k + ')';
+  }
+
+  function natural() {
+    return { w: img.naturalWidth || 1408, h: img.naturalHeight || 768 };
+  }
+
+  /** 讓整張圖剛好塞進畫面並置中 */
+  function fit() {
+    var n = natural(), r = stage.getBoundingClientRect();
+    kFit = Math.min(r.width / n.w, r.height / n.h);
+    k = kFit;
+    x = (r.width - n.w * k) / 2;
+    y = (r.height - n.h * k) / 2;
+    apply();
+  }
+
+  /** 圖比畫面小就置中，比畫面大就不准拖到露出背景 */
+  function clampPan() {
+    var n = natural(), r = stage.getBoundingClientRect();
+    var w = n.w * k, h = n.h * k;
+    x = w <= r.width ? (r.width - w) / 2 : Math.min(0, Math.max(r.width - w, x));
+    y = h <= r.height ? (r.height - h) / 2 : Math.min(0, Math.max(r.height - h, y));
+  }
+
+  /** 以畫面上的 (cx,cy) 為中心縮放 —— 那一點底下的圖不會跑掉 */
+  function zoomAt(cx, cy, factor) {
+    var r = stage.getBoundingClientRect();
+    var px = cx - r.left, py = cy - r.top;
+    var nk = Math.min(MAXK, Math.max(kFit, k * factor));
+    if (nk === k) return;
+    x = px - (px - x) * (nk / k);
+    y = py - (py - y) * (nk / k);
+    k = nk;
+    clampPan();
+    apply();
+    showHint(Math.round(k / kFit * 100) + '%');
+  }
+
+  var hintTimer = null;
+  function showHint(t) {
+    hint.textContent = t;
+    hint.classList.add('is-on');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { hint.classList.remove('is-on'); }, 2200);
+  }
+
+  function open(i) {
+    if (i < 0 || i >= flat.length) return;
+    idx = i;
+    var sheet = flat[idx];
+    viewer.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    $('mm-title').textContent = sheet.no + '　' + sheet.title;
+    $('mm-pos').textContent = (idx + 1) + ' / ' + flat.length;
+    $('mm-prev').disabled = idx === 0;
+    $('mm-next').disabled = idx === flat.length - 1;
+
+    img.src = current.dir + '/' + sheet.file;
+    img.alt = sheet.title + ' 的心智圖';
+    // 已經快取過的圖不會再觸發 load，所以 complete 的情況要自己補一次
+    if (img.complete && img.naturalWidth) fit(); else img.addEventListener('load', fit, { once: true });
+
+    markSeen(current, sheet);
+
+    /* 圖很寬，手機上整張塞進畫面之後字一定看不清楚。
+       第一次打開的時候講一次怎麼放大，之後就不再囉嗦。 */
+    if (!toldHowToZoom) {
+      toldHowToZoom = true;
+      setTimeout(function () { showHint('雙指放大，或連點兩下'); }, 350);
+    }
+  }
+
+  function close() {
+    viewer.hidden = true;
+    document.body.style.overflow = '';
+    renderSheets(current);     // 重畫一次，剛看過的那張會亮起來
+  }
+
+  function step(d) { open(idx + d); }
+
+  $('mm-close').addEventListener('click', close);
+  $('mm-prev').addEventListener('click', function () { step(-1); });
+  $('mm-next').addEventListener('click', function () { step(1); });
+  $('mm-fit').addEventListener('click', fit);
+  $('mm-in').addEventListener('click', function () { center(1.5); });
+  $('mm-out').addEventListener('click', function () { center(1 / 1.5); });
+
+  function center(f) {
+    var r = stage.getBoundingClientRect();
+    zoomAt(r.left + r.width / 2, r.top + r.height / 2, f);
+  }
+
+  /* 滾輪縮放。一定要 preventDefault，不然整頁會跟著捲。 */
+  stage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015));
+  }, { passive: false });
+
+  /* 連點兩下：在「整張」和「2.5 倍」之間切換，放大的中心就是點下去的地方 */
+  stage.addEventListener('dblclick', function (e) {
+    if (k > kFit * 1.05) fit();
+    else zoomAt(e.clientX, e.clientY, 2.5);
+  });
+
+  /* 拖曳與雙指縮放。用 pointer 事件，滑鼠和觸控同一套程式。 */
+  var pts = new Map(), last = null, pinch = null;
+
+  stage.addEventListener('pointerdown', function (e) {
+    stage.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 1) { last = { x: e.clientX, y: e.clientY }; stage.classList.add('is-drag'); }
+    if (pts.size === 2) pinch = pinchState();
+  });
+
+  function pinchState() {
+    var a = Array.from(pts.values());
+    return {
+      d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y),
+      cx: (a[0].x + a[1].x) / 2,
+      cy: (a[0].y + a[1].y) / 2,
+    };
+  }
+
+  stage.addEventListener('pointermove', function (e) {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pts.size >= 2) {
+      var now = pinchState();
+      if (pinch && pinch.d > 0) zoomAt(now.cx, now.cy, now.d / pinch.d);
+      pinch = now;
+      return;
+    }
+
+    if (!last) return;
+    x += e.clientX - last.x;
+    y += e.clientY - last.y;
+    last = { x: e.clientX, y: e.clientY };
+    clampPan();
+    apply();
+  });
+
+  function liftPointer(e) {
+    pts.delete(e.pointerId);
+    if (pts.size < 2) pinch = null;
+    if (pts.size === 0) { last = null; stage.classList.remove('is-drag'); }
+    else last = Array.from(pts.values())[0];   // 放開一指之後，剩下那指接手拖曳
+  }
+  stage.addEventListener('pointerup', liftPointer);
+  stage.addEventListener('pointercancel', liftPointer);
+
+  /* 鍵盤：27 吋螢幕上用鍵盤翻比用滑鼠快 */
+  document.addEventListener('keydown', function (e) {
+    if (viewer.hidden) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'ArrowLeft') { step(-1); return; }
+    if (e.key === 'ArrowRight') { step(1); return; }
+    if (e.key === '0') { fit(); return; }
+    if (e.key === '+' || e.key === '=') { center(1.5); return; }
+    if (e.key === '-' || e.key === '_') { center(1 / 1.5); }
+  });
+
+  /* 轉螢幕或改視窗大小，原本的 kFit 就不對了，重算一次 */
+  window.addEventListener('resize', function () {
+    if (!viewer.hidden) fit();
+  });
+
+  /* ── 起跑 ── */
+  renderSets();
+
+  /**
+   * 深連結：?set=science 直接落在那一套的圖牆。
+   * 首頁的卡片打這個，少一層選單。
+   */
+  (function deepLink() {
+    var q = new URLSearchParams(location.search);
+    var key = q.get('set');
+    if (!key) return;
+    var s = live.filter(function (p) { return p.key === key; })[0];
+    if (s) renderSheets(s);
+  })();
+})();
+</script>
+</body>
+</html>

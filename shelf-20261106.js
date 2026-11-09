@@ -62,6 +62,15 @@ window.SHELF = {
           tag: '教學',
         },
         {
+          title: '心智圖牆',
+          desc: '一課一張，整課重點畫在同一張圖上，考前翻一遍',
+          href: 'mindmap/index.html?set=science',
+          icon: 'assets/icon-natural-20261104.png',
+          carriesSetup: true,
+          grades: { '4-2': '13 張・不分版本' },
+          tag: '圖解',
+        },
+        {
           title: '課程闖關站',
           desc: '照課本單元分的題庫，答錯自動進錯題本',
           href: 'quest/index.html',
@@ -101,6 +110,15 @@ window.SHELF = {
           icon: 'assets/icon-social-20261104.png',
           grades: { '4-1': '', '4-2': '' },
           tag: '教學',
+        },
+        {
+          title: '心智圖牆',
+          desc: '一課一張，整課重點畫在同一張圖上，考前翻一遍',
+          href: 'mindmap/index.html?set=social',
+          icon: 'assets/icon-social-20261104.png',
+          carriesSetup: true,
+          grades: { '4-2': '12 張・不分版本' },
+          tag: '圖解',
         },
         {
           title: '課程闖關站',

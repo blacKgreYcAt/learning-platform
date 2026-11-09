@@ -1,0 +1,184 @@
+/**
+ * 心智圖檢視頁　樣式
+ * 2026-11-09
+ *
+ * 只服務 mindmap/index.html 一支，沒有別人載這一份。
+ * 顏色全部走 splat-core 的 --ink-* 變數，所以跟全站同一個視覺系統。
+ *
+ * 這一頁的重點不是好看，是「看得清楚」：
+ *   原圖只有 1408×768，字很小。手機上不放大根本讀不到，
+ *   所以閱讀器一定要能縮放和拖曳，而且放大之後不可以有任何東西擋住圖。
+ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+  background: var(--ink-bg, #0B1418);
+  color: var(--ink-text, #E9F6FA);
+  min-height: 100vh;
+  padding: 1.2rem;
+}
+
+.wrap { max-width: 1000px; margin: 0 auto; }
+
+/* ── 頂列 ───────────────────────────────── */
+.topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+
+.btn {
+  font: inherit; font-weight: 700; cursor: pointer; text-decoration: none;
+  display: inline-block; background: transparent;
+  color: var(--ink-cyan, #16D0F0);
+  border: 2px solid var(--ink-cyan, #16D0F0);
+  border-radius: 10px; padding: .5rem .9rem;
+  transition: background .18s, color .18s;
+}
+.btn:hover { background: var(--ink-cyan, #16D0F0); color: #06161c; }
+.btn.ghost { color: var(--ink-dim, #8FA8B2); border-color: rgba(255,255,255,.18); }
+.btn.ghost:hover { background: rgba(255,255,255,.08); color: var(--ink-text, #E9F6FA); }
+.btn.sm { padding: .34rem .72rem; font-size: .85rem; }
+.btn { white-space: nowrap; }        /* 閱讀器那一列很擠，按鈕字不可以換行 */
+.btn[hidden] { display: none; }
+.spacer { flex: 1; }
+
+.crumb { color: var(--ink-dim, #8FA8B2); font-size: .88rem; }
+.crumb b { color: var(--ink-text, #E9F6FA); }
+
+h1 { font-size: 1.85rem; letter-spacing: .04em; margin-bottom: .35rem; }
+.lede { color: var(--ink-dim, #8FA8B2); line-height: 1.75; margin-bottom: 1.4rem; }
+.mm-setup { color: var(--ink-dim, #8FA8B2); font-size: .88rem; margin-bottom: 1.4rem; }
+
+h2.unit-head {
+  font-size: 1.1rem; letter-spacing: .04em;
+  margin: 1.9rem 0 .85rem; padding-left: .6rem;
+  border-left: 5px solid var(--ink-gold, #FFB03A);
+}
+
+/* ── 科目卡（第一層）───────────────────────── */
+.set-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+.set-card {
+  font: inherit; text-align: left; cursor: pointer;
+  display: flex; align-items: center; gap: .9rem;
+  background: var(--ink-bg2, #122028);
+  color: var(--ink-text, #E9F6FA);
+  border: 3px solid rgba(255,255,255,.12);
+  border-radius: 16px; padding: 1.05rem 1.1rem;
+  transition: border-color .18s, transform .18s;
+}
+.set-card:hover { border-color: var(--ink-cyan, #16D0F0); transform: translateY(-2px); }
+.set-card .big { font-size: 2rem; line-height: 1; }
+.set-card strong { display: block; font-size: 1.15rem; margin-bottom: .2rem; }
+.set-card span.sub { color: var(--ink-dim, #8FA8B2); font-size: .88rem; }
+
+/* ── 圖卡（第二層）─────────────────────────── */
+.sheet-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+
+.sheet-card {
+  font: inherit; text-align: left; cursor: pointer; padding: 0; overflow: hidden;
+  background: var(--ink-bg2, #122028);
+  color: var(--ink-text, #E9F6FA);
+  border: 3px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  display: flex; flex-direction: column;
+  transition: border-color .18s, transform .18s;
+}
+.sheet-card:hover { border-color: var(--ink-cyan, #16D0F0); transform: translateY(-2px); }
+.sheet-card.is-seen { border-color: rgba(169,214,54,.55); }
+
+.sheet-thumb {
+  display: block; width: 100%; aspect-ratio: 1408 / 768;
+  object-fit: cover; object-position: center;
+  background: #0A1216;
+}
+
+.sheet-body { padding: .75rem .85rem .9rem; }
+.sheet-no {
+  display: inline-block; font-size: .76rem; font-weight: 700; letter-spacing: .06em;
+  color: #06161c; background: var(--ink-gold, #FFB03A);
+  border-radius: 6px; padding: .1rem .42rem; margin-bottom: .36rem;
+}
+.sheet-card.is-seen .sheet-no { background: var(--ink-lime, #A9D636); }
+.sheet-title { display: block; font-size: 1.02rem; font-weight: 700; line-height: 1.4; }
+.sheet-desc { display: block; color: var(--ink-dim, #8FA8B2); font-size: .84rem; line-height: 1.6; margin-top: .3rem; }
+
+/* 圖本身畫錯的地方。顏色用紅的，不要讓它混進一般說明裡。 */
+.sheet-flag {
+  display: block; margin-top: .5rem; padding: .42rem .55rem;
+  font-size: .8rem; line-height: 1.6;
+  color: #FFD9DF; background: rgba(255,51,85,.14);
+  border-left: 3px solid var(--ink-red, #FF3355); border-radius: 0 6px 6px 0;
+}
+
+.blank { color: var(--ink-dim, #8FA8B2); line-height: 1.9; }
+.foot { margin-top: 2.4rem; color: var(--ink-dim, #8FA8B2); font-size: .78rem; line-height: 1.8; }
+
+/* ── 閱讀器 ─────────────────────────────────
+   全螢幕覆蓋。上下兩條列固定，中間那一塊全部讓給圖。 */
+.mm-viewer {
+  position: fixed; inset: 0; z-index: 90;
+  display: flex; flex-direction: column;
+  background: #05090B;
+}
+.mm-viewer[hidden] { display: none; }
+
+.mm-bar, .mm-foot {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .55rem .7rem; flex-wrap: nowrap;
+  background: rgba(10,18,22,.94);
+  border-bottom: 2px solid rgba(255,255,255,.1);
+}
+.mm-foot { border-bottom: 0; border-top: 2px solid rgba(255,255,255,.1); justify-content: center; }
+.mm-foot { padding-bottom: calc(.55rem + env(safe-area-inset-bottom, 0px)); }
+
+.mm-title {
+  font-weight: 700; font-size: .95rem; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.mm-pos { color: var(--ink-dim, #8FA8B2); font-size: .85rem; min-width: 4.5rem; text-align: center; }
+
+/* 縮放按鈕要夠大才按得到，手機上尤其 */
+.mm-bar .btn, .mm-foot .btn { padding: .42rem .7rem; min-width: 2.75rem; text-align: center; }
+
+.mm-stage {
+  flex: 1; position: relative; overflow: hidden;
+  touch-action: none;            /* 縮放拖曳自己處理，不要讓瀏覽器搶走 */
+  cursor: grab; background: #05090B;
+}
+.mm-stage.is-drag { cursor: grabbing; }
+
+.mm-stage img {
+  position: absolute; top: 0; left: 0;
+  transform-origin: 0 0;
+  max-width: none;               /* 預設的 max-width:100% 會把縮放算壞 */
+  user-select: none; -webkit-user-drag: none;
+}
+
+/* 閱讀器按鈕的長短兩種寫法。
+   375px 的手機寬度一列塞不下「✕ 關閉／符合畫面／下一張」，字會折成兩行把列撐高，
+   所以窄螢幕只留符號和兩個字。 */
+.narrow-only { display: none; }
+
+/* 放大倍率的小提示，兩秒後自己淡掉 */
+.mm-hint {
+  position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%);
+  background: rgba(10,18,22,.9); color: var(--ink-text, #E9F6FA);
+  border: 2px solid rgba(255,255,255,.14); border-radius: 999px;
+  padding: .3rem .8rem; font-size: .82rem; font-weight: 700;
+  pointer-events: none; opacity: 0; transition: opacity .25s;
+}
+.mm-hint.is-on { opacity: 1; }
+
+@media (max-width: 520px) {
+  body { padding: .9rem; }
+  h1 { font-size: 1.45rem; }
+  .sheet-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .mm-title { font-size: .85rem; }
+  .mm-bar .btn, .mm-foot .btn { padding: .4rem .55rem; font-size: .82rem; min-width: 2.5rem; }
+  .wide-only { display: none; }
+  .narrow-only { display: inline; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-card, .sheet-card, .mm-hint { transition: none; }
+}
