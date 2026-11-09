@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════
+   字級與版面寬度：跟著螢幕一起長大（2026-11-09）
+
+   問題：Benjamin 用 27 吋螢幕看覺得字偏小，平板應該更小。實際量過確認：
+     首頁的字級幾乎全是固定 px，只有大標題用了 clamp。
+     在 1600px 寬的視窗裡 —— 卡片說明 12.5px、標籤 10.5px、卡片標題 15.5px，
+     而且內容被 max-width:1100px 綁住，27 吋上就是「一條窄柱 + 小字」。
+     闖關站本來就用 rem，所以它只要根字級會動，整頁就會跟著動。
+
+   做法：
+     1. 根字級改成流動的 clamp()，手機 16px、大螢幕最高 21px。
+        闖關站全站用 rem，這一步就自動放大了。
+     2. 首頁那些固定 px 改寫成 rem，讓它也跟著根字級走。
+     3. 內容寬度上限放寬，字變大了欄寬也要跟著給，不然每行字數變太少。
+
+   載入順序要在 splat-hub-shelf / 各 App 樣式之後。
+   這裡不用 !important —— 選擇器跟原本同層，靠載入順序就蓋得過。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. 流動根字級 ─────────────────────────────────
+   375px → 16px（下限，手機拿得近，夠用）
+   768px → 16.9px
+   1024px → 19.2px（平板橫放／小筆電）
+   1440px 以上 → 21px（上限，再大就只是浪費版面）
+   使用者在瀏覽器調過預設字級時，clamp 的 px 會蓋掉他的設定，
+   所以下限用 max() 跟 1rem 比，誰大取誰。 */
+html {
+  font-size: clamp(max(1rem, 16px), 0.9vw + 10px, 21px);
+}
+
+/* ── 2. 版面寬度 ───────────────────────────────────
+   字大了欄寬也要放寬，不然一行塞不了幾個字。
+   但也不能無限寬，一行太長反而難讀，所以上限 1320px。 */
+.wrap, .topbar-in { max-width: min(1320px, 94vw); }
+
+/* ── 3. 首頁：固定 px 改成 rem ─────────────────────
+   換算基準是原本的值 ÷ 16。有幾個順便調大一點點，
+   因為原本在桌機上就偏小（標籤 10.5px 實在太小）。 */
+
+.brand { font-size: 1.25rem; }
+.brand-mark { width: 2.1rem; height: 2.1rem; flex-basis: 2.1rem; }
+
+.head h1 {
+  /* 上限刻意用 px 不用 rem：rem 本身已經跟著螢幕長大了，
+     再用 rem 當上限等於放大兩次，1600px 寬時會變成 61px 的巨無霸。 */
+  font-size: clamp(1.75rem, 4.2vw, 46px);
+}
+.head p { font-size: 1.02rem; max-width: 56ch; }
+
+.picker-label { font-size: .84rem; min-width: 4rem; }
+.chip { font-size: 1rem; padding: .55rem 1rem; }
+.chip.sm { font-size: .88rem; padding: .45rem .85rem; }
+
+.shelf-head h2 { font-size: 1.42rem; }
+.shelf-head small { font-size: .86rem; }
+
+.subject-bar { font-size: 1.12rem; }
+.subject-bar .count { font-size: .8rem; }
+
+/* 卡片：說明文字是最常讀的，拉最多 */
+.row { grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.item { gap: .85rem; padding: .95rem; }
+.item-ico { width: 3.3rem; height: 3.3rem; flex-basis: 3.3rem; }
+.item-title { font-size: 1.04rem; }
+.item-tag { font-size: .72rem; padding: .15rem .55rem; }
+.item-desc { font-size: .88rem; }
+.item-note { font-size: .82rem; }
+
+.blank { font-size: .9rem; }
+.foot { font-size: .84rem; }
+
+/* ── 4. 闖關站 ─────────────────────────────────────
+   它的字級本來就是 rem，根字級一動整頁就跟著動了，不用逐條改。
+   欄寬也不用另外寫 —— 它的容器同樣叫 .wrap，上面第 2 節已經蓋掉
+   它原本寫死的 880px 了。 */
+
+/* ── 5. 手機不要被放大影響 ─────────────────────────
+   根字級在手機是下限 16px，上面的 rem 換算回去跟原本差不多，
+   但格線的 17rem 在 375px 會溢出，改回單欄。 */
+@media (max-width: 36rem) {
+  .row { grid-template-columns: 1fr; }
+  .wrap, .topbar-in { max-width: 100%; }
+}
