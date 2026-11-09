@@ -1,0 +1,77 @@
+/**
+ * 引導式教學　五下補充元件的樣式
+ * 2026-11-09
+ *
+ * 只服務 g5-widgets-5b-20261109.js 裡的兩個元件（彈簧秤、蹺蹺板）。
+ * 顏色全部沿用引擎那三支 CSS 已經定好的變數，沒有自己另外配色。
+ */
+
+/* ── 彈簧秤 ─────────────────────────────── */
+.spring-wrap { text-align: center; margin: 1rem 0; }
+
+.spring-svg {
+  width: 100%; max-width: 320px; height: auto;
+  margin: 0 auto; display: block;
+}
+
+.spring-bar { fill: var(--ink-dim, #8FA8B2); }
+
+.spring-coil {
+  fill: none; stroke: var(--ink-cyan, #16D0F0); stroke-width: 4;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* 拉壞的彈簧：變紅、變細，一眼看得出不對勁 */
+.spring-coil.is-broken { stroke: var(--ink-red, #FF3355); stroke-width: 3; opacity: .75; }
+
+.spring-hook { fill: var(--ink-dim, #8FA8B2); }
+.spring-weight { fill: var(--ink-gold, #FFB03A); stroke: rgba(0,0,0,.35); stroke-width: 1; }
+
+.spring-tick, .spring-rule { stroke: var(--ink-dim, #8FA8B2); stroke-width: 1.5; }
+.spring-num { fill: var(--ink-dim, #8FA8B2); font-size: 11px; }
+.spring-pointer { fill: var(--ink-orange, #FF7A1A); }
+
+.spring-readout {
+  margin: .8rem auto 0; max-width: 34rem; line-height: 1.85;
+  color: var(--ink-text, #E9F6FA); font-size: .95rem;
+}
+.spring-readout b { color: var(--ink-cyan, #16D0F0); }
+.spring-readout b.is-bad { color: var(--ink-red, #FF3355); }
+
+.spring-controls, .lever-controls {
+  display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: .85rem;
+}
+
+/* ── 蹺蹺板 ─────────────────────────────── */
+.lever-wrap { text-align: center; margin: 1rem 0; }
+
+.lever-svg { width: 100%; max-width: 420px; height: auto; margin: 0 auto; display: block; }
+
+.lever-fulcrum { fill: var(--ink-dim, #8FA8B2); }
+
+.lever-beam {
+  stroke: var(--ink-teal, #6AB2B5); stroke-width: 9; stroke-linecap: round;
+  transition: none;
+}
+/* 平衡的那一刻要明顯不一樣，不然小孩不知道自己調對了 */
+.lever-beam.is-level { stroke: var(--ink-lime, #A9D636); stroke-width: 11; }
+
+.lever-notch { fill: rgba(255,255,255,.45); }
+
+.lever-block { fill: var(--ink-cyan, #16D0F0); stroke: rgba(0,0,0,.35); stroke-width: 1; }
+.lever-block.is-right { fill: var(--ink-orange, #FF7A1A); }
+
+.lever-label {
+  fill: var(--ink-text, #E9F6FA); font-size: 12px; font-weight: 700;
+  text-anchor: middle;
+}
+
+.lever-readout {
+  margin: .8rem auto 0; max-width: 34rem; line-height: 1.85;
+  color: var(--ink-text, #E9F6FA); font-size: .95rem;
+}
+.lever-readout b { color: var(--ink-cyan, #16D0F0); }
+.lever-readout b.is-good { color: var(--ink-lime, #A9D636); }
+
+@media (max-width: 480px) {
+  .spring-readout, .lever-readout { font-size: .9rem; }
+}

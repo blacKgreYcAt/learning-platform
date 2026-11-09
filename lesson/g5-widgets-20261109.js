@@ -309,6 +309,12 @@
   */
   function Timeline(opts) {
     this.slots = opts.slots;              // [{ when, answer, why }]
+    /* 放錯格子時的提示。原本寫死成歷史科的講法，但是五下自然拿它來排地層，
+       「想一想臺灣是什麼樣子」在那裡完全不通，所以改成可以自己帶一句。
+       不帶就還是原本那句，社會那四個單元的行為一個字都沒有變。 */
+    this.hint = opts.hint || '還不對。想一想這件事發生的時候，臺灣是什麼樣子。';
+    this.doneText = opts.doneText || '全部排好了！先後順序比年份好記，' +
+      '因為每一件事都是前一件事造成的。';
     this.pool = shuffle(this.slots.map(function (s) { return s.answer; }));
     this.selected = null;
     this.done = 0;
@@ -346,7 +352,7 @@
         }
         if (slot.classList.contains('is-filled')) return;
         if (self.selected.text !== s.answer) {
-          self.note.textContent = '還不對。想一想這件事發生的時候，臺灣是什麼樣子。';
+          self.note.textContent = self.hint;
           return;
         }
         body.textContent = s.answer;
@@ -358,8 +364,7 @@
         self.note.textContent = s.why;
         buzz();
         if (self.done === self.slots.length) {
-          self.note.textContent = '全部排好了！先後順序比年份好記，' +
-            '因為每一件事都是前一件事造成的。';
+          self.note.textContent = self.doneText;
         }
       });
       self.slotEl.append(slot);

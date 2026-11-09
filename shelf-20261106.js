@@ -46,11 +46,11 @@ window.SHELF = {
       items: [
         {
           title: '引導式教學',
-          desc: '動物分類、聲光、天空、燃燒生鏽，一段一段帶著弄懂',
+          desc: '一段一段帶著弄懂：五上動物聲光天空燃燒，五下力大地植物熱',
           href: 'lesson/index.html?subject=science',
           icon: 'assets/icon-natural-20261104.png',
           carriesSetup: true,
-          grades: { '5-1': '4 個單元・康軒版' },
+          grades: { '5-1': '4 個單元・康軒版', '5-2': '4 個單元・康軒版' },
           tag: '教學',
         },
         {
@@ -77,7 +77,7 @@ window.SHELF = {
           icon: 'assets/icon-compass-20261106.png',
           // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
           carriesSetup: true,
-          grades: { '4-2': '144 題・不分版本', '5-1': '110 題・康軒版' },
+          grades: { '4-2': '144 題・不分版本', '5-1': '110 題・康軒版', '5-2': '120 題・康軒版' },
           tag: '題庫',
         },
         {

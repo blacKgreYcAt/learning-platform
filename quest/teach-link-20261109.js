@@ -83,6 +83,13 @@
       '燃燒與生鏽': [{ label: '燃燒與生鏽', home: 'L', unit: 'k5a-sci-burning' }],
     },
 
+    '自然|5|下': {
+      '力與運動': [{ label: '力與運動（含彈簧秤、蹺蹺板）', home: 'L', unit: 'k5b-sci-force' }],
+      '大地的奧妙': [{ label: '大地的奧妙（含排地層順序）', home: 'L', unit: 'k5b-sci-earth' }],
+      '植物世界的面面觀': [{ label: '植物世界的面面觀', home: 'L', unit: 'k5b-sci-plants' }],
+      '熱的作用與傳播': [{ label: '熱的作用與傳播', home: 'L', unit: 'k5b-sci-heat' }],
+    },
+
     '社會|5|上': {
       '臺灣我的家': [{ label: '臺灣我的家', home: 'L', unit: 'k5a-soc-home' }],
       '臺灣的自然環境與生活': [{ label: '自然環境與生活', home: 'L', unit: 'k5a-soc-environment' }],
