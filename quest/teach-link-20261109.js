@@ -25,35 +25,79 @@
 (function () {
   if (!window.QUEST) return;
 
-  var M = '../math-science-app/?grade=5-1&unit=';
+  /* 教學有兩個家：
+       M  星際數學探險（math-science-app）—— 五上翰林數學那十個單元
+       L  引導式教學共用殼（lesson/）—— 11/09 之後新寫的，四科都在裡面
+     兩邊都吃 ?unit=，所以對照表只記 home 和 unit，網址在要畫的時候才組。
+
+     為什麼不把網址寫死：lesson/ 會依年級學期版本過濾教學包，
+     寫死 v=kang 會蓋掉小孩自己選的版本，不帶又可能讀到舊的存檔值。
+     所以照闖關站「現在正在看的那個設定」去帶，三邊永遠一致。 */
+  function hrefOf(t) {
+    var s = window.QUEST.DB.setup;
+    var term = s.term === '上' ? 1 : 2;
+    if (t.home === 'M') {
+      return '../math-science-app/?grade=' + s.grade + '-' + term + '&unit=' + t.unit;
+    }
+    return '../lesson/index.html?g=' + s.grade + '&t=' + term +
+      '&v=' + s.version + '&unit=' + t.unit;
+  }
 
   /**
    * 科目|年級|學期 → 單元名 → 教學連結
    *
    * label 寫的是「那份教學實際在教什麼」，不是題庫單元的名字。
    * 名字不一樣是刻意的：小孩點進去看到的標題會跟 label 對得上。
+   *
+   * 這是一張對照表，本來就會長大 —— 之後補了哪一科哪一個學期，就在這裡加一格。
    */
   var TEACH = {
     '數學|5|上': {
       '因數與倍數': [
-        { label: '倍數與因數', url: M + 'g5-u02-factors' },
-        { label: '公因數與公倍數', url: M + 'g5-u04-common' },
+        { label: '倍數與因數', home: 'M', unit: 'g5-u02-factors' },
+        { label: '公因數與公倍數', home: 'M', unit: 'g5-u04-common' },
       ],
       '分數的加減': [
-        { label: '擴分、約分與異分母加減', url: M + 'g5-u07-fractions' },
+        { label: '擴分、約分與異分母加減', home: 'M', unit: 'g5-u07-fractions' },
       ],
       '整數的四則運算與小數乘法': [
-        // 小數乘法這一塊引導教學還沒做，所以只連四則運算，標題也不假裝有。
-        { label: '四則運算的順序與併式', url: M + 'g5-u06-operations' },
+        { label: '四則運算的順序與併式', home: 'M', unit: 'g5-u06-operations' },
+        { label: '小數乘法', home: 'L', unit: 'k5a-decimal-multiply' },
       ],
       '多邊形與面積': [
-        { label: '角、三角形與四邊形', url: M + 'g5-u03-plane' },
-        { label: '面積公式是怎麼來的', url: M + 'g5-u08-area' },
+        { label: '角、三角形與四邊形', home: 'M', unit: 'g5-u03-plane' },
+        { label: '面積公式是怎麼來的', home: 'M', unit: 'g5-u08-area' },
       ],
       '容積、容量與線對稱': [
         // 立體形體不等於容積，但是容積的先備觀念，標籤要講清楚是哪一個。
-        { label: '立體形體（容積的先備觀念）', url: M + 'g5-u05-solids' },
+        { label: '立體形體（容積的先備觀念）', home: 'M', unit: 'g5-u05-solids' },
+        { label: '容積與容量', home: 'L', unit: 'k5a-volume' },
+        { label: '線對稱', home: 'L', unit: 'k5a-symmetry' },
       ],
+    },
+
+    '自然|5|上': {
+      '動物世界': [{ label: '動物世界', home: 'L', unit: 'k5a-sci-animals' }],
+      '探索聲光世界': [{ label: '探索聲光世界', home: 'L', unit: 'k5a-sci-soundlight' }],
+      '神祕的天空': [{ label: '神祕的天空', home: 'L', unit: 'k5a-sci-sky' }],
+      '燃燒與生鏽': [{ label: '燃燒與生鏽', home: 'L', unit: 'k5a-sci-burning' }],
+    },
+
+    '社會|5|上': {
+      '臺灣我的家': [{ label: '臺灣我的家', home: 'L', unit: 'k5a-soc-home' }],
+      '臺灣的自然環境與生活': [{ label: '自然環境與生活', home: 'L', unit: 'k5a-soc-environment' }],
+      '尋根探源話臺灣': [{ label: '尋根探源話臺灣', home: 'L', unit: 'k5a-soc-roots' }],
+      '大航海時代的臺灣': [{ label: '大航海時代（含排時間軸）', home: 'L', unit: 'k5a-soc-sail' }],
+      '主題探究與實作：守護臺灣最美的風景': [
+        { label: '守護臺灣最美的風景', home: 'L', unit: 'k5a-soc-inquiry' },
+      ],
+    },
+
+    '國語|5|上': {
+      '字詞基本功': [{ label: '字詞基本功', home: 'L', unit: 'k5a-chi-words' }],
+      '成語與俗諺': [{ label: '成語與俗諺', home: 'L', unit: 'k5a-chi-idioms' }],
+      '句子與修辭': [{ label: '句子與修辭', home: 'L', unit: 'k5a-chi-rhetoric' }],
+      '閱讀理解': [{ label: '閱讀理解', home: 'L', unit: 'k5a-chi-reading' }],
     },
   };
 
@@ -72,7 +116,7 @@
   function strip(list) {
     var html = '<div class="teach-strip"><span class="teach-lead">先看教學</span>' +
       list.map(function (t) {
-        return '<a class="teach-link" href="' + t.url + '">' +
+        return '<a class="teach-link" href="' + hrefOf(t) + '">' +
           t.label.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</a>';
       }).join('') + '</div>';
     var d = document.createElement('div');

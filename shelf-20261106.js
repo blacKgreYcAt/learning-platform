@@ -45,6 +45,15 @@ window.SHELF = {
       key: 'science', name: '自然', icon: '🔬', color: 'var(--ink-lime)',
       items: [
         {
+          title: '引導式教學',
+          desc: '動物分類、聲光、天空、燃燒生鏽，一段一段帶著弄懂',
+          href: 'lesson/index.html?subject=science',
+          icon: 'assets/icon-natural-20261104.png',
+          carriesSetup: true,
+          grades: { '5-1': '4 個單元・康軒版' },
+          tag: '教學',
+        },
+        {
           title: '自然科綜合版',
           desc: '推力拉力、電路、導體、節能，動手操作的關卡',
           href: 'natural-science-app/?grade={grade}',
@@ -76,6 +85,15 @@ window.SHELF = {
     {
       key: 'social', name: '社會', icon: '🌏', color: 'var(--ink-gold)',
       items: [
+        {
+          title: '引導式教學',
+          desc: '地理、氣候、史前文化、大航海時代，含排時間軸',
+          href: 'lesson/index.html?subject=social',
+          icon: 'assets/icon-social-20261104.png',
+          carriesSetup: true,
+          grades: { '5-1': '5 個單元・康軒版' },
+          tag: '教學',
+        },
         {
           title: '社會科探險',
           desc: '大地觀測、水資源、家鄉踏查',
@@ -110,6 +128,15 @@ window.SHELF = {
           tag: '教學',
         },
         {
+          title: '康軒補充三課',
+          desc: '小數乘法、容積與容量、線對稱 —— 星際數學探險沒教到的那三塊',
+          href: 'lesson/index.html?subject=math',
+          icon: 'assets/icon-mathscience-20261104.png',
+          carriesSetup: true,
+          grades: { '5-1': '3 個單元・康軒版' },
+          tag: '教學',
+        },
+        {
           title: '課程闖關站',
           desc: '照課本單元分的題庫，答錯自動進錯題本',
           href: 'quest/index.html',
@@ -124,6 +151,15 @@ window.SHELF = {
     {
       key: 'chinese', name: '國語', icon: '📚', color: 'var(--ink-orange)',
       items: [
+        {
+          title: '引導式教學',
+          desc: '字詞、成語、修辭、閱讀理解，按能力分不按課文分',
+          href: 'lesson/index.html?subject=chinese',
+          icon: 'assets/icon-chinese-20261104.png',
+          carriesSetup: true,
+          grades: { '5-1': '4 個單元・各版本通用' },
+          tag: '教學',
+        },
         {
           title: '語文閣樓',
           desc: '課文理解、詞語和修辭',

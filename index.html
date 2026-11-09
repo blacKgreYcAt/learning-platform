@@ -197,7 +197,13 @@
           // 連結再把設定帶過去一份。localStorage 被鎖住（無痕模式）時，
           // 共用設定讀不到，網址參數還是能讓子頁開在正確的年級。
           var href = S.hrefOf(it, k);
-          if (it.carriesSetup) href += window.StudySetup.query(setup);
+          if (it.carriesSetup) {
+            // query() 回傳的是 '?g=5&t=1&v=kang'。連結本身如果已經帶了參數
+            // （例如 lesson/index.html?subject=science），直接接上去會變成兩個問號，
+            // 後面那一串整個失效。所以接之前先看它有沒有問號。
+            var q = window.StudySetup.query(setup);
+            href += href.indexOf('?') < 0 ? q : '&' + q.slice(1);
+          }
           html += cardHTML(it, href, S.slotOf(it, k));
         });
       }

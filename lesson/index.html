@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="dark">
+<title>📖 引導式教學</title>
+<!--
+  引導式教學　共用殼（2026-11-09）
+
+  為什麼要有這一支：
+  星際數學探險（math-science-app/）把「課程總表」寫死在它自己的 index.html 裡，
+  而且整支只服務數學一科。現在四科都要有引導式教學，再往那支塞會變成
+  動到一個已經完成並上線的檔案，而且自然社會國語也擠不進一個叫「數學探險」的殼。
+
+  所以照 quest/ 的作法再做一次：殼 + 資料檔。
+    lesson/index.html      ← 這支，只有流程和畫面
+    lesson/data/*.js       ← 一科一個學期一個檔，裡面是完整的互動教學單元
+
+  引擎完全沿用 math-science-app/g5-lesson-engine-20260807.js，樣式也沿用它那三支 CSS，
+  一行都沒有複製 —— 那支引擎寫得很好，問題從來不是引擎，是它上面那層選單。
+
+  math-science-app/ 原封不動，四下和五上翰林數學還在原本的位置照常運作。
+-->
+<link rel="stylesheet" href="../math-science-app/g5-styles-20260807.css">
+<link rel="stylesheet" href="../math-science-app/g5-splat-theme-20261104.css">
+<link rel="stylesheet" href="../math-science-app/g5-teacher-20261106.css">
+<link rel="stylesheet" href="lesson-shell-20261109.css">
+<link rel="stylesheet" href="../splat-typescale-20261109.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>📖 引導式教學</h1>
+    <p>先把概念弄懂，再去闖關站練題目</p>
+  </div>
+
+  <p class="lesson-setup" id="setup-line"></p>
+
+  <!-- 第一層：科目 -->
+  <section class="card" id="subject-card">
+    <h2 id="subject-title">今天想弄懂哪一科？</h2>
+    <p class="sub" id="subject-sub"></p>
+    <div class="unit-list" id="subject-list"></div>
+  </section>
+
+  <!-- 第二層：單元地圖 -->
+  <section class="card" id="unit-card" hidden>
+    <button class="back-link" id="unit-back" type="button">← 回科目</button>
+    <h2 id="unit-card-title"></h2>
+    <p class="sub" id="unit-card-sub"></p>
+    <div class="unit-list" id="unit-list"></div>
+  </section>
+
+  <p class="parent-link" id="parent-link" hidden>
+    <a href="../math-science-app/g5-tutor-report-20260808.html">家長：看「問老師」使用紀錄</a>
+  </p>
+
+  <!-- 第三層：課程 -->
+  <section class="card" id="lesson-card" hidden>
+    <button class="back-link" id="back-btn" type="button">← 回單元地圖</button>
+    <div id="lesson-root"></div>
+  </section>
+
+</div>
+
+<script src="../study-setup-20261106.js"></script>
+<script src="../math-science-app/g5-lesson-engine-20260807.js"></script>
+<!-- 這一支在 G5 上補幾個引擎沒有的元件（鏡射、堆積木、時間軸…），引擎本身沒有動 -->
+<script src="g5-widgets-20261109.js"></script>
+
+<!-- 教學內容：一科一個學期一個檔。加新的只要在這裡加一行。 -->
+<script src="data/math-5a-kang-20261109.js"></script>
+<script src="data/science-5a-kang-20261109.js"></script>
+<script src="data/social-5a-kang-20261109.js"></script>
+<script src="data/chinese-5a-20261109.js"></script>
+
+<script>
+'use strict';
+(function () {
+  var El = window.G5.El, LessonEngine = window.G5.LessonEngine;
+  var PACKS = window.LESSON_PACKS || [];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var subjectCard = $('subject-card'), unitCard = $('unit-card'),
+      lessonCard = $('lesson-card'), lessonRoot = $('lesson-root'),
+      parentLink = $('parent-link');
+
+  /* 年級／學期／版本跟首頁和闖關站共用同一份設定，三邊不會各說各話 */
+  var setup = window.StudySetup.resolve();
+  var term = window.StudySetup.termCh(setup.term);
+
+  $('setup-line').textContent =
+    setup.grade + ' 年級' + term + '學期　（要換年級請回首頁）';
+
+  /** 這一包是不是現在這個年級學期的？版本標 any 的四科通用。 */
+  function fits(p) {
+    return p.grade === setup.grade && p.term === term &&
+      (p.version === 'any' || p.version === setup.version);
+  }
+
+  var live = PACKS.filter(fits);
+
+  /* ── 第一層：科目 ── */
+  function renderSubjects() {
+    lessonCard.hidden = true; unitCard.hidden = true;
+    subjectCard.hidden = false; parentLink.hidden = true;
+
+    var list = $('subject-list');
+    list.replaceChildren();
+
+    if (!live.length) {
+      $('subject-sub').textContent = '';
+      list.append(El('p', { class: 'lesson-blank' },
+        setup.grade + ' 年級' + term + '學期的引導式教學還沒做。' +
+        '闖關站的題庫可能已經有了，可以先回首頁看看。'));
+      return;
+    }
+
+    $('subject-sub').textContent = '每一科都是一段一段帶著走，中間可以隨時問老師';
+
+    live.forEach(function (p) {
+      var done = p.units.filter(isDone).length;
+      list.append(El('button', {
+        class: 'unit is-ready' + (done === p.units.length ? ' is-done' : ''),
+        type: 'button',
+        onClick: function () { renderUnits(p); },
+      },
+        El('span', { class: 'icon' }, p.icon),
+        El('span', { class: 'meta' },
+          El('strong', {}, p.subject),
+          El('span', {}, p.units.length + ' 個單元・' + p.versionName)),
+        El('span', { class: 'tag' }, done + ' / ' + p.units.length)));
+    });
+  }
+
+  function isDone(u) {
+    try { return localStorage.getItem('g5-progress-' + u.id + '-done') === '1'; }
+    catch (e) { return false; }
+  }
+
+  /* ── 第二層：單元地圖 ── */
+  function renderUnits(pack) {
+    current = pack;
+    subjectCard.hidden = true; lessonCard.hidden = true;
+    unitCard.hidden = false; parentLink.hidden = false;
+
+    $('unit-card-title').textContent = pack.icon + '　' + pack.subject +
+      '　' + pack.grade + ' 年級' + pack.term + '學期';
+    $('unit-card-sub').textContent = pack.note || '';
+
+    var list = $('unit-list');
+    list.replaceChildren();
+
+    pack.units.forEach(function (u) {
+      list.append(El('button', {
+        class: 'unit is-ready' + (isDone(u) ? ' is-done' : ''),
+        type: 'button',
+        onClick: function () { openUnit(pack, u); },
+      },
+        El('span', { class: 'icon' }, u.icon),
+        El('span', { class: 'meta' },
+          El('strong', {}, u.title),
+          El('span', {}, u.estimatedMinutes + ' 分鐘 · ' + u.subtitle)),
+        El('span', { class: 'tag' }, isDone(u) ? '已完成' : '可開始')));
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── 第三層：課程 ── */
+  var current = null;
+
+  function openUnit(pack, unit) {
+    current = pack;
+    subjectCard.hidden = true; unitCard.hidden = true;
+    parentLink.hidden = true; lessonCard.hidden = false;
+
+    lessonRoot.replaceChildren(El('div', { class: 'lesson-intro' },
+      El('h2', { class: 'lesson-title' }, unit.icon + ' ' + unit.title),
+      El('p', { class: 'lesson-text' }, unit.subtitle),
+      El('h3', { style: 'margin:18px 0 10px;font-size:1.15rem;' }, '學完這個單元，你會：'),
+      El('ul', { class: 'objectives' }, unit.objectives.map(function (o) {
+        return El('li', {}, o);
+      })),
+      El('div', { class: 'lesson-nav' },
+        El('button', {
+          class: 'btn btn--primary', type: 'button',
+          onClick: function () {
+            lessonRoot.replaceChildren();
+            new LessonEngine(unit, lessonRoot).start();
+          },
+        }, '開始學習 →'))));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToMap() {
+    lessonCard.hidden = true;
+    if (current) renderUnits(current); else renderSubjects();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  $('back-btn').addEventListener('click', backToMap);
+  $('unit-back').addEventListener('click', renderSubjects);
+  window.addEventListener('lesson:exit', backToMap);
+
+  renderSubjects();
+
+  /**
+   * 深連結，兩種：
+   *   ?unit=<id>      直接落在那一課 —— 闖關站每個單元上面的「先看教學」打這個。
+   *                   小孩正卡在某個觀念，中間多一步選科目選單元就會放棄。
+   *   ?subject=<key>  落在那一科的單元地圖 —— 首頁的科目卡打這個。
+   * 兩個都找不到就留在科目清單，不會變空畫面。
+   */
+  (function deepLink() {
+    var q = new URLSearchParams(location.search);
+
+    var id = q.get('unit');
+    if (id) {
+      for (var i = 0; i < live.length; i++) {
+        var hit = live[i].units.filter(function (u) { return u.id === id; })[0];
+        if (hit) { openUnit(live[i], hit); return; }
+      }
+    }
+
+    var key = q.get('subject');
+    if (key) {
+      var pack = live.filter(function (p) { return p.key === key; })[0];
+      if (pack) renderUnits(pack);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

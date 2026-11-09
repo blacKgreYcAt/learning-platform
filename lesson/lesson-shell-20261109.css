@@ -1,0 +1,268 @@
+/* 引導式教學共用殼的額外樣式（2026-11-09）
+ *
+ * 絕大部分外觀直接沿用 math-science-app 的三支 CSS —— 這裡只補殼自己多出來的
+ * 那幾個東西：頂上那行年級提示、科目卡的空狀態、回上一層的按鈕位置。
+ * 刻意寫得很少，兩邊的視覺才不會慢慢長歪。
+ */
+
+.lesson-setup {
+  margin: -.4rem 0 1.1rem;
+  text-align: center;
+  font-size: .88rem;
+  letter-spacing: .04em;
+  color: var(--dim, #8FA8B2);
+}
+
+/* 單元地圖和科目清單都有「回上一層」，讓它跟標題拉開一點距離 */
+#unit-card .back-link {
+  margin-bottom: .9rem;
+}
+
+/* 這個年級學期還沒有教學內容時的說明 */
+.lesson-blank {
+  margin: .4rem 0;
+  padding: 1rem 1.1rem;
+  border: 2px dashed rgba(255, 255, 255, .18);
+  border-radius: 12px;
+  line-height: 1.8;
+  font-size: .95rem;
+  color: var(--dim, #8FA8B2);
+}
+
+/* ── 新元件：鏡射摺紙（線對稱）────────────────── */
+
+.mirror-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .7rem;
+}
+
+.mirror-svg {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  touch-action: manipulation;
+}
+
+.mirror-cell {
+  fill: rgba(255, 255, 255, .05);
+  stroke: rgba(255, 255, 255, .14);
+  stroke-width: 1.5;
+  cursor: pointer;
+}
+
+.mirror-cell.is-on { fill: var(--accent, #16D0F0); }
+.mirror-cell.is-ghost { fill: rgba(169, 214, 54, .33); }
+.mirror-cell.is-wrong { fill: rgba(255, 51, 85, .45); }
+
+.mirror-axis {
+  stroke: var(--gold, #FFB03A);
+  stroke-width: 4;
+  stroke-dasharray: 10 8;
+}
+
+.mirror-note {
+  min-height: 1.6em;
+  text-align: center;
+  font-size: .92rem;
+  line-height: 1.7;
+}
+
+/* ── 新元件：堆積木量容積 ────────────────────── */
+
+.stack-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .7rem;
+}
+
+.stack-svg {
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.stack-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.stack-readout {
+  text-align: center;
+  font-size: .95rem;
+  line-height: 1.8;
+}
+
+.stack-readout b { color: var(--accent, #16D0F0); }
+
+/* ── 新元件：排時間軸 ────────────────────────── */
+
+.timeline-wrap { display: flex; flex-direction: column; gap: .8rem; }
+
+.timeline-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+}
+
+.timeline-card {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: .5rem .8rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, .06);
+  color: inherit;
+  transition: background .18s, border-color .18s, transform .12s;
+}
+
+.timeline-card.is-selected {
+  border-color: var(--accent, #16D0F0);
+  background: rgba(22, 208, 240, .16);
+}
+
+.timeline-card.is-done {
+  opacity: .35;
+  cursor: default;
+}
+
+.timeline-slots {
+  display: grid;
+  gap: .5rem;
+}
+
+.timeline-slot {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .55rem .8rem;
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 255, 255, .18);
+  min-height: 3rem;
+}
+
+.timeline-slot.is-filled {
+  border-style: solid;
+  border-color: rgba(169, 214, 54, .5);
+  background: rgba(169, 214, 54, .08);
+}
+
+.timeline-when {
+  flex: 0 0 auto;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--gold, #FFB03A);
+  min-width: 6.5rem;
+}
+
+.timeline-note {
+  min-height: 1.6em;
+  font-size: .92rem;
+  line-height: 1.7;
+  text-align: center;
+}
+
+@media (max-width: 30rem) {
+  .timeline-slot { flex-wrap: wrap; }
+  .timeline-when { min-width: 0; flex-basis: 100%; }
+}
+
+/* 小一號的按鈕。g5-styles 只有 btn / btn--primary / btn--ghost，
+   容積那一組要連按六顆，不縮小會排成三行。 */
+.btn--sm {
+  padding: .35rem .7rem;
+  font-size: .85rem;
+}
+
+/* ── 新元件：堆積木的小積木 ────────────────── */
+
+.stack-cube {
+  fill: rgba(22, 208, 240, .28);
+  stroke: var(--accent, #16D0F0);
+  stroke-width: 2;
+}
+
+.stack-cube.is-top { fill: rgba(169, 214, 54, .38); stroke: var(--good, #A9D636); }
+
+/* ── 新元件：小數乘法的百格方陣 ──────────────── */
+
+.dec-wrap { display: flex; flex-direction: column; align-items: center; gap: .7rem; }
+
+.dec-svg { width: 100%; max-width: 24rem; height: auto; }
+
+.dec-cell {
+  fill: rgba(255, 255, 255, .04);
+  stroke: rgba(255, 255, 255, .16);
+  stroke-width: 1;
+}
+
+/* 兩個方向用不同顏色，重疊的地方才看得出是「兩次都被塗到」 */
+.dec-cell.is-a { fill: rgba(22, 208, 240, .3); }
+.dec-cell.is-b { fill: rgba(255, 176, 58, .3); }
+.dec-cell.is-a.is-b { fill: rgba(140, 190, 150, .4); }
+.dec-cell.is-both { fill: var(--good, #A9D636); stroke: #fff; stroke-width: 1.5; }
+
+.dec-note { min-height: 4.5em; text-align: center; font-size: .94rem; line-height: 1.8; }
+
+.dec-controls { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+
+/* ── 排時間軸：已放進去的事件文字 ──────────────── */
+
+.timeline-body { font-weight: 700; line-height: 1.6; }
+
+/* 直式算式。等寬字體才排得齊，數字要比內文大一點才看得清楚位值。 */
+.lesson-pre {
+  margin: .4rem 0;
+  padding: .8rem 1rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .3);
+  border: 2px solid rgba(255, 255, 255, .12);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  letter-spacing: .06em;
+  overflow-x: auto;
+}
+
+/* ── 國語：短文閱讀區塊 ────────────────────────
+   跟題目長得不一樣是刻意的 —— 這是「要讀的東西」，
+   不是「要答的東西」，排版要像文章，行距要鬆。 */
+
+.read-box {
+  margin: .5rem 0;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border-left: 5px solid var(--gold, #FFB03A);
+  background: rgba(255, 255, 255, .05);
+}
+
+.read-title {
+  margin: 0 0 .7rem;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--gold, #FFB03A);
+}
+
+.read-p {
+  margin: 0 0 .8rem;
+  font-size: 1.02rem;
+  line-height: 2;
+  text-indent: 2em;
+}
+
+.read-p:last-child { margin-bottom: 0; }
+
+/* 示範句不縮排，才看得出是單獨一句 */
+.read-sample {
+  text-indent: 0;
+  font-size: 1.05rem;
+  line-height: 2;
+}
