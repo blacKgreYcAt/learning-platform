@@ -138,6 +138,7 @@
   @media (prefers-reduced-motion:reduce) { .card,.prog-fill,.opt,.chip { transition:none; } }
 </style>
 <link rel="stylesheet" href="../splat-typescale-20261109.css">
+<link rel="stylesheet" href="teach-link-20261109.css">
 </head>
 <body>
 <div class="wrap">
@@ -566,5 +567,8 @@
   }
 })();
 </script>
+<!-- 單元上面的「先看教學」：外掛，要排在主程式後面（它要 window.QUEST）。
+     拿掉這一行就回到沒有教學連結的樣子。 -->
+<script src="teach-link-20261109.js"></script>
 </body>
 </html>
