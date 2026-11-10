@@ -1,0 +1,19 @@
+{
+  "name": "學霸星球",
+  "short_name": "學霸星球",
+  "description": "自己做給自己小孩用的學習站：引導式教學、課程闖關站、月考測驗卷、錯題複習。",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1418",
+  "theme_color": "#0B1418",
+  "icons": [
+    { "src": "/assets/favicon-32-20261110.png",  "sizes": "32x32",   "type": "image/png" },
+    { "src": "/assets/icon-192-20261110.png",    "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512-20261110.png",    "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-maskable-512-20261110.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -8,6 +8,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="color-scheme" content="dark">
 <title>🚀 星際數學探險</title>
+
+<!--
+  加到主畫面的圖示（2026-11-10）
+  用的是主角頭像 mascot-main-head-20261104.png —— 首頁 topbar 的品牌標記
+  就是這一張，所以主畫面上的圖示跟網站裡看到的是同一個角色。
+  路徑用根目錄絕對路徑，子資料夾的頁面（quest/、lesson/…）才不用各寫一份。
+  iOS 會自己套圓角遮罩，所以圖檔本身不畫圓角，只在四周留白免得馬尾被切掉。
+-->
+<meta name="theme-color" content="#0B1418">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32-20261110.png">
+<link rel="icon" type="image/png" sizes="180x180" href="/assets/favicon-180-20261110.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon-20261110.png">
+<meta name="apple-mobile-web-app-title" content="學霸星球">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- black 而不是 black-translucent：translucent 會讓內容鑽到狀態列底下，
+     這個網站的頁首沒有留安全區間距，會疊在一起。 -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="stylesheet" href="g5-styles-20260807.css">
 <!-- 墨水街頭風外觀層。必須排在基礎樣式之後；拿掉這一行即回到原本的深藍配色。 -->
 <link rel="stylesheet" href="g5-splat-theme-20261104.css">
