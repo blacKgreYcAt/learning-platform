@@ -96,11 +96,11 @@ window.SHELF = {
       items: [
         {
           title: '引導式教學',
-          desc: '地理、氣候、史前文化、大航海時代，含排時間軸',
+          desc: '五上地理氣候史前大航海，五下經濟活動與清帝國到日治',
           href: 'lesson/index.html?subject=social',
           icon: 'assets/icon-social-20261104.png',
           carriesSetup: true,
-          grades: { '5-1': '5 個單元・康軒版' },
+          grades: { '5-1': '5 個單元・康軒版', '5-2': '4 個單元・康軒版' },
           tag: '教學',
         },
         {
@@ -127,7 +127,7 @@ window.SHELF = {
           icon: 'assets/icon-compass-20261106.png',
           // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
           carriesSetup: true,
-          grades: { '4-2': '66 題・不分版本', '5-1': '120 題・康軒版' },
+          grades: { '4-2': '66 題・不分版本', '5-1': '120 題・康軒版', '5-2': '100 題・康軒版' },
           tag: '題庫',
         },
       ],

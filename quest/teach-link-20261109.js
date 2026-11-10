@@ -90,6 +90,19 @@
       '熱的作用與傳播': [{ label: '熱的作用與傳播', home: 'L', unit: 'k5b-sci-heat' }],
     },
 
+    '社會|5|下': {
+      '我們的經濟活動': [{ label: '我們的經濟活動', home: 'L', unit: 'k5b-soc-economy' }],
+      '清帝國時期臺灣發展重心的變化': [
+        { label: '清帝國時期的臺灣（含排時間軸）', home: 'L', unit: 'k5b-soc-qing' },
+      ],
+      '日治時期人民與政府的關係': [
+        { label: '日治時期人民與政府（含排抗爭方式）', home: 'L', unit: 'k5b-soc-rule' },
+      ],
+      '日治時期的建設、社會文化與生活的關係': [
+        { label: '日治時期的建設與生活', home: 'L', unit: 'k5b-soc-life' },
+      ],
+    },
+
     '社會|5|上': {
       '臺灣我的家': [{ label: '臺灣我的家', home: 'L', unit: 'k5a-soc-home' }],
       '臺灣的自然環境與生活': [{ label: '自然環境與生活', home: 'L', unit: 'k5a-soc-environment' }],
