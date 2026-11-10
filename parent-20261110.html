@@ -241,14 +241,18 @@
   html += '<section class="card"><h2>總覽</h2>' +
     '<div class="pt-cards">' +
     '<div class="pt-card"><b>' + doneLessons + '</b><span>練過的課數</span></div>' +
-    '<div class="pt-card ' + (rate >= 80 ? 'good' : rate >= 60 ? 'warn' : '') + '">' +
-      '<b>' + rate + '%</b><span>整體正確率</span></div>' +
+    /* 一篇成績都沒有的時候别寫 0%，
+       那讀起來像「全部答錯」，實際上是「還沒練」。 */
+    '<div class="pt-card ' + (!sumTotal ? '' : rate >= 80 ? 'good' : rate >= 60 ? 'warn' : '') + '">' +
+      '<b>' + (sumTotal ? rate + '%' : '—') + '</b><span>整體正確率</span></div>' +
     '<div class="pt-card"><b>' + DB.wrong.length + '</b><span>錯題本</span></div>' +
     '<div class="pt-card ' + (dueNow ? 'warn' : '') + '"><b>' + dueNow + '</b><span>今天該複習</span></div>' +
     '</div>' +
     '<p class="pt-note">最後一次練習：<b>' + (ago(lastAt) || '沒有紀錄') + '</b>。' +
-    '（正確率算的是每一課的「最佳成績」，所以會偏高一點 —— ' +
-    '要看真正不熟的地方，往下看「最需要注意的題目」。）</p>' +
+    (sumTotal
+      ? '（正確率算的是每一課的「最佳成績」，所以會偏高一點 —— ' +
+        '要看真正不熟的地方，往下看「最需要注意的題目」。）'
+      : '（課程闖關站那邊還沒有任何成績，所以正確率是空的。）') + '</p>' +
     '</section>';
 
   /* ═══════════ 二、各科掌握度 ═══════════ */
