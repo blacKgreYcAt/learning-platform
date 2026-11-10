@@ -297,6 +297,8 @@
 
   function mins(sec) {
     if (!sec) return '—';
+    /* 不到一分鐘寫「0 分」很蕙，而且跟「—」（沒紀錄）意思不一樣。 */
+    if (sec < 60) return '不到 1 分';
     var m = Math.round(sec / 60);
     if (m < 60) return m + ' 分';
     return Math.floor(m / 60) + ' 小時 ' + (m % 60) + ' 分';
