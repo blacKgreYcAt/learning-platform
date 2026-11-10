@@ -76,6 +76,15 @@
       ],
     },
 
+    '數學|5|下': {
+      '分數的乘法與除法': [{ label: '分數的乘法與除法', home: 'L', unit: 'k5b-math-frac' }],
+      '小數的除法': [{ label: '小數的除法', home: 'L', unit: 'k5b-math-decdiv' }],
+      '體積與生活中的大單位': [
+        { label: '體積與大單位（含堆積木）', home: 'L', unit: 'k5b-math-volume' },
+      ],
+      '比率與百分率': [{ label: '比率與百分率', home: 'L', unit: 'k5b-math-percent' }],
+    },
+
     '自然|5|上': {
       '動物世界': [{ label: '動物世界', home: 'L', unit: 'k5a-sci-animals' }],
       '探索聲光世界': [{ label: '探索聲光世界', home: 'L', unit: 'k5a-sci-soundlight' }],

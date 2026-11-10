@@ -155,13 +155,22 @@ window.SHELF = {
           tag: '教學',
         },
         {
+          title: '引導式教學',
+          desc: '分數乘除、小數除法、體積與大單位、比率百分率',
+          href: 'lesson/index.html?subject=math',
+          icon: 'assets/icon-mathscience-20261104.png',
+          carriesSetup: true,
+          grades: { '5-2': '4 個單元・康軒版' },
+          tag: '教學',
+        },
+        {
           title: '課程闖關站',
           desc: '照課本單元分的題庫，答錯自動進錯題本',
           href: 'quest/index.html',
           icon: 'assets/icon-compass-20261106.png',
           // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
           carriesSetup: true,
-          grades: { '5-1': '140 題・康軒版' },
+          grades: { '5-1': '140 題・康軒版', '5-2': '100 題・康軒版' },
           tag: '題庫',
         },
       ],
