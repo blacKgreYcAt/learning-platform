@@ -2226,7 +2226,13 @@ class LessonEngine {
 
   _showAnswer(holder, item) {
     holder.hidden = false;
-    holder.replaceChildren(El('p', { class: 'tutor-who' }, '👩‍🏫 老師'));
+    /* 2026-11-10：把「老師」前面的 emoji 拿掉。
+       11/06 給老師做了專屬角色（mascot-teacher-head），
+       .tutor-answer::before 已經把那張臉畫在這一行的左邊了，
+       旁邊再放一個 emoji 等於兩顆頭並排 —— 而且那個 emoji 是女老師，
+       跟畫出來的角色（戴圓框眼鏡的藍髮大叔）根本不是同一個人。
+       角色圖本來就是在回答「誰在講話」，文字只要留名字就好。 */
+    holder.replaceChildren(El('p', { class: 'tutor-who' }, '老師'));
     const paras = Array.isArray(item.a) ? item.a : [item.a];
     paras.forEach((p) => holder.append(El('p', { class: 'tutor-text' }, p)));
 
@@ -2236,7 +2242,7 @@ class LessonEngine {
         item.more.q || '我還是不懂');
       again.addEventListener('click', () => {
         again.remove();
-        holder.append(El('p', { class: 'tutor-who' }, '👩‍🏫 老師（換個方式講）'));
+        holder.append(El('p', { class: 'tutor-who' }, '老師（換個方式講）'));
         (Array.isArray(item.more.a) ? item.more.a : [item.more.a])
           .forEach((p) => holder.append(El('p', { class: 'tutor-text' }, p)));
         // 按了「還是不懂」是最強的訊號：第一層的解釋沒有講通
