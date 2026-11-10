@@ -2099,6 +2099,9 @@ class LessonEngine {
     if (Number.isInteger(saved) && saved > 0 && saved < this.unit.sections.length) {
       this.sectionIndex = saved;
     }
+    /* 2026-11-10：練習紀錄（practice-log-20261110.js）。
+       沒載那一支就什麼都不做，教學流程完全不受影響。 */
+    window.LESSON_LOG?.enter(this.unit, this.sectionIndex);
     this._render();
   }
 
@@ -2256,11 +2259,13 @@ class LessonEngine {
   _go(next) {
     this.sectionIndex = next;
     localStorage.setItem(this.storageKey, String(next));
+    window.LESSON_LOG?.step(next);
     this._render();
   }
 
   _finish() {
     localStorage.setItem(`${this.storageKey}-done`, '1');
+    window.LESSON_LOG?.finish();
     this._teardown();
     this.root.replaceChildren(
       El('div', { class: 'lesson-done' },

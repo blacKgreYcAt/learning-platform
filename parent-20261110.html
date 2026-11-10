@@ -105,7 +105,7 @@
 
 <!-- 題庫：要靠它把成績的代號翻回「哪一科哪一課」 -->
 <!-- 練習紀錄：這一頁只用它的讀取口 QUEST_LOG.read() -->
-<script src="quest/log-20261110.js"></script>
+<script src="practice-log-20261110.js"></script>
 <script src="study-setup-20261106.js"></script>
 <script src="quest/data/science-5a-kang-20261105.js"></script>
 <script src="quest/data/social-5a-kang-20261105.js"></script>
@@ -280,18 +280,20 @@
   var bars = [];
   for (var di = DAYS - 1; di >= 0; di--) {
     var d0 = today0 - di * 86400000;
-    bars.push({ d0: d0, n: 0, sec: 0, runs: 0 });
+    bars.push({ d0: d0, n: 0, sec: 0, steps: 0, runs: 0 });
   }
   var recent = plog.filter(function (e) { return e.t >= today0 - (DAYS - 1) * 86400000; });
   recent.forEach(function (e) {
     var b = bars[Math.floor((dayStart(e.t) - bars[0].d0) / 86400000)];
     if (!b) return;
-    b.n += e.n; b.sec += e.sec || 0; b.runs++;
+    b.n += e.n || 0; b.sec += e.sec || 0; b.steps += e.steps || 0; b.runs++;
   });
   var activeDays = bars.filter(function (b) { return b.runs; }).length;
   var totQ = bars.reduce(function (a, b) { return a + b.n; }, 0);
   var totSec = bars.reduce(function (a, b) { return a + b.sec; }, 0);
-  var peak = Math.max.apply(null, bars.map(function (b) { return b.n; }).concat([1]));
+  bars.forEach(function (b) { b.min = Math.round(b.sec / 60); });
+  var peak = Math.max.apply(null, bars.map(function (b) { return b.min; }).concat([1]));
+  var totSteps = bars.reduce(function (a, b) { return a + b.steps; }, 0);
 
   function mins(sec) {
     if (!sec) return '—';
@@ -316,23 +318,27 @@
          用原尺寸在手機上會折行，把那張卡擐高。 */
       '<div class="pt-card"><b class="sm">' + mins(totSec) + '</b>' +
         '<span>兩週內花的時間</span></div>' +
+      (totSteps ? '<div class="pt-card"><b>' + totSteps + '</b>' +
+        '<span>引導教學讀的段數</span></div>' : '') +
       '</div>';
     html += '<div class="pt-days">' + bars.map(function (b) {
       var dt = new Date(b.d0);
       var tip = (dt.getMonth() + 1) + '/' + dt.getDate() + '（週' + WD[dt.getDay()] + '）　' +
-        (b.runs ? b.n + ' 題・' + mins(b.sec) : '沒練');
+        (b.runs ? mins(b.sec) + (b.n ? '・' + b.n + ' 題' : '') +
+          (b.steps ? '・教學 ' + b.steps + ' 段' : '') : '沒練');
       /* title 只有滑鼠移上去才看得到，手機上等於沒有。
          所以題數直接寫在柱子上面，不靠任何互動。 */
       return '<div class="pt-day" title="' + esc(tip) + '">' +
-        '<div class="pt-day-n">' + (b.n || '') + '</div>' +
-        '<div class="pt-day-bar"><i style="height:' + (b.n ? Math.max(8, b.n / peak * 100) : 0) +
-        '%"></i></div>' +
+        '<div class="pt-day-n">' + (b.min || (b.runs ? '<1' : '')) + '</div>' +
+        '<div class="pt-day-bar"><i style="height:' +
+        (b.runs ? Math.max(8, b.min / peak * 100) : 0) + '%"></i></div>' +
         '<div class="pt-day-l">' + WD[dt.getDay()] + '</div></div>';
     }).join('') + '</div>';
     var d0 = new Date(bars[0].d0);
     html += '<p class="pt-note" style="margin-top:.9rem">' +
-      '每一根是一天做的題數，從 ' +
-      (d0.getMonth() + 1) + '/' + d0.getDate() + ' 到今天。<br>' +
+      '每一根是一天練了幾分鐘，從 ' +
+      (d0.getMonth() + 1) + '/' + d0.getDate() + ' 到今天。' +
+      '闖關、月考測驗卷、錯題複習、引導式教學都算。<br>' +
       '<b>重點看的是有幾天有練，不是總題數</b> —— ' +
       '一次做五十題再放三個禮拜，記憶效果比每天十題差很多。</p>';
   }
