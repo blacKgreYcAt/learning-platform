@@ -171,11 +171,11 @@ window.SHELF = {
       items: [
         {
           title: '引導式教學',
-          desc: '字詞、成語、修辭、閱讀理解，按能力分不按課文分',
+          desc: '按能力分不按課文分：五上字詞成語修辭閱讀，五下字音詞語標點文體',
           href: 'lesson/index.html?subject=chinese',
           icon: 'assets/icon-chinese-20261104.png',
           carriesSetup: true,
-          grades: { '5-1': '4 個單元・各版本通用' },
+          grades: { '5-1': '4 個單元・各版本通用', '5-2': '4 個單元・各版本通用' },
           tag: '教學',
         },
         {
@@ -193,7 +193,7 @@ window.SHELF = {
           icon: 'assets/icon-compass-20261106.png',
           // 闖關站看得懂 ?g/?t/?v，首頁把選好的設定直接帶過去
           carriesSetup: true,
-          grades: { '5-1': '100 題・各版本通用' },
+          grades: { '5-1': '100 題・各版本通用', '5-2': '100 題・各版本通用' },
           tag: '題庫',
         },
       ],

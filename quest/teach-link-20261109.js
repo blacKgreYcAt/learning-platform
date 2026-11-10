@@ -113,6 +113,13 @@
       ],
     },
 
+    '國語|5|下': {
+      '字音字形': [{ label: '字音字形（形近、同音、多音）', home: 'L', unit: 'k5b-chi-shape' }],
+      '詞語辨析與運用': [{ label: '詞語辨析與運用', home: 'L', unit: 'k5b-chi-words2' }],
+      '句子與標點': [{ label: '句子與標點（含改病句）', home: 'L', unit: 'k5b-chi-sentence' }],
+      '文體與閱讀策略': [{ label: '文體與閱讀策略', home: 'L', unit: 'k5b-chi-reading2' }],
+    },
+
     '國語|5|上': {
       '字詞基本功': [{ label: '字詞基本功', home: 'L', unit: 'k5a-chi-words' }],
       '成語與俗諺': [{ label: '成語與俗諺', home: 'L', unit: 'k5a-chi-idioms' }],
