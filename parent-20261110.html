@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="color-scheme" content="dark">
+<title>📊 家長檢視</title>
+<!--
+  家長檢視頁（2026-11-10）
+
+  為什麼要有這一頁：
+  小孩練了一千多題，可是我完全看不到他練了什麼、卡在哪裡。
+  資料其實全都在瀏覽器裡 —— 闖關成績、錯題、複習排程、
+  引導教學進度、他按過哪些「我不懂」—— 只是沒有一個地方能一起看。
+
+  這一頁不產生任何新資料，只讀既有的 localStorage。
+  所以它是純粹的檢視頁：關掉它，什麼都不會變。
+
+  已經有一支 math-science-app/g5-tutor-report-20260808.html，
+  那一支只看「問老師」而且只涵蓋星際數學探險那十個單元，留著不動。
+  這一頁是上層：四個資料來源一起看，而且會講「所以你該做什麼」。
+
+  重要限制（頁面裡也有寫）：
+  localStorage 是綁「裝置 + 瀏覽器」的。在 Mac 上看不到 iPad 的紀錄。
+  要看他在哪台裝置上練的，就要在那台裝置上打開這一頁。
+-->
+<link rel="stylesheet" href="math-science-app/g5-styles-20260807.css">
+<link rel="stylesheet" href="math-science-app/g5-splat-theme-20261104.css">
+<link rel="stylesheet" href="splat-typescale-20261109.css">
+<style>
+  .pt-back { display:inline-block; margin-bottom:1rem; }
+  .pt-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:.7rem; margin:1rem 0 1.6rem; }
+  .pt-card { background:rgba(255,255,255,.04); border:2px solid rgba(255,255,255,.12);
+    border-radius:12px; padding:.85rem .9rem; text-align:center; }
+  .pt-card b { display:block; font-size:1.9rem; font-weight:900; line-height:1.1;
+    font-variant-numeric:tabular-nums; }
+  .pt-card span { display:block; margin-top:.25rem; font-size:.82rem; color:var(--text-dim); }
+  .pt-card.good b { color:var(--green); }
+  .pt-card.warn b { color:var(--amber); }
+
+  /* 各科一列：科目名 + 進度條 + 正確率 */
+  .pt-sub { margin:.55rem 0; }
+  .pt-sub-top { display:flex; align-items:baseline; gap:.5rem; font-size:.95rem; }
+  .pt-sub-name { font-weight:900; }
+  .pt-sub-meta { margin-left:auto; color:var(--text-dim); font-size:.84rem;
+    font-variant-numeric:tabular-nums; }
+  .pt-bar { height:.8rem; border-radius:99px; background:rgba(255,255,255,.06);
+    overflow:hidden; margin-top:.35rem; display:flex; }
+  .pt-bar i { display:block; height:100%; }
+  .pt-bar .hi { background:var(--green); }
+  .pt-bar .mid { background:var(--amber); }
+  .pt-bar .lo { background:var(--red); }
+
+  /* 清單：卡關題目、我不懂、低分的課 */
+  .pt-list { margin:.6rem 0 0; }
+  .pt-item { background:rgba(255,255,255,.03); border-left:4px solid rgba(255,255,255,.18);
+    border-radius:0 10px 10px 0; padding:.7rem .85rem; margin:.5rem 0; }
+  .pt-item.hot { border-left-color:var(--red); }
+  .pt-item.warm { border-left-color:var(--amber); }
+  .pt-item-q { font-weight:800; line-height:1.5; }
+  .pt-item-m { margin-top:.3rem; font-size:.82rem; color:var(--text-dim); }
+  .pt-item-m b { color:var(--amber); font-weight:800; }
+  .pt-item-m b.bad { color:var(--red); }
+
+  .pt-note { font-size:.86rem; color:var(--text-dim); line-height:1.7; }
+  .pt-empty { color:var(--text-dim); font-size:.9rem; }
+  .pt-howto li { margin:.45rem 0; line-height:1.65; }
+  .pt-warn { border-left:4px solid var(--amber); background:rgba(255,200,60,.07);
+    border-radius:0 10px 10px 0; padding:.8rem .95rem; font-size:.88rem; line-height:1.7; }
+  @media (max-width:480px) {
+    .pt-cards { grid-template-columns:repeat(2,1fr); gap:.5rem; }
+    .pt-card { padding:.65rem .4rem; }
+    .pt-card b { font-size:1.55rem; }
+    .pt-card span { font-size:.75rem; }
+    .pt-sub-meta { font-size:.78rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="btn btn--ghost pt-back" href="index.html">← 回首頁</a>
+
+  <div class="hero">
+    <h1>📊 家長檢視</h1>
+    <p>他練了什麼、卡在哪裡　·　資料只存在這台裝置，沒有上傳任何地方</p>
+  </div>
+
+  <div id="report"></div>
+
+</div>
+
+<!-- 題庫：要靠它把成績的代號翻回「哪一科哪一課」 -->
+<script src="study-setup-20261106.js"></script>
+<script src="quest/data/science-5a-kang-20261105.js"></script>
+<script src="quest/data/social-5a-kang-20261105.js"></script>
+<script src="quest/data/math-5a-kang-20261106.js"></script>
+<script src="quest/data/chinese-5a-any-20261106.js"></script>
+<script src="quest/data/science-5b-kang-20261109.js"></script>
+<script src="quest/data/social-5b-kang-20261109.js"></script>
+<script src="quest/data/chinese-5b-20261110.js"></script>
+<script src="quest/data/math-5b-kang-20261110.js"></script>
+<script src="quest/data/science-4b-any-20261105.js"></script>
+<script src="quest/data/social-4b-any-20261105.js"></script>
+
+<!--
+  引導教學的單元資料：要靠它把 g5-progress-<id> 翻成「單元名稱 + 共幾段」。
+  那些檔第一行是 var G5 = window.G5，所以要先給一個空殼，不然會爆。
+  真正的互動元件不需要 —— build() 在這一頁永遠不會被呼叫。
+-->
+<script>window.G5 = window.G5 || {};</script>
+<script src="lesson/data/math-5a-kang-20261109.js"></script>
+<script src="lesson/data/science-5a-kang-20261109.js"></script>
+<script src="lesson/data/social-5a-kang-20261109.js"></script>
+<script src="lesson/data/chinese-5a-20261109.js"></script>
+<script src="lesson/data/science-5b-kang-20261109.js"></script>
+<script src="lesson/data/social-5b-kang-20261109.js"></script>
+<script src="lesson/data/chinese-5b-20261110.js"></script>
+<script src="lesson/data/math-5b-kang-20261110.js"></script>
+
+<script>
+'use strict';
+(function () {
+
+  var root = document.getElementById('report');
+  var BANKS = window.QUEST_BANKS || {};
+  var PACKS = window.LESSON_PACKS || [];
+
+  /* ── 讀資料。每一種都可能不存在（新裝置、無痕視窗），所以全部包起來。 ── */
+  function read(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+  var DB = read('quest-20261105', {}) || {};
+  DB.best = DB.best || {};
+  DB.wrong = DB.wrong || [];
+  DB.review = DB.review || {};
+  var tutorLog = read('g5-tutor-log', []) || [];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+
+  function ago(ts) {
+    if (!ts) return null;
+    var d = Math.floor((Date.now() - ts) / 86400000);
+    if (d <= 0) return '今天';
+    if (d === 1) return '昨天';
+    if (d < 7) return d + ' 天前';
+    if (d < 30) return Math.round(d / 7) + ' 週前';
+    return Math.round(d / 30) + ' 個月前';
+  }
+
+  /* 星際數學探險那十個單元的名字。
+     它們的課程內容寫死在 math-science-app 自己的檔案裡，
+     為了一個名字去載十支 unit 檔不划算，所以在這裡放一張對照表。
+     （lesson/ 底下的新單元不用，那些從 LESSON_PACKS 直接讀得到。） */
+  var MATH_UNIT_NAMES = {
+    'g5-u01-linechart': '折線圖',
+    'g5-u02-factors': '倍數與因數',
+    'g5-u03-plane': '角、三角形與四邊形',
+    'g5-u04-common': '公因數與公倍數',
+    'g5-u05-solids': '立體形體',
+    'g5-u06-operations': '四則運算',
+    'g5-u07-fractions': '分數的加減',
+    'g5-u08-area': '面積',
+    'g5-u09-multiply': '小數的乘法',
+    'g5-u10-sector': '扇形',
+  };
+
+  /* ── 把題庫攤平：成績的代號 -> 這是哪一科哪一課 ── */
+  function bankId(b) {
+    return b.subjectKey + '-' + b.grade + (b.term === '上' ? 'a' : 'b') + '-' + b.version;
+  }
+  var LESSONS = [];           // {key, subject, grade, term, unit, lesson, total}
+  var QMAP = {};              // 題目文字 -> {subject, where}
+  Object.keys(BANKS).forEach(function (k) {
+    var b = BANKS[k];
+    b.units.forEach(function (u) {
+      u.lessons.forEach(function (l, i) {
+        LESSONS.push({
+          key: bankId(b) + '/' + u.no + '/' + i,
+          subject: b.subject, grade: b.grade, term: b.term,
+          unit: u.name, lesson: l.name, total: l.quiz.length,
+        });
+        l.quiz.forEach(function (q) {
+          if (!QMAP[q.q]) {
+            QMAP[q.q] = {
+              subject: b.subject,
+              where: b.subject + '・' + u.name + '・' + l.name,
+            };
+          }
+        });
+      });
+    });
+  });
+
+  var html = '';
+
+  /* ═══════════ 沒有任何資料 ═══════════ */
+  var anyData = Object.keys(DB.best).length || DB.wrong.length || tutorLog.length;
+  if (!anyData) {
+    root.innerHTML =
+      '<section class="card"><h2>這台裝置上還沒有紀錄</h2>' +
+      '<p class="pt-warn">紀錄是跟<b>裝置加瀏覽器</b>綁在一起的，不會同步。<br>' +
+      '如果他都用 iPad 練，就要在 iPad 上打開這一頁才看得到。' +
+      '在這台電腦上看永遠會是空的。</p></section>';
+    return;
+  }
+
+  /* ═══════════ 一、總覽 ═══════════ */
+  var doneLessons = 0, sumScore = 0, sumTotal = 0, weak = [];
+  LESSONS.forEach(function (L) {
+    var b = DB.best[L.key];
+    if (!b) return;
+    doneLessons++;
+    sumScore += b.score; sumTotal += b.total;
+    if (pct(b.score, b.total) < 60) weak.push({ L: L, b: b });
+  });
+
+  var reviewKeys = Object.keys(DB.review);
+  var dueNow = 0, graduated = 0, boxes = [0, 0, 0, 0, 0];
+  reviewKeys.forEach(function (q) {
+    var r = DB.review[q];
+    if (r.done) { graduated++; return; }
+    boxes[Math.min(r.box, 5) - 1]++;
+    if (r.due <= Date.now()) dueNow++;
+  });
+
+  var lastAt = 0;
+  DB.wrong.forEach(function (w) { if (w.at > lastAt) lastAt = w.at; });
+  tutorLog.forEach(function (e) { if (e.t > lastAt) lastAt = e.t; });
+
+  var rate = pct(sumScore, sumTotal);
+  html += '<section class="card"><h2>總覽</h2>' +
+    '<div class="pt-cards">' +
+    '<div class="pt-card"><b>' + doneLessons + '</b><span>練過的課數</span></div>' +
+    '<div class="pt-card ' + (rate >= 80 ? 'good' : rate >= 60 ? 'warn' : '') + '">' +
+      '<b>' + rate + '%</b><span>整體正確率</span></div>' +
+    '<div class="pt-card"><b>' + DB.wrong.length + '</b><span>錯題本</span></div>' +
+    '<div class="pt-card ' + (dueNow ? 'warn' : '') + '"><b>' + dueNow + '</b><span>今天該複習</span></div>' +
+    '</div>' +
+    '<p class="pt-note">最後一次練習：<b>' + (ago(lastAt) || '沒有紀錄') + '</b>。' +
+    '（正確率算的是每一課的「最佳成績」，所以會偏高一點 —— ' +
+    '要看真正不熟的地方，往下看「最需要注意的題目」。）</p>' +
+    '</section>';
+
+  /* ═══════════ 二、各科掌握度 ═══════════ */
+  var bySub = {};
+  LESSONS.forEach(function (L) {
+    var tag = L.subject + ' ' + L.grade + L.term;
+    var s = bySub[tag] || (bySub[tag] = { subject: L.subject, grade: L.grade, term: L.term,
+      total: 0, done: 0, hi: 0, mid: 0, lo: 0, score: 0, qs: 0 });
+    s.total++;
+    var b = DB.best[L.key];
+    if (!b) return;
+    s.done++; s.score += b.score; s.qs += b.total;
+    var p = pct(b.score, b.total);
+    if (p >= 80) s.hi++; else if (p >= 60) s.mid++; else s.lo++;
+  });
+
+  var subRows = Object.keys(bySub)
+    .map(function (k) { return bySub[k]; })
+    .filter(function (s) { return s.done; })
+    .sort(function (a, b) { return pct(a.score, a.qs) - pct(b.score, b.qs); });
+
+  html += '<section class="card"><h2>各科掌握度</h2>';
+  if (!subRows.length) {
+    html += '<p class="pt-empty">還沒有任何一課的成績。</p>';
+  } else {
+    html += subRows.map(function (s) {
+      var w = s.done || 1;
+      return '<div class="pt-sub">' +
+        '<div class="pt-sub-top"><span class="pt-sub-name">' + esc(s.subject) + '</span>' +
+        '<span class="pt-note">' + s.grade + ' 年級' + esc(s.term) + '</span>' +
+        '<span class="pt-sub-meta">練過 ' + s.done + ' / ' + s.total + ' 課　正確率 ' +
+        pct(s.score, s.qs) + '%</span></div>' +
+        '<div class="pt-bar">' +
+        '<i class="hi" style="width:' + (s.hi / w * 100) + '%"></i>' +
+        '<i class="mid" style="width:' + (s.mid / w * 100) + '%"></i>' +
+        '<i class="lo" style="width:' + (s.lo / w * 100) + '%"></i>' +
+        '</div></div>';
+    }).join('');
+    html += '<p class="pt-note" style="margin-top:1rem">' +
+      '條子是他練過的課：<span style="color:var(--green)">綠＝八成以上</span>　' +
+      '<span style="color:var(--amber)">黃＝六到八成</span>　' +
+      '<span style="color:var(--red)">紅＝不到六成</span>。' +
+      '排序是正確率低的在上面。</p>';
+  }
+  html += '</section>';
+
+  /* ═══════════ 三、最需要注意的題目 ═══════════ */
+  var stuck = reviewKeys.map(function (q) {
+    return { q: q, r: DB.review[q], info: QMAP[q] };
+  }).filter(function (x) {
+    /* 「答錯一次、還沒輪到複習」的題目 box 本來就是 1，那不是訊號。
+       真正該看的是兩種：答錯兩次以上，或者曾經答對過、又掉回第一盒。 */
+    return x.info && !x.r.done &&
+      (x.r.wrong >= 2 || (x.r.box === 1 && x.r.right >= 1));
+  }).sort(function (a, b) {
+    if (b.r.wrong !== a.r.wrong) return b.r.wrong - a.r.wrong;
+    return a.r.box - b.r.box;
+  }).slice(0, 12);
+
+  html += '<section class="card"><h2>最需要注意的題目</h2>';
+  if (!stuck.length) {
+    html += '<p class="pt-empty">目前沒有反覆答錯、也沒有答對後又退回去的題目。' +
+      (reviewKeys.length ? '錯過的題目都在穩穩往上升盒。' : '他還沒累積到錯題。') + '</p>';
+  } else {
+    html += '<p class="pt-note">這裡只放兩種題目：<b>答錯兩次以上</b>的，' +
+      '和<b>曾經答對、後來又答錯掉回第一盒</b>的。' +
+      '（只錯過一次、還沒輪到複習的不算 —— 那還看不出什麼。）<br>' +
+      '這些是他「看解析時覺得懂了，但是沒有真的記住」的地方。</p>' +
+      '<div class="pt-list">' + stuck.map(function (x) {
+        var hot = x.r.wrong >= 2;
+        /* 回退的那一種要講清楚為什麼上榜，不然家長會看不懂
+           「只答錯一次」的題目憑什麼排在這裡。 */
+        var why = hot
+          ? '答錯 <b class="bad">' + x.r.wrong + '</b> 次'
+          : '答對過 <b>' + x.r.right + '</b> 次，後來又答錯掉回來';
+        return '<div class="pt-item ' + (hot ? 'hot' : 'warm') + '">' +
+          '<div class="pt-item-q">' + esc(x.q) + '</div>' +
+          '<div class="pt-item-m">' + esc(x.info.where) + '　·　' + why +
+          '　·　現在在第 <b>' + x.r.box + '</b> 盒</div></div>';
+      }).join('') + '</div>';
+  }
+  html += '</section>';
+
+  /* ═══════════ 四、他說「我不懂」的地方 ═══════════ */
+  var tcount = {};
+  tutorLog.forEach(function (e) {
+    var k = (e.unit || '?') + '||' + (e.q || '?');
+    var c = tcount[k] || (tcount[k] = { unit: e.unit, q: e.q, ask: 0, more: 0 });
+    if (e.kind === 'more') c.more++; else c.ask++;
+  });
+  var tRows = Object.keys(tcount).map(function (k) { return tcount[k]; })
+    .sort(function (a, b) {
+      if (b.more !== a.more) return b.more - a.more;      // 按了「還是不懂」最重要
+      return b.ask - a.ask;
+    }).slice(0, 10);
+
+  function unitName(id) {
+    if (MATH_UNIT_NAMES[id]) return MATH_UNIT_NAMES[id];
+    for (var i = 0; i < PACKS.length; i++) {
+      var hit = PACKS[i].units.filter(function (u) { return u.id === id; })[0];
+      if (hit) return hit.title.replace(/^單元 \d+　/, '');
+    }
+    return id || '（不明單元）';
+  }
+
+  html += '<section class="card"><h2>他按過「我不懂」的地方</h2>';
+  if (!tRows.length) {
+    html += '<p class="pt-empty">還沒有用過「問老師」。這個功能目前只有' +
+      '星際數學探險那十個單元有，其他科的引導教學還沒有做。</p>';
+  } else {
+    html += '<p class="pt-note">他主動按下去求救的地方。' +
+      '有標<b class="bad">還是不懂</b>的最值得看 —— 那代表第一層解釋沒有講通，' +
+      '可能要你親自講一次。</p>' +
+      '<div class="pt-list">' + tRows.map(function (c) {
+        /* more 本身也是一次求救（看完解釋再按一次），
+           所以總次數要含它，不然會出現「問了 0 次・還是不懂 1 次」。 */
+        return '<div class="pt-item ' + (c.more ? 'hot' : '') + '">' +
+          '<div class="pt-item-q">' + esc(c.q) + '</div>' +
+          '<div class="pt-item-m">' + esc(unitName(c.unit)) + '　·　' +
+          '求救 <b>' + (c.ask + c.more) + '</b> 次' +
+          (c.more ? '　·　其中 <b class="bad">' + c.more +
+            ' 次是「還是不懂」</b>' : '') +
+          '</div></div>';
+      }).join('') + '</div>';
+  }
+  html += '</section>';
+
+  /* ═══════════ 五、引導教學進度 ═══════════ */
+  var lessonRows = [];
+  PACKS.forEach(function (p) {
+    p.units.forEach(function (u) {
+      var at = Number(read2('g5-progress-' + u.id));
+      var done = read2('g5-progress-' + u.id + '-done') === '1';
+      if (!done && !at) return;                          // 完全沒碰過就不列
+      lessonRows.push({
+        subject: p.subject, grade: p.grade, term: p.term,
+        title: u.title.replace(/^單元 \d+　/, ''),
+        at: at, total: u.sections.length, done: done,
+      });
+    });
+  });
+  Object.keys(MATH_UNIT_NAMES).forEach(function (id) {
+    var at = Number(read2('g5-progress-' + id));
+    var done = read2('g5-progress-' + id + '-done') === '1';
+    if (!done && !at) return;
+    lessonRows.push({
+      subject: '數學', grade: 5, term: '上',
+      title: MATH_UNIT_NAMES[id] + '（星際數學探險）',
+      at: at, total: null, done: done,
+    });
+  });
+
+  function read2(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  html += '<section class="card"><h2>引導教學進度</h2>';
+  if (!lessonRows.length) {
+    html += '<p class="pt-empty">他還沒開始任何一個引導教學單元。' +
+      '引導教學是「先弄懂再練題目」的那一半，從首頁各科的第一張卡進去。</p>';
+  } else {
+    lessonRows.sort(function (a, b) { return (a.done ? 1 : 0) - (b.done ? 1 : 0); });
+    html += '<div class="pt-list">' + lessonRows.map(function (r) {
+      var meta = r.done ? '<b style="color:var(--green)">已完成</b>'
+        : r.total ? '進行到第 <b>' + (r.at + 1) + '</b> 段 / 共 ' + r.total + ' 段'
+        /* 星際數學探險的段數寫在它自己的 unit 檔裡，這一頁沒有載，
+           所以只講到第幾段，不假裝知道總共幾段。 */
+        : '進行到第 <b>' + (r.at + 1) + '</b> 段';
+      return '<div class="pt-item' + (r.done ? '' : ' warm') + '">' +
+        '<div class="pt-item-q">' + esc(r.title) + '</div>' +
+        '<div class="pt-item-m">' + esc(r.subject) + ' ' + r.grade + ' 年級' +
+        esc(r.term) + '　·　' + meta + '</div></div>';
+    }).join('') + '</div>' +
+    '<p class="pt-note" style="margin-top:.8rem">沒做完的排在上面。' +
+    '停在中間不一定是壞事 —— 有可能是那一段太難，值得問他一下。</p>';
+  }
+  html += '</section>';
+
+  /* ═══════════ 六、複習排程 ═══════════ */
+  var STEPS = [1, 3, 7, 14, 30];
+  html += '<section class="card"><h2>複習排程</h2>';
+  if (!reviewKeys.length) {
+    html += '<p class="pt-empty">排程是空的。答錯的題目會自動排進來，' +
+      '之後在他快忘掉的時候再問一次。</p>';
+  } else {
+    var live = reviewKeys.length - graduated;
+    var maxBox = Math.max.apply(null, boxes.concat([1]));
+    html += '<div class="pt-cards">' +
+      '<div class="pt-card"><b>' + live + '</b><span>還在複習</span></div>' +
+      '<div class="pt-card good"><b>' + graduated + '</b><span>已經畢業</span></div>' +
+      '<div class="pt-card ' + (dueNow ? 'warn' : '') + '"><b>' + dueNow + '</b><span>今天到期</span></div>' +
+      '</div>';
+    html += boxes.map(function (n, i) {
+      return '<div class="pt-sub"><div class="pt-sub-top">' +
+        '<span class="pt-sub-name">盒 ' + (i + 1) + '</span>' +
+        '<span class="pt-note">答對後等 ' + STEPS[i] + ' 天</span>' +
+        '<span class="pt-sub-meta">' + n + ' 題</span></div>' +
+        '<div class="pt-bar"><i class="' + (i < 2 ? 'lo' : i < 4 ? 'mid' : 'hi') +
+        '" style="width:' + (n / maxBox * 100) + '%"></i></div></div>';
+    }).join('');
+    html += '<p class="pt-note" style="margin-top:1rem">' +
+      '健康的樣子是「右邊比左邊多」—— 題目一路往高盒子移動代表他真的記住了。' +
+      '如果<b>盒 1 一直堆著下不去</b>，那幾題就是真的沒懂，不是練習次數的問題。</p>';
+  }
+  html += '</section>';
+
+  /* ═══════════ 七、怎麼用這一頁 ═══════════ */
+  html += '<section class="card"><h2>這一頁怎麼看</h2>' +
+    '<ol class="pt-howto pt-note">' +
+    '<li><b>先看「最需要注意的題目」。</b>' +
+    '答錯兩次以上的，通常不是粗心，是某個觀念根本沒建立起來。' +
+    '帶他回那一課的引導教學再走一遍，比叫他多寫幾題有用。</li>' +
+    '<li><b>再看「還是不懂」。</b>' +
+    '那是他看完解釋、又再按一次求救的地方 —— 程式已經盡力了，這幾個點需要你講。</li>' +
+    '<li><b>各科掌握度看紅色的比例，不要看正確率。</b>' +
+    '正確率算的是每一課的最佳成績，本來就會偏高。紅條多的那一科才是真的要補。</li>' +
+    '<li><b>複習排程不用催他每天做。</b>' +
+    '間隔是故意拉開的，太早複習記不久。「今天到期」有數字再叫他去點就好。</li>' +
+    '</ol></section>';
+
+  /* ═══════════ 八、資料說明 ═══════════ */
+  html += '<section class="card"><h2>關於這些資料</h2>' +
+    '<p class="pt-warn">紀錄是跟<b>裝置加瀏覽器</b>綁在一起的，不會跨裝置同步。<br>' +
+    '他用 iPad 練的東西，在這台電腦上看不到 —— 要在 iPad 上打開這一頁。</p>' +
+    '<p class="pt-note" style="margin-top:.9rem">' +
+    '所有資料都只存在瀏覽器本機，沒有上傳到任何地方，也沒有任何帳號。<br>' +
+    '用無痕視窗練習、或是清掉網站資料，紀錄就會消失。<br>' +
+    '這一頁只讀不寫 —— 看這一頁不會改到他的任何進度。</p>' +
+    '</section>';
+
+  root.innerHTML = html;
+})();
+</script>
+</body>
+</html>
