@@ -312,6 +312,7 @@
         };
       }),
       i: 0, score: 0, up: 0, down: 0, graduated: 0, requeue: [],
+      startedAt: Date.now(),     // 2026-11-10：給練習紀錄算花了多久
     };
     renderQ();
   }
@@ -409,6 +410,21 @@
   }
 
   function finish() {
+    /* 2026-11-10：練習紀錄。複習沒有「答對幾題」這種分數
+       （同一題答錯會在本輪結尾再問一次但不重算），
+       所以 score 記的是往前推進的題數。 */
+    if (typeof window.QUEST_LOG === 'function') {
+      window.QUEST_LOG({
+        kind: 'review',
+        subject: '', where: '錯題複習',
+        /* 答錯的題目會被推回 run.items 在本輪結尾再問一次（again: true），
+           直接用 length 會比畫面上說的「N 題」多。
+           記不重複的題數，跟下面 score 的分母才對得起來。 */
+        n: run.items.filter(function (x) { return !x.again; }).length,
+        score: run.up + run.graduated,
+        sec: (Date.now() - run.startedAt) / 1000
+      });
+    }
     var s = stats();
     var word = run.down === 0 ? '這一輪全部往前推進了，很漂亮。'
       : run.up + run.graduated > run.down ? '大部分都記住了，退回去的幾題明天再碰一次。'

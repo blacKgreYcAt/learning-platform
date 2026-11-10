@@ -35,6 +35,7 @@
     border-radius:12px; padding:.85rem .9rem; text-align:center; }
   .pt-card b { display:block; font-size:1.9rem; font-weight:900; line-height:1.1;
     font-variant-numeric:tabular-nums; }
+  .pt-card b.sm { font-size:1.25rem; padding:.3rem 0; white-space:nowrap; }
   .pt-card span { display:block; margin-top:.25rem; font-size:.82rem; color:var(--text-dim); }
   .pt-card.good b { color:var(--green); }
   .pt-card.warn b { color:var(--amber); }
@@ -62,6 +63,17 @@
   .pt-item-m { margin-top:.3rem; font-size:.82rem; color:var(--text-dim); }
   .pt-item-m b { color:var(--amber); font-weight:800; }
   .pt-item-m b.bad { color:var(--red); }
+
+  /* 兩週長條圖 */
+  .pt-days { display:flex; gap:.3rem; align-items:flex-end; margin-top:1rem; }
+  .pt-day { flex:1; display:flex; flex-direction:column; align-items:center; gap:.3rem;
+    cursor:default; }
+  .pt-day-bar { width:100%; height:68px; background:rgba(255,255,255,.05);
+    border-radius:5px; display:flex; align-items:flex-end; overflow:hidden; }
+  .pt-day-bar i { display:block; width:100%; background:var(--cyan); border-radius:5px; }
+  .pt-day-l { font-size:.7rem; color:var(--text-dim); }
+  .pt-day-n { font-size:.68rem; font-weight:800; color:var(--text-dim);
+    font-variant-numeric:tabular-nums; min-height:1em; line-height:1; }
 
   .pt-note { font-size:.86rem; color:var(--text-dim); line-height:1.7; }
   .pt-empty { color:var(--text-dim); font-size:.9rem; }
@@ -92,6 +104,8 @@
 </div>
 
 <!-- 題庫：要靠它把成績的代號翻回「哪一科哪一課」 -->
+<!-- 練習紀錄：這一頁只用它的讀取口 QUEST_LOG.read() -->
+<script src="quest/log-20261110.js"></script>
 <script src="study-setup-20261106.js"></script>
 <script src="quest/data/science-5a-kang-20261105.js"></script>
 <script src="quest/data/social-5a-kang-20261105.js"></script>
@@ -139,6 +153,9 @@
   DB.wrong = DB.wrong || [];
   DB.review = DB.review || {};
   var tutorLog = read('g5-tutor-log', []) || [];
+  /* 練習紀錄是 11/10 才加的，以前的練習都沒有留下來，
+     所以這一段在舊裝置上會是空的 —— 頁面裡會說明。 */
+  var plog = (window.QUEST_LOG && window.QUEST_LOG.read) ? window.QUEST_LOG.read() : [];
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -204,7 +221,7 @@
   var html = '';
 
   /* ═══════════ 沒有任何資料 ═══════════ */
-  var anyData = Object.keys(DB.best).length || DB.wrong.length || tutorLog.length;
+  var anyData = Object.keys(DB.best).length || DB.wrong.length || tutorLog.length || plog.length;
   if (!anyData) {
     root.innerHTML =
       '<section class="card"><h2>這台裝置上還沒有紀錄</h2>' +
@@ -236,6 +253,7 @@
   var lastAt = 0;
   DB.wrong.forEach(function (w) { if (w.at > lastAt) lastAt = w.at; });
   tutorLog.forEach(function (e) { if (e.t > lastAt) lastAt = e.t; });
+  plog.forEach(function (e) { if (e.t > lastAt) lastAt = e.t; });
 
   var rate = pct(sumScore, sumTotal);
   html += '<section class="card"><h2>總覽</h2>' +
@@ -254,6 +272,71 @@
         '要看真正不熟的地方，往下看「最需要注意的題目」。）'
       : '（課程闖關站那邊還沒有任何成績，所以正確率是空的。）') + '</p>' +
     '</section>';
+
+  /* ═══════════ 一點五、最近兩週練了多少 ═══════════ */
+  var DAYS = 14;
+  function dayStart(ts) { var d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  var today0 = dayStart(Date.now());
+  var bars = [];
+  for (var di = DAYS - 1; di >= 0; di--) {
+    var d0 = today0 - di * 86400000;
+    bars.push({ d0: d0, n: 0, sec: 0, runs: 0 });
+  }
+  var recent = plog.filter(function (e) { return e.t >= today0 - (DAYS - 1) * 86400000; });
+  recent.forEach(function (e) {
+    var b = bars[Math.floor((dayStart(e.t) - bars[0].d0) / 86400000)];
+    if (!b) return;
+    b.n += e.n; b.sec += e.sec || 0; b.runs++;
+  });
+  var activeDays = bars.filter(function (b) { return b.runs; }).length;
+  var totQ = bars.reduce(function (a, b) { return a + b.n; }, 0);
+  var totSec = bars.reduce(function (a, b) { return a + b.sec; }, 0);
+  var peak = Math.max.apply(null, bars.map(function (b) { return b.n; }).concat([1]));
+
+  function mins(sec) {
+    if (!sec) return '—';
+    var m = Math.round(sec / 60);
+    if (m < 60) return m + ' 分';
+    return Math.floor(m / 60) + ' 小時 ' + (m % 60) + ' 分';
+  }
+  var WD = ['日', '一', '二', '三', '四', '五', '六'];
+
+  html += '<section class="card"><h2>最近兩週練了多少</h2>';
+  if (!plog.length) {
+    html += '<p class="pt-empty">練習紀錄是 2026-11-10 才加上去的，' +
+      '在那之前練的都沒有留下來。<br>' +
+      '之後每練完一次（闖關、月考測驗卷、錯題複習都算）會自動記一筆，' +
+      '這一段就會長出來。</p>';
+  } else {
+    html += '<div class="pt-cards">' +
+      '<div class="pt-card ' + (activeDays >= 7 ? 'good' : activeDays >= 3 ? 'warn' : '') + '">' +
+        '<b>' + activeDays + '</b><span>有練的天數 / 14</span></div>' +
+      '<div class="pt-card"><b>' + totQ + '</b><span>兩週內做的題數</span></div>' +
+      /* 「1 小時 39 分」比兩邊的純數字長很多，
+         用原尺寸在手機上會折行，把那張卡擐高。 */
+      '<div class="pt-card"><b class="sm">' + mins(totSec) + '</b>' +
+        '<span>兩週內花的時間</span></div>' +
+      '</div>';
+    html += '<div class="pt-days">' + bars.map(function (b) {
+      var dt = new Date(b.d0);
+      var tip = (dt.getMonth() + 1) + '/' + dt.getDate() + '（週' + WD[dt.getDay()] + '）　' +
+        (b.runs ? b.n + ' 題・' + mins(b.sec) : '沒練');
+      /* title 只有滑鼠移上去才看得到，手機上等於沒有。
+         所以題數直接寫在柱子上面，不靠任何互動。 */
+      return '<div class="pt-day" title="' + esc(tip) + '">' +
+        '<div class="pt-day-n">' + (b.n || '') + '</div>' +
+        '<div class="pt-day-bar"><i style="height:' + (b.n ? Math.max(8, b.n / peak * 100) : 0) +
+        '%"></i></div>' +
+        '<div class="pt-day-l">' + WD[dt.getDay()] + '</div></div>';
+    }).join('') + '</div>';
+    var d0 = new Date(bars[0].d0);
+    html += '<p class="pt-note" style="margin-top:.9rem">' +
+      '每一根是一天做的題數，從 ' +
+      (d0.getMonth() + 1) + '/' + d0.getDate() + ' 到今天。<br>' +
+      '<b>重點看的是有幾天有練，不是總題數</b> —— ' +
+      '一次做五十題再放三個禮拜，記憶效果比每天十題差很多。</p>';
+  }
+  html += '</section>';
 
   /* ═══════════ 二、各科掌握度 ═══════════ */
   var bySub = {};

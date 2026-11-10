@@ -243,6 +243,17 @@ window.QUEST_EXAM_INIT = function () {
     if (isBest) Q.DB[BEST_KEY][k] = { score: score, total: total, at: Date.now() };
     Q.save();
 
+    /* 2026-11-10：練習紀錄。測驗卷本來就有 took，直接用。 */
+    if (typeof window.QUEST_LOG === 'function') {
+      window.QUEST_LOG({
+        kind: 'exam',
+        subject: run.b.subject, grade: run.b.grade, term: run.b.term,
+        where: (Q.RANGES.filter(function (r) { return r[0] === run.range; })[0]
+                 || ['', '月考'])[1],
+        n: total, score: score, sec: took / 1000
+      });
+    }
+
     renderResult(score, total, took, isBest && !!prev);
   }
 

@@ -169,6 +169,9 @@
 <script src="data/social-4b-any-20261105.js"></script>
 
 <!-- 月考測驗卷：外掛，拿掉這一行就回到沒有測驗卷的樣子 -->
+<!-- 練習紀錄：每次練完寫一筆流水帳，給家長檢視頁看「哪幾天有練」。
+     拿掉這一行，三個練習流程裡的呼叫會自動變成 no-op。 -->
+<script src="log-20261110.js"></script>
 <script src="exam-20261106.js"></script>
 
 <script>
@@ -410,7 +413,8 @@
         // 選項也洗牌，順便把「哪一個是正解」帶著走
         return { q: q, pairs: shuffle(q.choices.map(function (c, i) { return { text: c, ok: i === q.correct }; })) };
       }),
-      i: 0, score: 0, wrong: []
+      i: 0, score: 0, wrong: [],
+      startedAt: Date.now()      // 2026-11-10：給練習紀錄算花了多久
     };
     backBtn.hidden = false;
     backBtn.onclick = function () { renderUnits(id); };
@@ -470,6 +474,17 @@
   }
 
   function finish() {
+    /* 2026-11-10：寫一筆練習紀錄（log-20261110.js）。
+       沒載那支外掛就什麼都不做，闖關流程完全不受影響。 */
+    if (typeof window.QUEST_LOG === 'function') {
+      window.QUEST_LOG({
+        kind: 'quest',
+        subject: run.b.subject, grade: run.b.grade, term: run.b.term,
+        where: run.u.name + '・' + run.l.name,
+        n: run.items.length, score: run.score,
+        sec: (Date.now() - run.startedAt) / 1000
+      });
+    }
     var k = lKey(run.b, run.uNo, run.lIdx), best = DB.best[k];
     // 只在更好的時候覆蓋，免得重練手滑把好成績蓋掉
     if (!best || run.score > best.score) {
